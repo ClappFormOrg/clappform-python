@@ -144,12 +144,10 @@ class Clappform:
         document = self._private_request("GET", "/version")
         return dc.Version(**document["data"])
 
-    def _app_path(self, app) -> str:
+    def _app_path(self, app, extended: bool = False) -> str:
         if isinstance(app, dc.App):
-            return app.path()
-        if isinstance(app, str):
-            return dc.App._path.format(app)
-        raise TypeError(f"app arg is not of type {dc.App} or {str}, got {type(app)}")
+            return app.path(extended=extended)
+        return dc.App.path(app, extended=extended)
 
     def get_apps(self) -> list[dc.App]:
         """Gets all apps.
@@ -171,11 +169,13 @@ class Clappform:
         document = self._private_request("GET", "/apps")
         return [dc.App(**obj) for obj in document["data"]]
 
-    def get_app(self, app) -> dc.App:
+    def get_app(self, app, extended: bool = False) -> dc.App:
         """Get a single app.
 
         :param app: App to get from the API
         :type app: :class:`str` | :class:`clappform.dataclasses.App`
+        :param bool extended: Optional retreive fully expanded app, defaults
+            to ``false``.
 
         Usage::
 
@@ -191,7 +191,7 @@ class Clappform:
         :returns: App Object
         :rtype: clappform.dataclasses.App
         """
-        path = self._app_path(app)
+        path = self._app_path(app, extended)
         document = self._private_request("GET", path)
         return dc.App(**document["data"])
 
@@ -277,18 +277,12 @@ class Clappform:
         document = self._private_request("DELETE", path)
         return dc.ApiResponse(**document)
 
-    def _collection_path(self, app, collection):
+    def _collection_path(self, app, collection, extended: int = 0):
         if isinstance(collection, dc.Collection):
-            return collection.path()
-        if not isinstance(collection, str):
-            t = type(collection)
-            raise TypeError(
-                f"collection arg is not of type {dc.Collection} or {str}, got {t}"
-            )
-        app = self._app_path(app).replace("/app/", "")
-        return dc.Collection._path.format(app, collection)
+            return collection.path(extended=extended)
+        return dc.Collection.format_path(app, collection, extended=extended)
 
-    def get_collections(self, app=None, extended=0) -> list[dc.Collection]:
+    def get_collections(self, app=None, extended: int = 0) -> list[dc.Collection]:
         """Get all the collections.
 
         The `extended` parameter allows an integer value from 0 - 3.
@@ -317,6 +311,7 @@ class Clappform:
         :returns: List of Collections or empty list if there are no collections
         :rtype: list[clappform.dataclasses.Collection]
         """
+        dc.Collection.check_extended(extended)
         document = self._private_request("GET", f"/collections?extended={extended}")
         if isinstance(app, dc.App):
             return [
@@ -366,18 +361,13 @@ class Clappform:
         :returns: Collection Object
         :rtype: clappform.dataclasses.Collection
         """
-        extended_range = range(4)  # API allows for 4 levels of extension.
-        if extended not in extended_range:
-            raise ValueError(f"extended {extended} not in {list(extended_range)}")
         if isinstance(collection, str) and app is None:
             t = type(collection)
             raise TypeError(
                 f"app kwarg cannot be {type(app)} when collection arg is {t}"
             )
-        path = self._collection_path(app, collection)
-        document = self._private_request(
-            "GET", f"{path}?extended={extended}&offset={offset}"
-        )
+        path = self._collection_path(app, collection, extended)
+        document = self._private_request("GET", f"{path}?offset={offset}")
         return dc.Collection(**document["data"])
 
     def create_collection(
@@ -412,8 +402,13 @@ class Clappform:
         :returns: New Collection Object
         :rtype: clappform.dataclasses.Collection
         """
-        path = self._app_path(app)
-        path = path.replace("/app/", "/collection/")
+        if isinstance(app, dc.App):
+            path = app.collection_path()
+        elif isinstance(app, str):
+            path = dc.App.collection_path(app)
+        else:
+            raise TypeError(f"app is not of type {dc.App} or {str}, got {type(app)}")
+
         valid_databases = ("MONGO", "DATALAKE")
         if db not in valid_databases:
             raise ValueError(f"db kwarg value is not one of: {valid_databases}")
@@ -487,11 +482,7 @@ class Clappform:
     def _query_path(self, query) -> str:
         if isinstance(query, dc.Query):
             return query.path()
-        if isinstance(query, str):
-            return dc.Query._path.format(query)
-        raise TypeError(
-            f"query arg is not of type {dc.Query} or {str}, got {type(query)}"
-        )
+        return dc.Query.format_path(query)
 
     def get_queries(self) -> list[dc.Query]:
         """Get all queries.
@@ -779,12 +770,7 @@ class Clappform:
     def _actionflow_path(self, actionflow) -> str:
         if isinstance(actionflow, dc.Actionflow):
             return actionflow.path()
-        if isinstance(actionflow, int):
-            return dc.Actionflow._path.format(actionflow)
-        t = type(actionflow)
-        raise TypeError(
-            f"actionflow arg is not of type {dc.Actionflow} or {int}, got {t}"
-        )
+        return dc.Actionflow.format_path(actionflow)
 
     def get_actionflows(self) -> list[dc.Actionflow]:
         """Get all actionflows.
@@ -867,5 +853,101 @@ class Clappform:
         :rtype: clappform.dataclasses.ApiResponse
         """
         path = self._actionflow_path(actionflow)
+        document = self._private_request("DELETE", path)
+        return dc.ApiResponse(**document)
+
+    def _questionnaire_path(self, questionnaire, extended: bool = False) -> str:
+        if isinstance(questionnaire, dc.Questionnaire):
+            return questionnaire.path(extended=extended)
+        return dc.Questionnaire.format_path(questionnaire, extended=extended)
+
+    def get_questionnaires(self, extended: bool = False) -> list[dc.Questionnaire]:
+        """Get all questionnaires
+
+        :param bool extended: Optional retreive fully expanded questionnaires, defaults
+            to ``false``.
+
+        :returns: List of :class:`clappform.dataclasses.Questionnaire` or empty list if
+            there are no questionnaires.
+        :rtype: list[clappform.dataclasses.Questionnaire]
+        """
+        if not isinstance(extended, bool):
+            raise TypeError(f"extended is not of type {bool}, got {type(extended)}")
+        extended = str(extended).lower()
+        document = self._private_request("GET", f"/questionnaires?extended={extended}")
+        return [dc.Questionnaire(**obj) for obj in document["data"]]
+
+    def get_questionnaire(
+        self, questionnaire, extended: bool = False
+    ) -> dc.Questionnaire:
+        """Get a questionnaire
+
+        :param bool extended: Optional retreive fully expanded questionnaire, defaults
+            to ``false``.
+
+        :returns: Qustionnaire Object
+        :rtype: clappform.dataclasses.Questionnaire
+        """
+        path = self._questionnaire_path(questionnaire, extended=extended)
+        document = self._private_request("GET", path)
+        return dc.Questionnaire(**document["data"])
+
+    def create_questionnaire(self, name: str, settings: dict) -> dc.ApiResponse:
+        """Create a new questionnaire.
+
+        :param str name: Display name for the new questionnaire.
+        :param dict settings: Settings object
+
+        :returns: ApiResponse object
+        :rtype: clappform.dataclasses.ApiResponse
+        """
+        document = self._private_request(
+            "POST",
+            "/questionnaire",
+            json={
+                "name": name,
+                "settings": settings,
+            },
+        )
+        return dc.ApiResponse(**document)
+
+    def update_questionnaire(
+        self, questionnaire: dc.Questionnaire, settings: dict
+    ) -> dc.Questionnaire:
+        """Update an existing Questionnaire.
+
+        :param questionnaire: Questionnaire object to update.
+        :type questionnaire: clappform.dataclasses.Questionnaire
+        :param dict settings: Settings object
+
+        :returns: Updated Questionnaire object
+        :rtype: clappform.dataclasses.Questionnaire
+        """
+        if not isinstance(questionnaire, dc.Questionnaire):
+            t = type(questionnaire)
+            raise TypeError(
+                f"questionnaire arg must be of type {dc.Questionnaire}, got {t}"
+            )
+        document = self._private_request(
+            "PUT",
+            questionnaire.path(),
+            json={
+                "active": questionnaire.active,
+                "settings": settings,
+            },
+        )
+        return dc.Questionnaire(**document["data"])
+
+    def delete_questionnaire(self, questionnaire):
+        """Delete a Questionnaire.
+
+        :param questionnaire: Questionnaire identifier
+        :type questionnaire: :class:`int` |
+            :class:`clappform.dataclasses.Questionnaire`
+
+        :returns: API response object
+        :rtype: clappform.dataclasses.ApiResponse
+        """
+        path = self._questionnaire_path(questionnaire)
         document = self._private_request("DELETE", path)
         return dc.ApiResponse(**document)
