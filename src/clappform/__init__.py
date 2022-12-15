@@ -7,6 +7,7 @@ Clappform API Wrapper
 """
 __requires__ = ["requests==2.28.1", "Cerberus==1.3.4"]
 # Python Standard Library modules
+from urllib.parse import urlparse
 from dataclasses import asdict
 import math
 import time
@@ -27,8 +28,6 @@ __license__ = "MIT"
 __doc__ = "Clappform Python API wrapper"
 
 
-# Access to a protected member _path of a client class (protected-access)
-# pylint: disable=protected-access
 class Clappform:
     """:class:`Clappform <Clappform>` class is used to more easily interact with an
     Clappform environement through the API.
@@ -150,7 +149,7 @@ class Clappform:
     def _app_path(self, app, extended: bool = False) -> str:
         if isinstance(app, dc.App):
             return app.path(extended=extended)
-        return dc.App.path(app, extended=extended)
+        return dc.App.format_path(app, extended=extended)
 
     def get_apps(self) -> list[dc.App]:
         """Gets all apps.
@@ -965,4 +964,99 @@ class Clappform:
         """
         path = self._questionnaire_path(questionnaire)
         document = self._private_request("DELETE", path)
+        return dc.ApiResponse(**document)
+
+    def _export_actions_from_groups(self, groups: list[dict]) -> list[dict]:
+        actions = []
+        for group in groups:
+            for page in group["pages"]:
+                for row in page["rows"]:
+                    for module in row["modules"]:
+                        if "actions" not in module["selection"]:
+                            continue
+                        for action in module["selection"]["actions"]:
+                            actions.append(action)
+        return actions
+
+    def export_app(self, app) -> dict:
+        """Export an app.
+
+        :param app: App to export
+        :type app: :class:`str` | :class:`clappform.dataclasses.App`
+
+        :returns: Exported App
+        :rtype: dict
+        """
+        app = self.get_app(app, extended=True)
+        actions = self._export_actions_from_groups(app.groups)
+
+        actionflows = [
+            self.get_actionflow(x["actionflowId"]["id"])
+            for x in filter(
+                lambda x: "type" in x
+                and x["type"] == "actionflow"
+                and "actionflowId" in x
+                and x["actionflowId"] is not None
+                and "id" in x["actionflowId"],
+                actions,
+            )
+        ]
+        questionnaires = [
+            self.get_questionnaire(x["template"]["id"])
+            for x in filter(
+                lambda x: "type" in x
+                and x["type"] == "questionnaire"
+                and "template" in x
+                and x["template"] is not None
+                and "id" in x["template"],
+                actions,
+            )
+        ]
+        import_entries_document = self._private_request("GET", "/import?extended=true")
+        # Non-iterable value `app.collections` is used in an iterating context
+        # (not-an-iterable). `extended=True` In `self.get_app` will change
+        # `dc.App.collections` to a `list`.
+        # pylint: disable=E1133
+        import_entries = list(
+            filter(
+                lambda x: x["collection"] in [x["slug"] for x in app.collections],
+                import_entries_document["data"],
+            )
+        )
+        # pylint: enable=E1133
+        version = self.version()
+        return {
+            "apps": [asdict(app)],
+            "collections": app.collections,
+            "form_templates": [asdict(x) for x in questionnaires],
+            "action_flows": [asdict(x) for x in actionflows],
+            "import_entry": import_entries,
+            "config": {
+                "timestamp": int(time.time()),
+                "created_by": self.username,
+                "enviroment": urlparse(self._base_url).hostname,
+                "api_version": version.api,
+                "web_application_version": version.web_application,
+                "web_server_version": version.web_server,
+                "deployable": True,
+            }
+        }
+
+    def import_app(self, app: dict, data_export: bool = False) -> dc.ApiResponse:
+        """Import an app.
+
+        :param dict app: Exported app object.
+
+        :returns: Api Response Object
+        :rtype: clappform.dataclasses.ApiResponse
+        """
+        config = app.pop("config")
+        if not config["deployable"]:
+            raise Exception(f"app is not deployable")
+
+        if not isinstance(data_export, bool):
+            t = type(data_export)
+            raise TypeError(f"data_export is not of type {bool}, got {t}")
+        app["delete_mongo_data"] = data_export
+        document = self._private_request("POST", "/transfer/app", json=app)
         return dc.ApiResponse(**document)

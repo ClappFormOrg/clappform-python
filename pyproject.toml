@@ -58,4 +58,5 @@ disable = [
     "R0913", # (too-many-arguments)
     "R0904", # (too-many-public-methods)
     "R0903", # (too-few-public-methods)
+    "C0302", # (too-many-lines)
 ]
