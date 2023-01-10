@@ -5,23 +5,26 @@ Clappform API Wrapper
 :copyright: (c) 2022 Clappform B.V..
 :license: MIT, see LICENSE for more details.
 """
-__requires__ = ["requests==2.28.1", "Cerberus==1.3.4"]
+__requires__ = ["requests==2.28.1", "Cerberus==1.3.4", "pandas==1.5.2"]
 # Python Standard Library modules
 from urllib.parse import urlparse
 from dataclasses import asdict
+import tempfile
 import math
 import time
+import json
 
 # PyPi modules
 from cerberus import Validator
 import requests as r
+import pandas as pd
 
 # clappform Package imports.
 from . import dataclasses as dc
 from .exceptions import HTTPError
 
 # Metadata
-__version__ = "2.1.2"
+__version__ = "2.3.0"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -36,6 +39,7 @@ class Clappform:
         ``https://app.clappform.com``.
     :param str username: Username used in the authentication :meth:`auth <auth>`.
     :param str password: Password used in the authentication :meth:`auth <auth>`.
+    :param int timeout: Optional HTTP request timeout in seconds, defaults to: ``2``.
 
     Most routes of the Clappform API require authentication. For the routes in the
     Clappform API that require authentication :class:`Clappform <Clappform>` will do
@@ -146,6 +150,9 @@ class Clappform:
         document = self._private_request("GET", "/version")
         return dc.Version(**document["data"])
 
+    def _remove_nones(self, original: dict) -> dict:
+        return {k: v for k, v in original.items() if v is not None}
+
     def _app_path(self, app, extended: bool = False) -> str:
         if isinstance(app, dc.App):
             return app.path(extended=extended)
@@ -253,7 +260,8 @@ class Clappform:
         """
         if not isinstance(app, dc.App):
             raise TypeError(f"app arg is not of type {dc.App}, got {type(app)}")
-        document = self._private_request("PUT", app.path(), json=asdict(app))
+        payload = self._remove_nones(asdict(app))
+        document = self._private_request("PUT", app.path(), json=payload)
         return dc.App(**document["data"])
 
     def delete_app(self, app) -> dc.ApiResponse:
@@ -453,9 +461,8 @@ class Clappform:
         if not isinstance(collection, dc.Collection):
             t = type(collection)
             raise TypeError(f"collection arg is not of type {dc.Collection}, got {t}")
-        document = self._private_request(
-            "PUT", collection.path(), json=asdict(collection)
-        )
+        payload = self._remove_nones(asdict(collection))
+        document = self._private_request("PUT", collection.path(), json=payload)
         return dc.Collection(**document["data"])
 
     def delete_collection(self, collection: dc.Collection) -> dc.ApiResponse:
@@ -599,7 +606,8 @@ class Clappform:
         """
         if not isinstance(query, dc.Query):
             raise TypeError(f"query arg must be of type {dc.Query}, got {type(query)}")
-        document = self._private_request("PUT", query.path(), json=asdict(query))
+        payload = self._remove_nones(asdict(query))
+        document = self._private_request("PUT", query.path(), json=payload)
         return dc.Query(**document["data"])
 
     def delete_query(self, query) -> dc.ApiResponse:
@@ -681,7 +689,8 @@ class Clappform:
         :type query: :class:`clappform.dataclasses.Query` |
             :class:`clappform.dataclasses.Collection`
         :param int limit: Amount of records to retreive per request.
-        :param interval_timeout: Time to sleep per request.
+        :param interval_timeout: Optional time to sleep per request, defaults to:
+            ``0.1``.
         :type interval_timeout: int
 
         Usage::
@@ -727,6 +736,35 @@ class Clappform:
             params["path"] = f"{path}?next_page={document['next_page']}"
             time.sleep(interval_timeout)  # Prevent Denial Of Service (dos) flagging.
             document = self._private_request(**params)
+
+    def write_dataframe(
+        self,
+        df: pd.DataFrame,
+        collection: dc.Collection,
+        chunk_size: int = 100,
+        interval_timeout: int = 0.1,
+    ):
+        """Write Pandas DataFrame to collection.
+
+        :param df: Pandas DataFrame to write to collection
+        :type df: :class:`pandas.DataFrame`
+        :param collection: Collection to hold DataFrame records
+        :type collection: :class:`clappform.dataclasses.Collection`
+        :param int chunk_size: defaults to: ``100``
+        :param interval_timeout: Optional time to sleep per request, defaults to:
+            ``0.1``.
+        :type interval_timeout: int
+        """
+        list_df = [df[i : i + chunk_size] for i in range(0, df.shape[0], chunk_size)]
+        for i in range(len(list_df)):
+            # `TemporaryFile` And `force_ascii=False` force the chunck to be `UTF-8`
+            # encoded.
+            with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fd:
+                df.to_json(fd, orient="records", force_ascii=False)
+                fd.seek(0)  # Reset pointer to begin of file for reading.
+                data = json.loads(fd.read())
+            self.append_dataframe(collection, data)
+            time.sleep(interval_timeout)
 
     def append_dataframe(self, collection, array: list[dict]) -> dc.ApiResponse:
         """Append data to a collection.
@@ -852,9 +890,8 @@ class Clappform:
             raise TypeError(
                 f"actionflow arg is not of type {dc.Actionflow}, got {type(actionflow)}"
             )
-        document = self._private_request(
-            "PUT", actionflow.path(), json=asdict(actionflow)
-        )
+        payload = self._remove_nones(asdict(actionflow))
+        document = self._private_request("PUT", actionflow.path(), json=payload)
         return dc.Actionflow(**document["data"])
 
     def delete_actionflow(self, actionflow) -> dc.ApiResponse:
@@ -942,13 +979,16 @@ class Clappform:
             raise TypeError(
                 f"questionnaire arg must be of type {dc.Questionnaire}, got {t}"
             )
+        payload = self._remove_nones(
+            {
+                "active": questionnaire.active,
+                "settings": settings,
+            }
+        )
         document = self._private_request(
             "PUT",
             questionnaire.path(),
-            json={
-                "active": questionnaire.active,
-                "settings": settings,
-            },
+            json=payload,
         )
         return dc.Questionnaire(**document["data"])
 
@@ -1039,7 +1079,7 @@ class Clappform:
                 "web_application_version": version.web_application,
                 "web_server_version": version.web_server,
                 "deployable": True,
-            }
+            },
         }
 
     def import_app(self, app: dict, data_export: bool = False) -> dc.ApiResponse:
@@ -1052,7 +1092,7 @@ class Clappform:
         """
         config = app.pop("config")
         if not config["deployable"]:
-            raise Exception(f"app is not deployable")
+            raise Exception("app is not deployable")
 
         if not isinstance(data_export, bool):
             t = type(data_export)
