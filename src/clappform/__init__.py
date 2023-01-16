@@ -415,7 +415,7 @@ class Clappform:
         if isinstance(app, dc.App):
             path = app.collection_path()
         elif isinstance(app, str):
-            path = dc.App.collection_path(app)
+            path = dc.App.format_collection_path(app)
         else:
             raise TypeError(f"app is not of type {dc.App} or {str}, got {type(app)}")
 
