@@ -24,7 +24,7 @@ from . import dataclasses as dc
 from .exceptions import HTTPError
 
 # Metadata
-__version__ = "2.4.2"
+__version__ = "2.4.3"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -290,6 +290,8 @@ class Clappform:
     def _collection_path(self, app, collection, extended: int = 0):
         if isinstance(collection, dc.Collection):
             return collection.path(extended=extended)
+        if isinstance(app, dc.App):
+            return dc.Collection.format_path(app.id, collection, extended=extended)
         return dc.Collection.format_path(app, collection, extended=extended)
 
     def get_collections(self, app=None, extended: int = 0) -> list[dc.Collection]:
@@ -1092,6 +1094,7 @@ class Clappform:
         """
         config = app.pop("config")
         if not config["deployable"]:
+            # pylint: disable=W0719
             raise Exception("app is not deployable")
 
         if not isinstance(data_export, bool):
