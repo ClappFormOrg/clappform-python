@@ -18,6 +18,7 @@ import json
 from cerberus import Validator
 import requests as r
 import pandas as pd
+import numpy as np
 
 # clappform Package imports.
 from . import dataclasses as dc
@@ -757,6 +758,14 @@ class Clappform:
             ``0.1``.
         :type interval_timeout: int
         """
+        # Transform DataFrame to be JSON serializable
+        for col in df.columns:
+            if df[col].dtype == "datetime64[ns, UTC]":
+                df[col] = df[col].astype("datetime64[s, UTC]").astype("int")
+            df[col] = df[col].replace([np.nan, np.inf, -np.inf], None)
+        df = df.replace([np.nan, np.inf, -np.inf], None)
+
+        # Split DataFrame up into chunks.
         list_df = [df[i : i + chunk_size] for i in range(0, df.shape[0], chunk_size)]
         for i in range(len(list_df)):
             # `TemporaryFile` And `force_ascii=False` force the chunck to be `UTF-8`
@@ -1096,6 +1105,7 @@ class Clappform:
         if not config["deployable"]:
             # pylint: disable=W0719
             raise Exception("app is not deployable")
+        # pylint: enable=W0719
 
         if not isinstance(data_export, bool):
             t = type(data_export)
