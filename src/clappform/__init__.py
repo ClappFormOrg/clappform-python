@@ -714,7 +714,7 @@ class Clappform:
         path = "/dataframe/read_data"
         params = {
             "method": "POST",
-            "path": path,
+            "path": f"{path}?extended=true",
             "json": {"limit": limit},
         }
         if isinstance(query, dc.Query):
