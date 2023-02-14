@@ -260,6 +260,8 @@ class Query(AbstractBase):
     slug: str
     source_query: str
     modules: list = None
+    primary: bool = None
+    settings: dict = None
 
     @staticmethod
     def format_path(query: str) -> str:
