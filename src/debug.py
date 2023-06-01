@@ -1,4 +1,6 @@
 """Script sets the python debugger and debug logging."""
+# flake8: noqa=F401
+# pylint: disable=W0611
 import pdb
 import logging
 import clappform

@@ -5,8 +5,7 @@ clappform.dataclasses
 This module contains the set of Clappform's return objects.
 """
 # Python Standard Library modules
-from urllib.parse import urlparse
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import base64
 import json
 import time
@@ -54,16 +53,25 @@ class Auth:
     #: Bearer token to be used get new :attr:`access_token`.
     refresh_token: str
 
+    _expires: int
+
+    def __init__(self, access_token: str, refresh_expiration: int, refresh_token: str):
+        self.access_token = access_token
+        self.refresh_expiration = refresh_expiration
+        self.refresh_token = refresh_token
+
+        token_data = json.loads(
+            base64.b64decode(self.access_token.split(".")[1] + "==")
+        )
+        self._expires = token_data["exp"]
+
     def is_token_valid(self) -> bool:
         """Returns boolean answer to: is the :attr:`access_token` still valid?
 
         :returns: Validity of :attr:`access_token`
         :rtype: bool
         """
-        token_data = json.loads(
-            base64.b64decode(self.access_token.split(".")[1] + "==")
-        )
-        if token_data["exp"] + 60 > int(time.time()):
+        if self._expires > int(time.time()) + 60:
             return True
         return False
 
@@ -78,17 +86,20 @@ class Version:
     """
 
     #: Version of the API.
-    api: str
+    api: str = None
     #: Version of the Web Application.
-    web_application: str
+    web_application: str = None
     #: Version of the Web Server
-    web_server: str
+    web_server: str = None
+
+    def one_or_all_path(self) -> str:
+        return "/version"
 
 
-class AbstractBase(metaclass=abc.ABCMeta):
-    """AbstractBase is used as a base class for dataclasses.
-    :class:`AbstractBase <AbstractBase>` contains only one abstract method. Any class
-    that inherits from :class:`AbstractBase <AbstractBase>` is required to implement
+class ResourceType(metaclass=abc.ABCMeta):
+    """ResourceType is used as a base class for dataclasses.
+    :class:`ResourceType <ResourceType>` contains only one abstract method. Any class
+    that inherits from :class:`ResourceType <ResourceType>` is required to implement
     :meth:`path <path>`.
     """
 
@@ -106,18 +117,9 @@ class AbstractBase(metaclass=abc.ABCMeta):
             raise TypeError(f"boolean is not of type {bool}, got {type(boolean)}")
         return str(boolean).lower()
 
-    @abc.abstractmethod
-    def path(self) -> str:
-        """Return the route used to by the resource.
-
-        :returns: HTTP path of the resource
-        :rtype: str
-        """
-        return
-
 
 @dataclass
-class App(AbstractBase):
+class App(ResourceType):
     """App dataclass.
 
     :param int collections: Number of collections this app has.
@@ -129,61 +131,61 @@ class App(AbstractBase):
     :param dict settings: Settings to configure app.
     """
 
-    collections: int
-    default_page: str
-    description: str
-    groups: int
-    id: str
-    name: str
-    settings: dict
+    collections: int = None
+    default_page: str = None
+    description: str = None
+    groups: int = None
+    id: str = None
+    _id: str = field(init=False, repr=False, default=None)
+    name: str = None
+    settings: dict = None
+    extended: bool = field(init=True, repr=False, default=False)
 
-    @staticmethod
-    def format_path(app: str, extended: bool = False) -> str:
+    @property
+    def id(self) -> str:
+        return self._id
+
+    @id.setter
+    def id(self, value: str) -> None:
+        assert isinstance(value, (property, str, type(None)))
+        if isinstance(value, property):
+            value = self._id
+        self._id = value
+
+    def one_or_all_path(self) -> str:
         """Return the route used to retreive the App.
 
         :returns: App's HTTP resource path.
         :rtype: str
         """
-        if not isinstance(app, str):
-            raise TypeError(f"app is not of type {str}, got {type(app)}")
-        extended = AbstractBase.bool_to_lower(extended)
-        return f"/app/{app}?extended={extended}"
+        if self.id is not None:
+            return self.one_path()
+        return self.all_path()
 
-    @staticmethod
-    def format_collection_path(app: str) -> str:
-        """Return the base route used to get and create the App's collections'.
+    def one_path(self) -> str:
+        extended = self.bool_to_lower(bool(self.extended))
+        if self.id is None:
+            raise TypeError(f"id attribute can not be {None}")
+        return f"/app/{self.id}?extended={extended}"
 
-        :returns: App's collection HTTP get and create path.
-        :rtype: str
-        """
-        App.format_path(app)  # Checks if `app` is of type `str`.
-        return f"/collection/{app}"
+    def all_path(self) -> str:
+        extended = self.bool_to_lower(bool(self.extended))
+        return f"/apps?extended={extended}"
 
-    def path(self, extended: bool = False) -> str:
-        """Return the route used to retreive the App.
-
-        :returns: App's HTTP resource path.
-        :rtype: str
-        """
-        return App.format_path(self.id, extended)
-
-    def collection_path(self) -> str:
-        """Return the base route used to get and create the App's collections'.
-
-        :returns: App's collection HTTP get and create path.
-        :rtype: str
-        """
-        return App.format_collection_path(self.id)
+    def create_path(self) -> str:
+        return "/app"
 
 
 @dataclass
-class Collection(AbstractBase):
+class Collection(ResourceType):
     """Collection dataclass."""
 
-    app: str
-    database: str
-    name: str
-    slug: str
+    app: str = None
+    _app: str = field(init=False, repr=False, default=None)
+    slug: str = None
+    _slug: str = field(init=False, repr=False, default=None)
+    database: str = None
+    name: str = None
     items: int = None
     description: str = None
     is_encrypted: bool = None
@@ -192,6 +194,33 @@ class Collection(AbstractBase):
     queries: list = None
     sources: list = None
     id: int = None
+    extended: int = field(init=True, repr=False, default=0)
+
+    @property
+    def app(self) -> str:
+        return self._app
+
+    @app.setter
+    def app(self, value) -> None:
+        assert isinstance(value, (property, str, App, type(None)))
+        if isinstance(value, property):
+            # initial value not specified, use default
+            value = self._app
+        if isinstance(value, App):
+            value = value.id
+        self._app = value
+
+    @property
+    def slug(self) -> str:
+        return self._slug
+
+    @slug.setter
+    def slug(self, value: str) -> None:
+        assert isinstance(value, (property, str, type(None)))
+        if isinstance(value, property):
+            # initial value not specified, use default
+            value = self._slug
+        self._slug = value
 
     @staticmethod
     def check_extended(extended: int):
@@ -200,47 +229,29 @@ class Collection(AbstractBase):
             raise TypeError(f"extended is not of type {int}, got {type(extended)}")
         extended_range = range(4)  # API allows for 4 levels of extension.
         if extended not in extended_range:
-            raise ValueError(f"extended {extended} not in {list(extended_range)}")
+            raise ValueError(f"extended {extended} not in {extended_range}")
 
-    @staticmethod
-    def format_base_path(app: str, extended: int = 0) -> str:
-        """Return the route used for getting all and creating collections.
+    def one_or_all_path(self):
+        if self.app is None and self.slug is None:
+            return self.all_path()
+        return self.one_path()
 
-        :returns: Collection getting and creating HTTP path
-        :rtype: str
-        """
-        App.format_path(app)  # This call checks if app is of type str.
-        Collection.check_extended(extended)
-        return f"/collection/{app}?extended={extended}"
+    def one_path(self) -> str:
+        self.check_extended(self.extended)
+        if self.app is None or self.slug is None:
+            raise TypeError("both 'app' and 'slug' attributes can not be {None}")
+        return f"/collection/{self.app}/{self.slug}?extended={self.extended}"
 
-    def base_path(self, extended: int = 0) -> str:
-        """Return the route used for getting all and creating collections.
+    def all_path(self) -> str:
+        self.check_extended(self.extended)
+        return f"/collections?extended={self.extended}"
 
-        :returns: Collection getting and creating HTTP path
-        :rtype: str
-        """
-        return Collection.format_base_path(self.app, extended)
+    def create_path(self) -> str:
+        if self.app is None:
+            raise TypeError("app attribute can not be None")
+        return f"/collection/{self.app}"
 
-    @staticmethod
-    def format_path(app: str, collection: str, extended: int = 0) -> str:
-        """Return the route used to retreive the collection.
-
-        :param str app: App to which collection belongs to.
-        :param str collection: Collection to get from app.
-        :param int extended: Optional level to which the fields get expanded, defaults
-            to: ``0``
-
-        :returns: Collection's HTTP resouce path
-        :rtype: str
-        """
-        path = urlparse(Collection.format_base_path(app)).path
-        if not isinstance(collection, str):
-            raise TypeError(f"collection is not of type {str}, got {type(collection)}")
-        Collection.check_extended(extended)
-        return f"{path}/{collection}?extended={extended}"
-
-    @staticmethod
-    def format_item_path(app: str, collection: str) -> str:
+    def one_item_path(self, item: str) -> str:
         """Return the route used for creating and deleting items.
 
         :param str app: App to which collection belongs to.
@@ -249,26 +260,16 @@ class Collection(AbstractBase):
         :returns: Item HTTP resource path
         :rtype: str
         """
-        Collection.format_path(app, collection)  # Does the type checks.
-        return f"/item/{app}/{collection}"
+        if self.app is None or self.slug is None:
+            raise TypeError("both 'app' and 'slug' attributes can not be {None}")
+        if not isinstance(item, str):
+            raise TypeError(f"item arg is not of type {str}, got {type(item)}")
+        return f"/item/{self.app}/{self.slug}/{item}"
 
-    def path(self, extended: int = 0) -> str:
-        """Return the route used to retreive the Collection.
-
-        :param int extended: Level to which the fields get expanded.
-
-        :returns: Collection API route
-        :rtype: str
-        """
-        return Collection.format_path(self.app, self.slug, extended)
-
-    def item_path(self) -> str:
-        """Return the route used for creating and deleting items.
-
-        :returns: Item HTTP resource path
-        :rtype: str
-        """
-        return Collection.format_item_path(self.app, self.slug)
+    def create_item_path(self) -> str:
+        if self.app is None or self.slug is None:
+            raise TypeError(f"both 'app' and 'slug' attributes can not be {None}")
+        return f"/item/{self.app}/{self.slug}"
 
     def dataframe_path(self) -> str:
         """Return the route used to retreive the Dataframe.
@@ -276,44 +277,86 @@ class Collection(AbstractBase):
         :returns: Collection's Dataframe HTTP resource path
         :rtype: str
         """
+        if self.app is None or self.slug is None:
+            raise TypeError(f"'app' and 'slug' attributes can not be {None}")
         return f"/dataframe/{self.app}/{self.slug}"
 
 
 @dataclass
-class Query(AbstractBase):
+class Query(ResourceType):
     """Query dataclass."""
 
-    app: str
-    collection: str
-    data_source: str
-    export: bool
-    id: int
-    name: str
-    query: list
-    slug: str
-    source_query: str
+    app: str = None
+    _app: str = field(init=False, repr=False, default=None)
+    collection: str = None
+    _collection: str = field(init=False, repr=False, default=None)
+    data_source: str = None
+    export: bool = None
+    id: int = None
+    name: str = None
+    query: list = None
+    slug: str = None
+    source_query: str = None
     modules: list = None
     primary: bool = None
     settings: dict = None
 
-    @staticmethod
-    def format_path(query: str) -> str:
+    @property
+    def app(self) -> str:
+        return self._app
+
+    @app.setter
+    def app(self, value) -> None:
+        assert isinstance(value, (property, str, App, type(None)))
+        if isinstance(value, property):
+            # initial value not specified, use default
+            value = self._app
+        if isinstance(value, App):
+            value = value.id
+        self._app = value
+
+    @property
+    def collection(self) -> str:
+        return self._collection
+
+    @collection.setter
+    def collection(self, value: str) -> None:
+        assert isinstance(value, (property, str, Collection, type(None)))
+        if isinstance(value, property):
+            # initial value not specified, use default
+            value = self._collection
+        if isinstance(value, Collection):
+            self._app = value.app
+            value = value.slug
+        self._collection = value
+
+    def one_or_all_path(self) -> str:
+        if self.slug is None:
+            return self.all_path()
+        return self.one_path()
+
+    def one_path(self) -> str:
         """Return the route used to retreive the Query.
 
         :returns: Query HTTP resource path
         :rtype: str
         """
-        if not isinstance(query, str):
-            raise TypeError(f"query is not of type {str}, got {type(query)}")
-        return f"/query/{query}"
+        if not isinstance(self.slug, str):
+            raise TypeError(
+                f"slug attribute is not of type {str}, got {type(self.slug)}"
+            )
+        return f"/query/{self.slug}"
 
-    def path(self) -> str:
+    def all_path(self) -> str:
         """Return the route used to retreive the Query.
 
         :returns: Query HTTP resource path
         :rtype: str
         """
-        return Query.format_path(self.slug)
+        return "/queries"
+
+    def create_path(self) -> str:
+        return "/query"
 
     def source_path(self) -> str:
         """Return the route used to source the Query.
@@ -321,135 +364,104 @@ class Query(AbstractBase):
         :returns: Source Query API route
         :rtype: str
         """
+        if not isinstance(self.slug, str):
+            raise TypeError(
+                f"slug attribute is not of type {str}, got {type(self.slug)}"
+            )
         return f"/source_query/{self.slug}"
 
 
 @dataclass
-class Actionflow(AbstractBase):
+class Actionflow(ResourceType):
     """Actionflow dataclass."""
 
-    id: int
-    name: str
-    settings: dict
+    id: int = None
+    name: str = None
+    settings: dict = None
     cronjobs: list = None
     tasks: list = None
 
-    @staticmethod
-    def format_path(actionflow: int) -> str:
-        """Return the route used to retreive the Actionflow.
+    def one_or_all_path(self) -> str:
+        if self.id is None:
+            return self.all_path()
+        return self.one_path()
 
-        :param int actionflow: Actionflow id.
+    def all_path(self) -> str:
+        return "/actionflows"
 
-        :returns: Actionflow HTTP resource path
-        :rtype: str
-        """
-        if not isinstance(actionflow, int):
-            raise TypeError(f"actionflow is not of type {int}, got {type(actionflow)}")
-        return f"/actionflow/{actionflow}"
+    def one_path(self) -> str:
+        return f"/actionflow/{self.id}"
 
-    def path(self) -> str:
-        """Return the route used to retreive the Actionflow.
-
-        :returns: Actionflow HTTP resource path
-        :rtype: str
-        """
-        return Actionflow.format_path(self.id)
+    def create_path(self) -> str:
+        return "/actionflow"
 
 
 @dataclass
-class Questionnaire(AbstractBase):
+class Questionnaire(ResourceType):
     """Questionnaire dataclass."""
 
-    name: str
-    id: int
-    created_at: int
-    active: bool
-    created_by: dict
-    latest_version: dict
+    name: str = None
+    id: int = None
+    created_at: int = None
+    active: bool = None
+    created_by: dict = None
+    latest_version: dict = None
     versions: list = None
+    settings: dict = field(init=True, repr=False, default=None)
+    extended: bool = field(init=True, repr=False, default=False)
 
-    @staticmethod
-    def format_path(questionnaire: int, extended: bool = False) -> str:
-        """Return the route used to retreive the Questionnaire.
+    def one_or_all_path(self) -> str:
+        if self.id is None:
+            return self.all_path()
+        return self.one_path()
 
-        :param int questionnaire: Questionnaire id.
-        :param bool extended: Include versions when retreiving questionnaire.
+    def all_path(self) -> str:
+        extended = self.bool_to_lower(bool(self.extended))
+        return f"/questionnaires?extended={extended}"
 
-        :returns: Questionnaire HTTP resource path
-        :rtype: str
-        """
-        if not isinstance(questionnaire, int):
-            t = type(questionnaire)
-            raise TypeError(f"questionnaire is not of type {int}, got {t}")
-        extended = AbstractBase.bool_to_lower(extended)
-        return f"/questionnaire/{questionnaire}?extended={extended}"
+    def one_path(self) -> str:
+        extended = self.bool_to_lower(bool(self.extended))
+        if not isinstance(self.id, int):
+            raise TypeError(f"id attribute is not of type {int}, got {type(self.id)}")
+        return f"/questionnaire/{self.id}?extended={extended}"
 
-    def path(self, extended: bool = False) -> str:
-        """Return the route used to retreive the Questionnaire.
-
-        :param bool extended: Include versions when retreiving questionnaire.
-
-        :returns: Questionnaire API route
-        :rtype: str
-        """
-        return Questionnaire.format_path(self.id, extended=extended)
+    def create_path(self) -> str:
+        return "/questionnaire"
 
 
 @dataclass
-class File:
-    """File dataclass."""
-
-    content: bytes
-    filename: str
-    type: str
-    folder_path: list[str]
-
-    def path(self) -> str:
-        """Return the route used to retreive the File.
-
-        :returns: File API route
-        :rtype: str
-        """
-        return f"/file/{self.filename}"
-
-
-@dataclass
-class User(AbstractBase):
+class User(ResourceType):
     """User dataclass."""
 
-    email: str
-    extra_information: dict
-    first_name: str
-    last_name: str
-    is_active: bool
-    id: int
-    phone: str
+    email: str = None
+    extra_information: dict = None
+    first_name: str = None
+    last_name: str = None
+    is_active: bool = None
+    id: int = None
+    phone: str = None
     messages: dict = None
     last_online: int = None
     permissions: list[str] = None
     roles: list[dict] = None
+    extended: bool = field(init=True, repr=False, default=False)
 
-    @staticmethod
-    def format_path(email: str, extended: bool = False) -> str:
-        """Return the route used to retreive the User.
+    def one_or_all_path(self) -> str:
+        if self.email is None:
+            return self.all_path()
+        return self.one_path()
 
-        :param str email: Email address.
-        :param bool extended: Enable more verbose fields.
+    def all_path(self) -> str:
+        extended = self.bool_to_lower(bool(self.extended))
+        return f"/users?extended={extended}"
 
-        :returns: Email HTTP resource path
-        :rtype: str
-        """
-        if not isinstance(email, str):
-            raise TypeError("email must be of type {str}, got {type(email)}")
-        extended = AbstractBase.bool_to_lower(extended)
-        return f"/user/{email}?extended={extended}"
+    def one_path(self) -> str:
+        extended = self.bool_to_lower(bool(self.extended))
+        if not isinstance(self.email, str):
+            raise TypeError(
+                f"email attribute is not of type {str}, got {type(self.email)}"
+            )
+        return f"/user/{self.email}?extended={extended}"
 
-    def path(self, extended: bool = False) -> str:
-        """Return the route used to retreive the User.
-
-        :param bool extended: Enable more verbose fields.
-
-        :returns: User API route
-        :rtype: str
-        """
-        return User.format_path(self.email, extended=extended)
+    def create_path(self) -> str:
+        return "/user"
