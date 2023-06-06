@@ -29,6 +29,7 @@ from .exceptions import (
     PaginationKeyError,
 )
 
+
 # Metadata
 __version__ = "3.0.0-alpha.1"
 __author__ = "Clappform B.V."

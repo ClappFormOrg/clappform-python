@@ -109,6 +109,20 @@ class ResourceType(metaclass=abc.ABCMeta):
     methods.
     """
 
+    @staticmethod
+    def bool_to_lower(boolean: bool) -> str:
+        """Return a boolean string in lowercase.
+
+        :param boolean: ``True`` or ``False`` value to convert to lowercase string.
+        :type boolean: bool
+
+        :returns: Lowercase boolean string
+        :rtype: str
+        """
+        if not isinstance(boolean, bool):
+            raise TypeError(f"boolean is not of type {bool}, got {type(boolean)}")
+        return str(boolean).lower()
+
     @abc.abstractmethod
     def one_or_all_path(self) -> str:
         """Return the path to retreive one or all resources.
@@ -140,20 +154,6 @@ class ResourceType(metaclass=abc.ABCMeta):
         :returns: Resource HTTP path
         :rtype: str
         """
-
-    @staticmethod
-    def bool_to_lower(boolean: bool) -> str:
-        """Return a boolean string in lowercase.
-
-        :param boolean: ``True`` or ``False`` value to convert to lowercase string.
-        :type boolean: bool
-
-        :returns: Lowercase boolean string
-        :rtype: str
-        """
-        if not isinstance(boolean, bool):
-            raise TypeError(f"boolean is not of type {bool}, got {type(boolean)}")
-        return str(boolean).lower()
 
 
 @dataclass
