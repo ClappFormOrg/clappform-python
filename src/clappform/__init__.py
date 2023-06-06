@@ -30,7 +30,7 @@ from .exceptions import (
 )
 
 # Metadata
-__version__ = "3.0.0"
+__version__ = "3.0.0-alpha.1"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -45,26 +45,38 @@ class Clappform:
         ``https://app.clappform.com``.
     :param str username: Username used in the authentication :meth:`auth <auth>`.
     :param str password: Password used in the authentication :meth:`auth <auth>`.
-    :param int timeout: Optional HTTP request timeout in seconds, defaults to: ``2``.
 
     Most routes of the Clappform API require authentication. For the routes in the
     Clappform API that require authentication :class:`Clappform <Clappform>` will do
     the authentication for you.
 
-    In the example below ``c.get_apps()`` uses a route which requires authentication.
+    In the example below ``c.get(r.App())`` uses a route which requires authentication.
     :class:`Clappform <Clappform>` does the authentication for you.
 
     Usage::
 
         >>> from clappform import Clappform
+        >>> import clappform.dataclasses as r
         >>> c = Clappform(
         ...     "https://app.clappform.com",
         ...     "j.doe@clappform.com",
         ...     "S3cr3tP4ssw0rd!",
         ... )
-        >>> apps = c.get_apps()
+        >>> apps = c.get(r.App())
         >>> for app in apps:
         ...     print(app.name)
+
+    The :meth:`get`, :meth:`create`, :meth:`update` and :meth:`delete`
+    methods can act on any object that implements the
+    :class:`clappform.dataclasses.ResourceType` interface.
+
+    The currently supported resources are:
+      - :class:`clappform.dataclasses.App`
+      - :class:`clappform.dataclasses.Collection`
+      - :class:`clappform.dataclasses.Query`
+      - :class:`clappform.dataclasses.Actionflow`
+      - :class:`clappform.dataclasses.Questionnaire`
+      - :class:`clappform.dataclasses.User`
     """
 
     _auth: dc.Auth = None
@@ -78,7 +90,7 @@ class Clappform:
         self._base_url: str = f"{base_url}/api"
 
         #: Session for all HTTP requests.
-        self.session = r.Session()
+        self.session: r.sessions.Session = r.Session()
         self.session.headers.update({"User-Agent": self._default_user_agent()})
         self.session.mount(self._base_url, HTTPAdapter(max_retries=3))
 
@@ -89,7 +101,7 @@ class Clappform:
         self.password: str = password
 
         #: Default request keyword arguments.
-        self.request_kwargs = {
+        self.request_kwargs: dict = {
             "timeout": 1,
             "allow_redirects": True,
             "verify": True,

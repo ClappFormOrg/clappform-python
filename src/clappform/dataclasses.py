@@ -87,21 +87,59 @@ class Version:
 
     #: Version of the API.
     api: str = None
+
     #: Version of the Web Application.
     web_application: str = None
+
     #: Version of the Web Server
     web_server: str = None
 
     def one_or_all_path(self) -> str:
+        """Return the path to retreive the version.
+
+        :returns: Version HTTP path
+        :rtype: str
+        """
         return "/version"
 
 
 class ResourceType(metaclass=abc.ABCMeta):
-    """ResourceType is used as a base class for dataclasses.
-    :class:`ResourceType <ResourceType>` contains only one abstract method. Any class
-    that inherits from :class:`ResourceType <ResourceType>` is required to implement
-    :meth:`path <path>`.
+    """ResourceType is used as an interface for :class:`clappform.Clappform`. Any class
+    that uses this class as a base can be used with :class:`clappform.Clappform`'s
+    methods.
     """
+
+    @abc.abstractmethod
+    def one_or_all_path(self) -> str:
+        """Return the path to retreive one or all resources.
+
+        :returns: Resource HTTP path
+        :rtype: str
+        """
+
+    @abc.abstractmethod
+    def one_path(self) -> str:
+        """Return the path to retreive this Resource
+
+        :returns: Resource HTTP path
+        :rtype: str
+        """
+
+    @abc.abstractmethod
+    def all_path(self) -> str:
+        """Return the path to retreive all Resources.
+
+        :returns: Resource HTTP path
+        :rtype: str
+        """
+
+    @abc.abstractmethod
+    def create_path(self) -> str:
+        """Return the path to create a Resource.
+
+        :returns: Resource HTTP path
+        :rtype: str
+        """
 
     @staticmethod
     def bool_to_lower(boolean: bool) -> str:
@@ -120,7 +158,7 @@ class ResourceType(metaclass=abc.ABCMeta):
 
 @dataclass
 class App(ResourceType):
-    """App dataclass.
+    """App resource type.
 
     :param int collections: Number of collections this app has.
     :param str default_page: Page to view when opening app.
@@ -129,20 +167,58 @@ class App(ResourceType):
     :param str id: Used internally to identify app.
     :param str name: Name of the app.
     :param dict settings: Settings to configure app.
+    :param bool extended: Whether fully expanded app object with ``get``.
+
+    Usage::
+
+        >>> from clappform import Clappform
+        >>> import clappform.dataclasses as r
+        >>> c = Clappform(
+        ...     "https://app.clappform.com",
+        ...     "j.doe@clappform.com",
+        ...     "S3cr3tP4ssw0rd!",
+        ... )
+        >>> new_app = r.App(
+        ...     id="uspresidents",
+        ...     name="US Presidents",
+        ...     description="US Presidents Dashboard",
+        ...     settings={}
+        ... )
+        >>> c.create(new_app)
+        App(collections=0, default_page='', description='US Presidents Dashboard', groups=0, id='uspresidents', name='US Presidents', settings={})
+        >>> app = c.get(r.App(id="uspresidents"))
+        >>> c.delete(app)
+        ApiResponse(code=200, message='Successfully deleted app with ID: uspresidents.', response_id='647de8f97416cc352603a431')
+        >>> for app in c.get(r.App()):
+        ...     print(app.name)
     """
 
+    #: Number of collections this app has. If ``extended=True`` this will be a list
+    #: of collections.
     collections: int = None
+    #: Slug of the page to display when opening the app.
     default_page: str = None
+    #: Text under app name on the app overview page.
     description: str = None
+    #: Groups of pages this app has. If ``extended=True`` this will be a list of dicts.
     groups: int = None
+    #: String id of the app. This is also used in the URL as a slug.
     id: str = None
     _id: str = field(init=False, repr=False, default=None)
+    #: Name of the app displayed on the page.
     name: str = None
+    #: Extra settings that further configure the app.
     settings: dict = None
+    #: Used by ``get`` to gauge whether to fetch fully expanded app object.
     extended: bool = field(init=True, repr=False, default=False)
 
     @property
     def id(self) -> str:
+        """Return the id property.
+
+        :returns: id Property
+        :rtype: str
+        """
         return self._id
 
     @id.setter
@@ -153,9 +229,9 @@ class App(ResourceType):
         self._id = value
 
     def one_or_all_path(self) -> str:
-        """Return the route used to retreive the App.
+        """Return the path to retreive one or all Apps.
 
-        :returns: App's HTTP resource path.
+        :returns: App HTTP path
         :rtype: str
         """
         if self.id is not None:
@@ -163,41 +239,117 @@ class App(ResourceType):
         return self.all_path()
 
     def one_path(self) -> str:
+        """Return the path to retreive this App
+
+        :returns: App HTTP path
+        :rtype: str
+        """
         extended = self.bool_to_lower(bool(self.extended))
         if self.id is None:
             raise TypeError(f"id attribute can not be {None}")
         return f"/app/{self.id}?extended={extended}"
 
     def all_path(self) -> str:
+        """Return the path to retreive all Apps.
+
+        :returns: App HTTP path
+        :rtype: str
+        """
         extended = self.bool_to_lower(bool(self.extended))
         return f"/apps?extended={extended}"
 
     def create_path(self) -> str:
+        """Return the path to create an App.
+
+        :returns: App HTTP path
+        :rtype: str
+        """
         return "/app"
 
 
 @dataclass
 class Collection(ResourceType):
-    """Collection dataclass."""
+    """Collection resource type.
 
+    :param str app: Id of the app collection belongs to.
+    :param str slug: Unique id of the collection.
+    :param str database: Database location to store documents, e.g. ``MONGO`` or
+        ``DATALAKE``.
+    :param str name: Display name of the collection.
+    :param str description: Description below collection name. ``extended=1``
+    :param int id: Numeric ID of the collection used for internal identification.
+        ``extended=1``
+    :param bool is_encrypted: Use of encryption on this collection. ``extended=1``
+    :param bool is_locked: Read only permissions on collection. ``extended=1``
+    :param bool is_logged: HTTP Access logging on this collection. ``extended=1``
+    :param bool sources: List of locations the data originates from. ``extended=1``
+    :param list queries: Queries that query this collection's data. ``extended=2``
+    :param bool extended: At what level to expand collection object with ``get``.
+
+    Usage::
+
+        >>> from clappform import Clappform
+        >>> import clappform.dataclasses as r
+        >>> c = Clappform(
+        ...     "https://app.clappform.com",
+        ...     "j.doe@clappform.com",
+        ...     "S3cr3tP4ssw0rd!",
+        ... )
+        >>> app = c.get(r.App(id="uspresidets"))
+        >>> new_collection = r.Collection(
+        ...     app=app,
+        ...     database="MONGO",
+        ...     name="United States Presidents",
+        ...     slug="presidents",
+        ...     description="All presidents of the United Stated of America"
+        ... )
+        >>> c.create(new_collection)
+        Collection(app='uspresidents', slug='presidents', database='MONGO', name='United States Presidents', items=None, description='All presidents of the United Stated of America', is_encrypted=False, is_locked=False, is_logged=False, queries=None, sources=[], id=473)
+        >>> collection = c.get(r.Collection(app="uspresidents", slug="presidents"))
+        >>> c.delete(collection)
+        ApiResponse(code=200, message='Successfully deleted collection with slug: presidents.', response_id='647df8477416cc352603a447')
+        >>> for collection in c.get(r.Collection()):
+        ...     print(f"{collection.app}: {collection.slug}")
+    """
+
+    #: App id this collection belong to. This can be of type
+    #: :class:`clappform.dataclasses.App` or :class:`str`.
     app: str = None
     _app: str = field(init=False, repr=False, default=None)
+    #: Unique string id for this collection.
     slug: str = None
     _slug: str = field(init=False, repr=False, default=None)
+    #: Database location where this collection is stored, e.g. ``"MONGO"`` or
+    #: ``"DATALAKE"``.
     database: str = None
+    #: Name of the collection to display on the web page.
     name: str = None
-    items: int = None
+    #: Description below the name to display on the web page.
     description: str = None
+    #: Whether to use encryption for this collection. Default is ``False``.
     is_encrypted: bool = None
+    #: Whether this collection is write protected. Collection is read only. Default is
+    #: ``False``.
     is_locked: bool = None
+    #: Whether HTTP access loggin is enabled. Default is ``False``.
     is_logged: bool = None
+    #: Queries that have been created for this collection's data.
     queries: list = None
+    #: List of location where the data in this collection came from.
     sources: list = None
+    #: Numeric id of this collection, used for internal identifacation.
     id: int = None
+    #: Used by ``get`` to gauge whether to fetch fully expanded app object. Allowed
+    #: values: ``0`` - ``3``. Defaults to ``0``.
     extended: int = field(init=True, repr=False, default=0)
 
     @property
     def app(self) -> str:
+        """Return the app property.
+
+        :returns: app Property
+        :rtype: str
+        """
         return self._app
 
     @app.setter
@@ -212,6 +364,11 @@ class Collection(ResourceType):
 
     @property
     def slug(self) -> str:
+        """Return the slug property.
+
+        :returns: slug Property
+        :rtype: str
+        """
         return self._slug
 
     @slug.setter
@@ -232,30 +389,47 @@ class Collection(ResourceType):
             raise ValueError(f"extended {extended} not in {extended_range}")
 
     def one_or_all_path(self):
+        """Return the path to retreive one or all collections.
+
+        :returns: Collection HTTP path
+        :rtype: str
+        """
         if self.app is None and self.slug is None:
             return self.all_path()
         return self.one_path()
 
     def one_path(self) -> str:
+        """Return the path to retreive this Collection
+
+        :returns: Collection HTTP path
+        :rtype: str
+        """
         self.check_extended(self.extended)
         if self.app is None or self.slug is None:
             raise TypeError("both 'app' and 'slug' attributes can not be {None}")
         return f"/collection/{self.app}/{self.slug}?extended={self.extended}"
 
     def all_path(self) -> str:
+        """Return the path to retreive all Collections.
+
+        :returns: Collection HTTP path
+        :rtype: str
+        """
         self.check_extended(self.extended)
         return f"/collections?extended={self.extended}"
 
     def create_path(self) -> str:
+        """Return the path to create a Collection.
+
+        :returns: Collection HTTP path
+        :rtype: str
+        """
         if self.app is None:
             raise TypeError("app attribute can not be None")
         return f"/collection/{self.app}"
 
     def one_item_path(self, item: str) -> str:
         """Return the route used for creating and deleting items.
-
-        :param str app: App to which collection belongs to.
-        :param str collection: Collection to get from app.
 
         :returns: Item HTTP resource path
         :rtype: str
@@ -284,7 +458,33 @@ class Collection(ResourceType):
 
 @dataclass
 class Query(ResourceType):
-    """Query dataclass."""
+    """Collection resource type.
+
+    Usage::
+
+        >>> from clappform import Clappform
+        >>> import clappform.dataclasses as r
+        >>> c = Clappform(
+        ...     "https://app.clappform.com",
+        ...     "j.doe@clappform.com",
+        ...     "S3cr3tP4ssw0rd!",
+        ... )
+        >>> collection = c.get(r.Collection(app="uspresidets", slug="presidents"))
+        >>> new_query = r.Query(
+        ...     collection=collection,
+        ...     data_source="app",
+        ...     query=[],
+        ...     name="all presidents",
+        ...     slug="f1cb2ba5-64a7-4056-99d5-7d639557970f",
+        ... )
+        >>> c.create(new_collection)
+        Query(app='uspresidets', collection='presidents', data_source='app', export=False, id=3601, name='all presidents', query=[], slug='f1cb2ba5-64a7-4056-99d5-7d639557970f', source_query='', modules=[], primary=True, settings={})
+        >>> query = c.get(r.Query(slug="f1cb2ba5-64a7-4056-99d5-7d639557970f"))
+        >>> c.delete(query)
+        ApiResponse(code=200, message='Successfully deleted query with slug: f1cb2ba5-64a7-4056-99d5-7d639557970f.', response_id='')
+        >>> for query in c.get(r.Query()):
+        ...     print(f"{query.app}/{query.collection}: {query.slug}")
+    """
 
     app: str = None
     _app: str = field(init=False, repr=False, default=None)
