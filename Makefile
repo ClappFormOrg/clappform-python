@@ -16,6 +16,6 @@ black:
 
 lint:
 	pylint $$(git ls-files '*.py')
-	flake8 $$(git ls-files '*.py') --ignore=E203,W503 --max-complexity=10 --max-line-length=88
+	flake8 $$(git ls-files '*.py')
 	black --check $$(git ls-files '*.py')
 
