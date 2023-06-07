@@ -54,12 +54,6 @@ exclude = '''
 [tool.pylint]
 max-line-length = 88
 disable = [
-    "C0301", # (line-too-long)
-    "C0116", # (missing-function-docstring)
     "C0103", # (invalid-name)
     "R0902", # (too-many-instance-attributes)
-    "R0913", # (too-many-arguments)
-    "R0904", # (too-many-public-methods)
-    "R0903", # (too-few-public-methods)
-    "C0302", # (too-many-lines)
 ]
