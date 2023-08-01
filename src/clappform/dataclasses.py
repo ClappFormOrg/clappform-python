@@ -619,7 +619,10 @@ class Actionflow(ResourceType):
 
     id: int = None
     name: str = None
+    slug: str = None
+    fast: bool = None
     settings: dict = None
+    start_keys: list = None
     cronjobs: list = None
     tasks: list = None
 
