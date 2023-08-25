@@ -10,10 +10,14 @@ __requires__ = ["requests==2.28.1", "Cerberus==1.3.4", "pandas==1.5.2"]
 from urllib.parse import urlparse
 from dataclasses import asdict
 from concurrent import futures
+from itertools import chain
+from queue import Queue
 import tempfile
 import math
 import time
 import os
+
+from typing import Generator
 
 # PyPi modules
 from requests.adapters import HTTPAdapter
@@ -33,7 +37,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.0.0"
+__version__ = "4.1.0-alpha.1"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -48,6 +52,8 @@ class Clappform:
         ``https://app.clappform.com``.
     :param str username: Username used in the authentication :meth:`auth <auth>`.
     :param str password: Password used in the authentication :meth:`auth <auth>`.
+    :param int workers: Number of workers to use in ThreadPoolExecutor and
+         Connectionpool. Defaults to ``min(32, os.cpu_count() + 4)``.
 
     Most routes of the Clappform API require authentication. For the routes in the
     Clappform API that require authentication :class:`Clappform <Clappform>` will do
@@ -89,6 +95,7 @@ class Clappform:
         base_url: str,
         username: str,
         password: str,
+        workers: int = min(32, os.cpu_count() + 4),
     ):
         self._base_url: str = f"{base_url}/api"
 
@@ -97,7 +104,7 @@ class Clappform:
         self.session.headers.update({"User-Agent": self._default_user_agent()})
         self.session.mount(
             self._base_url,
-            HTTPAdapter(max_retries=3, pool_maxsize=min(32, os.cpu_count() + 4)),
+            HTTPAdapter(max_retries=3, pool_maxsize=workers),
         )
 
         #: Username to use in the :meth:`auth <auth>`
@@ -105,6 +112,10 @@ class Clappform:
 
         #: Password to use in the :meth:`auth <auth>`
         self.password: str = password
+
+        #: Number of workers to use in ThreadPoolExecutor and Connectionpool.
+        #: defaults to: ``min(32, os.cpu_count() + 4)``.
+        self.workers: int = workers
 
         #: Default request keyword arguments.
         self.request_kwargs: dict = {
@@ -114,6 +125,12 @@ class Clappform:
             "stream": False,
             "cert": None,
         }
+
+        #: ThreadPoolExecut obj to submit large amount of requests to.
+        self.executor = futures.ThreadPoolExecutor(max_workers=workers)
+
+    def __del__(self):
+        self.executor.shutdown()
 
     def _default_user_agent(self) -> str:
         """Return a string with version of requests and clappform packages."""
@@ -361,14 +378,16 @@ class Clappform:
         document = self._private_request("DELETE", resource.one_path())
         return dc.ApiResponse(**document)
 
-    def aggregate_dataframe(self, options: dict, max_workers=None):
+    def aggregate_dataframe(
+        self, options: dict, max_workers=None
+    ) -> Generator[list[dict], None, None]:
         """Aggregate a dataframe
 
         :param dict options: Options for dataframe aggregation.
         :param int max_workers: Optional number of workers to use in thread pool.
 
         :returns: Generator to read dataframe
-        :rtype: :class:`generator`
+        :rtype: Generator
         """
         v = Validator(
             {
@@ -416,20 +435,21 @@ class Clappform:
         if pages_to_get == 1:
             pass
         else:
-            with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                for result in executor.map(
-                    lambda x: self._private_request(
-                        "POST", f"{path}&next_page={x}", json=payload
-                    ),
-                    range(
-                        options["limit"],
-                        pages_to_get * options["limit"],
-                        options["limit"],
-                    ),
-                ):
-                    yield result["data"]
+            for result in self.executor.map(
+                lambda x: self._private_request(
+                    "POST", f"{path}&next_page={x}", json=payload
+                ),
+                range(
+                    options["limit"],
+                    pages_to_get * options["limit"],
+                    options["limit"],
+                ),
+            ):
+                yield result["data"]
 
-    def read_dataframe(self, query, limit: int = 100, max_workers=None):
+    def read_dataframe(
+        self, query, limit: int = 100, max_workers=None
+    ) -> Generator[list[dict], None, None]:
         """Read a dataframe.
 
         :param query: Query to for retreiving data. When Query is of type
@@ -456,7 +476,7 @@ class Clappform:
             ...     list_df.extend(chunck)
 
         :returns: Generator to read dataframe
-        :rtype: :class:`generator`
+        :rtype: Generator
         """
         path = "/dataframe/read_data?extended=true"
         payload = {"limit": limit}
@@ -483,14 +503,13 @@ class Clappform:
         if pages_to_get == 1:
             pass
         else:
-            with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                for result in executor.map(
-                    lambda x: self._private_request(
-                        "POST", f"{path}&next_page={x}", json=payload
-                    ),
-                    range(limit, pages_to_get * limit, limit),
-                ):
-                    yield result["data"]
+            for result in self.executor.map(
+                lambda x: self._private_request(
+                    "POST", f"{path}&next_page={x}", json=payload
+                ),
+                range(limit, pages_to_get * limit, limit),
+            ):
+                yield result["data"]
 
     def write_dataframe(
         self,
@@ -567,9 +586,8 @@ class Clappform:
         :returns: Exported App
         :rtype: dict
         """
-        app_type = type(app)
-        if not app_type == dc.App:
-            raise TypeError("app argument is not of type {dc.App}, got {app_type}")
+        if not isinstance(app, dc.App):
+            raise TypeError("app argument is not of type {dc.App}, got {type(app)}")
 
         app.extended = True
         app = self.get(app)
@@ -647,6 +665,53 @@ class Clappform:
         app["delete_mongo_data"] = data_export
         document = self._private_request("POST", "/transfer/app", json=app)
         return dc.ApiResponse(**document)
+
+    def _transfer_collection(self, collection, dest):
+        queue = Queue()
+        for chunk in self.read_dataframe(collection):
+            queue.put(chunk)
+            # pylint: disable=W0212
+            yield dest.executor.submit(dest._transfer_write, collection, queue)
+            # pylint: enable=W0212
+        queue.join()
+
+    def _transfer_write(self, collection, queue):
+        chunk = queue.get_nowait()
+        resp = self._private_request(
+            method="POST", path=collection.dataframe_path(), json=chunk
+        )
+        queue.task_done()
+        return resp
+
+    def transfer_collections(
+        self, src: dict, dest, max_workers=None
+    ) -> Generator[dc.ApiResponse, None, None]:
+        """Transfer data from collection(s) from an app to a destination.
+
+        Destination is an instance of the :class:`clappform.Clappform`. This method
+        recreates all the data from all collections of an app to the same app and
+        collections on another :class:`clappform.Clappform`.
+
+        :param src: App dictionary or the value of running :meth:`export_app`.
+        :type src: dict
+        :param dest: Destination clappform environment.
+        :type dest: :class:`clappform.Clappform`
+
+        :returns: Generator of :class:`clappform.dataclasses.ApiResponse`
+        :rtype: Generator
+        """
+        if not isinstance(dest, Clappform):
+            t = type(dest)
+            raise TypeError(f"destination is not of type {Clappform}, got, {t}")
+
+        if isinstance(src, dict):
+            cs = [dc.Collection(**x) for x in src["collections"]]
+        else:
+            raise TypeError("Could not get collections from src")
+        for future in chain.from_iterable(
+            [self._transfer_collection(c, dest) for c in cs]
+        ):
+            yield future.result()
 
     def current_user(self, extended: bool = False) -> dc.User:
         """Get :class:`clappform.dataclasses.User` object of the current user.
