@@ -37,7 +37,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0-alpha.1"
+__version__ = "4.1.0-alpha.2"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -119,7 +119,7 @@ class Clappform:
 
         #: Default request keyword arguments.
         self.request_kwargs: dict = {
-            "timeout": 1,
+            "timeout": 10,
             "allow_redirects": True,
             "verify": True,
             "stream": False,
