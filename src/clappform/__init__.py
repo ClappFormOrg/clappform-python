@@ -37,7 +37,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0-alpha.2"
+__version__ = "4.1.0-alpha.3"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -531,8 +531,6 @@ class Clappform:
         """
         # Transform DataFrame to be JSON serializable
         for col in df.columns:
-            if df[col].dtype == "datetime64[ns, UTC]":
-                df[col] = df[col].astype("datetime64[s, UTC]").astype("int")
             df[col] = df[col].replace([np.nan, np.inf, -np.inf], None)
         df = df.replace([np.nan, np.inf, -np.inf], None)
 
