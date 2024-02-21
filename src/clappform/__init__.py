@@ -39,7 +39,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0-alpha.5"
+__version__ = "4.1.0-alpha.6"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -120,6 +120,7 @@ class Clappform:
                 max_retries=Retry(
                     total=self.tries - 1,  # Total of 3 retries.
                     backoff_factor=self.backoff_factor,
+                    status_forcelist=[502, 503, 504],
                 ),
                 pool_maxsize=workers,
             ),

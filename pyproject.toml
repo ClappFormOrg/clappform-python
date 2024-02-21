@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clappform"
-version = "4.1.0-alpha.5"
+version = "4.1.0-alpha.6"
 authors= [
     { name="Clappform B.V.", email="info@clappform.com" },
 ]
