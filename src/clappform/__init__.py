@@ -39,7 +39,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0-alpha.4"
+__version__ = "4.1.0-alpha.5"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -159,7 +159,7 @@ class Clappform:
         updated_kwargs = self.request_kwargs.copy()
         updated_kwargs.update(kwargs)
 
-        delay, sleep_for, tries, immediate_retry = 1, 0, self.tries, False
+        delay, sleep_for, tries, immediate_retry = 1, 0, self.tries, True
         while tries >= 1:
             time.sleep(sleep_for)
             try:
