@@ -20,7 +20,9 @@ import os
 from typing import Generator
 
 # PyPi modules
+from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
+from requests.exceptions import Timeout
 import requests as r
 
 from cerberus import Validator
@@ -37,7 +39,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0-alpha.3"
+__version__ = "4.1.0-alpha.4"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -54,6 +56,8 @@ class Clappform:
     :param str password: Password used in the authentication :meth:`auth <auth>`.
     :param int workers: Number of workers to use in ThreadPoolExecutor and
          Connectionpool. Defaults to ``min(32, os.cpu_count() + 4)``.
+    :param int tries: Number of times to try (not retry) before giving up.
+    :param int backoff_factor: Backoff factor to multiply delay with.
 
     Most routes of the Clappform API require authentication. For the routes in the
     Clappform API that require authentication :class:`Clappform <Clappform>` will do
@@ -90,21 +94,35 @@ class Clappform:
 
     _auth: dc.Auth = None
 
-    def __init__(
+    def __init__(  # pylint: disable=R0913
         self,
         base_url: str,
         username: str,
         password: str,
         workers: int = min(32, os.cpu_count() + 4),
+        tries: int = 4,
+        backoff_factor: int = 1,
     ):
         self._base_url: str = f"{base_url}/api"
+
+        #: Number of times to try (not retry) before giving up.
+        self.tries: int = 4
+
+        #: Backoff factor to multiply delay with.
+        self.backoff_factor: int = 1
 
         #: Session for all HTTP requests.
         self.session: r.sessions.Session = r.Session()
         self.session.headers.update({"User-Agent": self._default_user_agent()})
         self.session.mount(
             self._base_url,
-            HTTPAdapter(max_retries=3, pool_maxsize=workers),
+            HTTPAdapter(
+                max_retries=Retry(
+                    total=self.tries - 1,  # Total of 3 retries.
+                    backoff_factor=self.backoff_factor,
+                ),
+                pool_maxsize=workers,
+            ),
         )
 
         #: Username to use in the :meth:`auth <auth>`
@@ -140,9 +158,25 @@ class Clappform:
     def _request(self, method: str, path: str, **kwargs) -> dict:
         updated_kwargs = self.request_kwargs.copy()
         updated_kwargs.update(kwargs)
-        resp = self.session.request(method, f"{self._base_url}{path}", **updated_kwargs)
-        doc = resp.json()
 
+        delay, sleep_for, tries, immediate_retry = 1, 0, self.tries, False
+        while tries >= 1:
+            time.sleep(sleep_for)
+            try:
+                resp = self.session.request(
+                    method, f"{self._base_url}{path}", **updated_kwargs
+                )
+                break
+            except Timeout:
+                tries -= 1
+                if immediate_retry:
+                    immediate_retry = not immediate_retry
+                if tries <= 0:
+                    raise
+                delay *= 2
+                sleep_for = self.backoff_factor * delay
+
+        doc = resp.json()
         try:
             resp.raise_for_status()
         except r.exceptions.HTTPError as exc:
