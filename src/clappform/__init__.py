@@ -22,7 +22,7 @@ from typing import Generator
 # PyPi modules
 from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
-from requests.exceptions import Timeout
+from requests.exceptions import Timeout, ConnectTimeout
 import requests as r
 
 from cerberus import Validator
@@ -39,7 +39,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0-alpha.6"
+__version__ = "4.1.0-alpha.7"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -111,6 +111,9 @@ class Clappform:
         #: Backoff factor to multiply delay with.
         self.backoff_factor: int = 1
 
+        #: List of HTTP status codes to force a try on.
+        self.status_forcelist: list[int] = [502, 503, 504]
+
         #: Session for all HTTP requests.
         self.session: r.sessions.Session = r.Session()
         self.session.headers.update({"User-Agent": self._default_user_agent()})
@@ -167,6 +170,10 @@ class Clappform:
                 resp = self.session.request(
                     method, f"{self._base_url}{path}", **updated_kwargs
                 )
+                if resp.status_code in self.status_forcelist:
+                    raise ConnectTimeout(
+                        f"received a '{resp.status_code}' status code", response=resp
+                    )
                 break
             except Timeout:
                 tries -= 1
