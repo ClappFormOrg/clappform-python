@@ -39,7 +39,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0-alpha.7"
+__version__ = "4.1.0-alpha.8"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -150,9 +150,6 @@ class Clappform:
 
         #: ThreadPoolExecut obj to submit large amount of requests to.
         self.executor = futures.ThreadPoolExecutor(max_workers=workers)
-
-    def __del__(self):
-        self.executor.shutdown()
 
     def _default_user_agent(self) -> str:
         """Return a string with version of requests and clappform packages."""
