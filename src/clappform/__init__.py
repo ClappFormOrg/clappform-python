@@ -17,7 +17,7 @@ import math
 import time
 import os
 
-from typing import Generator
+from typing import Generator, Any, Optional
 
 # PyPi modules
 from urllib3.util import Retry
@@ -39,7 +39,7 @@ from .exceptions import (
 
 
 # Metadata
-__version__ = "4.1.0"
+__version__ = "4.2.0-alpha1"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -447,7 +447,6 @@ class Clappform:
                     "allow_unknown": True,
                     "schema": {
                         "input": {"type": "string"},
-                        "keys": {"type": "list"},
                     },
                 },
                 "item_id": {
@@ -682,6 +681,39 @@ class Clappform:
             },
         }
 
+    def start_actionflow(
+        self, actionflow: dc.Actionflow, settings: Optional[dict[str, Any]] = None
+    ) -> dict:
+        """Start an actionflow.
+
+        :param actionflow: Actionflow with ``id`` or ``slug`` property.
+        :type collection: clappform.dataclasses.Actionflow
+        :param settings: Optional extra settings for starting an actionflow.
+        :type settings: Optional[dict[str, Any]]
+
+        :returns: API response object
+        :rtype: clappform.dataclasses.ApiResponse
+        """
+        if isinstance(actionflow.slug, str):
+            actionflowid = actionflow.slug
+        elif isinstance(actionflow.id, int):
+            actionflowid = actionflow.id
+        else:
+            raise TypeError(
+                "Neither 'slug' or 'id' properties are str and int respectively"
+            )
+
+        user = self.get(dc.User(email=self.username))
+        payload = {"actionflowid": actionflowid, "user": user.id}
+        if isinstance(settings, dict):
+            payload.update({"settings": settings})
+        document = self._private_request(
+            "POST",
+            actionflow.create_path() + "/start",
+            json=payload,
+        )
+        return dc.ApiResponse(**document)
+
     def import_app(self, app: dict, data_export: bool = False) -> dc.ApiResponse:
         """Import an app.
 
@@ -692,9 +724,7 @@ class Clappform:
         """
         config = app.pop("config")
         if not config["deployable"]:
-            # pylint: disable=W0719
-            raise Exception("app is not deployable")
-        # pylint: enable=W0719
+            raise Exception("app is not deployable")  # pylint: disable=W0719
 
         if not isinstance(data_export, bool):
             t = type(data_export)
