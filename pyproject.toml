@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clappform"
-version = "4.2.0-alpha1"
+version = "5.0.0-alpha1"
 authors= [
     { name="Clappform B.V.", email="info@clappform.com" },
 ]
 description = "Clappform Python API wrapper"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
@@ -23,38 +23,36 @@ dependencies = [
     "pandas==1.5.2"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff==0.5.4",
+    "build==1.2.1",
+    "pylint==3.2.6",
+    "isort==5.13.2",
+    "flake8==7.1.0",
+    "black==24.4.2",
+    "mypy==1.11.0",
+    "grpcio-tools==1.65.1"
+]
+
 [project.urls]
 "Documentation" = "https://clappform.readthedocs.io"
 "Source" = "https://github.com/ClappFormOrg/clappform-python"
 
+[tool.mypy]
+show_column_numbers = true
+show_error_codes = true
+strict = true
+
 [tool.black]
-line-length = 88
+line-length = 79
 target-version = ['py310']
 include = '\.pyi?$'
-exclude = '''
-
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
-'''
 
 [tool.pylint]
-max-line-length = 88
-disable = [
-    "C0103", # (invalid-name)
-    "R0902", # (too-many-instance-attributes)
-    "W0613", # (unused-argument)
-]
+max-line-length = 79
+disable = []
+
+
+[tool.ruff]
+exclude = ["proto"]

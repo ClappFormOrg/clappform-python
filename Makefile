@@ -1,21 +1,38 @@
-run:
-	python -i src/debug.py
+.PHONY: all help install required build release black mypy pylint flake8 ruff lint docker clean
 
-init: requirements-dev.txt
-	pip install -r requirements-dev.txt
+all: install required clean
 
-build: pyproject.toml
-	pip install build
-	python -m build
+help: ## Display this help screen
+	@grep -E '^[a-zA-Z0-9_]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-15s %s\n", $$1, $$2}'
 
-clean:
-	rm -r dist src/clappform.egg-info
+install: ## Install a dependencies for development
+	@pip install -r requirements-dev.txt --upgrade
 
-black:
-	black $$(git ls-files '*.py')
+required: ## Install requirements to run project.
+	@pip install -r requirements.txt --upgrade
 
-lint:
-	pylint $$(git ls-files '*.py')
-	flake8 $$(git ls-files '*.py')
-	black --check $$(git ls-files '*.py')
+build: ## Build the package
+	@python -m build --sdist
 
+black: ## Run black utility to format source files
+	@black --check clappform
+
+mypy: ## Run mypy utility to static type check
+	@mypy clappform
+
+pylint: ## Run pylint utility to check source files
+	@pylint clappform
+
+flake8: ## Run flake8 utility to check source files
+	@flake8 clappform
+
+ruff: ## Run ruff utility to check source files
+	@ruff check --no-fix --no-unsafe-fixes clappform
+	@ruff format --check clappform
+
+lint: black mypy pylint flake8 ruff ## Lint a whole project
+
+clean: ## Delete all temporary files
+	@find clappform -type f -name '*.py[cod]' -delete
+	@find clappform -type d -name '__pycache__' -delete
+	@rm -rf *.egg *.egg-info build dist public

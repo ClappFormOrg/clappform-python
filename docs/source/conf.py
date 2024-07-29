@@ -1,12 +1,3 @@
-"""Clappform documentation build configuration file."""
-# pylint: disable=redefined-builtin,wrong-import-position
-# flake8: noqa=E402
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath("../src"))
-import clappform
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -14,9 +5,16 @@ import clappform
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+from __future__ import annotations
+
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("../.."))
+import clappform
 
 project = "Clappform"
-copyright = f"2022, {clappform.__author__}"
+copyright = f"2024, {clappform.__author__}"
 author = clappform.__author__
 version = clappform.__version__
 release = clappform.__version__
@@ -24,18 +22,28 @@ release = clappform.__version__
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx"]
-intersphinx_mapping = {"python": ("https://docs.python.org/3.10", None)}
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",
+    "sphinx_autodoc_typehints",
+]
 
-templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+autodoc_typehints_format = 'short'
+python_use_unqualified_type_names = True
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "grpc": ('https://grpc.github.io/grpc/python/', None),
+}
+
+templates_path = ['_templates']
+exclude_patterns = []
+
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
-html_static_path = ["_static"]
-
-# -- Options for Autodoc output ----------------------------------------------
-autodoc_member_order = "bysource"
+html_theme = 'alabaster'
+html_static_path = ['_static']
