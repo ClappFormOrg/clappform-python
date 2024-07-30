@@ -26,7 +26,7 @@ from .typedefs import GrpcChannelOptions, GrpcMetadata, RpcCallOptions
 from .utils import default_options
 
 # Metadata
-__version__ = "5.0.0-alpha3"
+__version__ = "5.0.0-alpha4"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
