@@ -27,7 +27,7 @@ jobs:
       with:
         python-version: '3.x'
     - name: Install dependencies
-      run: make init
+      run: make
     - name: Build
       run: make build
     - name: Publish package
