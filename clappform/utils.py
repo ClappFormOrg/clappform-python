@@ -1,11 +1,16 @@
 """
-This module defines type aliases and a data structure used for configuring gRPC RPC call options.
+This module defines type aliases and a data structure used for configuring gRPC
+RPC call options.
 """
 
 import json
-from typing import Optional, Union
+import tempfile
+from typing import Optional, Union, Iterator
+
+import pandas
 
 from .typedefs import GrpcChannelOptions
+from .proto.clappform.data.v1 import insert_pb2
 
 
 def default_options(
@@ -50,7 +55,10 @@ def default_options(
 
     >>> options = default_options()
     >>> print(options)
-    [("grpc.enable_retries", 1), ("grpc.service_config", '{"methodConfig": [{"name": [{}], "retryPolicy": {"maxAttempts": 5, "initialBackoff": "0.1s", "maxBackoff": "1s", "backoffMultiplier": 2, "retryableStatusCodes": ["UNAVAILABLE"]}}]}')]
+    [("grpc.enable_retries", 1), ("grpc.service_config", '{"methodConfig": [{"\
+name": [{}], "retryPolicy": {"maxAttempts": 5, "initialBackoff": "0.1s", "\
+maxBackoff": "1s", "backoffMultiplier": 2, "retryableStatusCodes": ["\
+UNAVAILABLE"]}}]}')]
 
     This function is used to configure gRPC channel options with retry policies
     for better resilience in network operations.
@@ -78,3 +86,47 @@ def default_options(
     options.append(("grpc.enable_retries", 1))
     options.append(("grpc.service_config", service_config_json))
     return options
+
+
+def insert_many_dataframe(
+    collection: str,
+    df: pandas.DataFrame,
+    size: int = 2500,
+    encoding: str = "utf-8",
+) -> Iterator[insert_pb2.InsertRequest]:
+    """
+    Yields InsertRequest objects for chunks of a DataFrame.
+
+    This function splits a pandas DataFrame into smaller chunks and yields
+    `InsertRequest` objects containing JSON-encoded data from each chunk.
+
+    :param collection: The name of the collection where data will be
+                       inserted.
+    :type collection: str
+    :param df: The DataFrame to be split into chunks and inserted.
+    :type df: pandas.DataFrame
+    :param size: The size of each chunk. Defaults to 2500.
+    :type size: int, optional
+    :param encoding: The encoding to be used for JSON data.
+                     Defaults to "utf-8".
+    :type encoding: str, optional
+    :return: An iterator over `InsertRequest` objects containing the
+             JSON-encoded data.
+    :rtype: Iterator[:class:`~clappform.proto.clappform.data.v1.insert_pb2.\
+InsertRequest`]
+
+    :raises ValueError: If the DataFrame is empty.
+    """
+    if df.empty:
+        raise ValueError("The DataFrame is empty")
+
+    for chunk in [df[i : i + size] for i in range(0, df.shape[0], size)]:
+        # `TemporaryFile` And `force_ascii=False` force the chunck to be
+        # `UTF-8` encoded.
+        with tempfile.TemporaryFile(mode="w+", encoding=encoding) as fd:
+            chunk.to_json(fd, orient="records", force_ascii=False)
+            fd.seek(0)  # Reset pointer to begin of file for reading.
+            yield insert_pb2.InsertRequest(
+                data=fd.read().encode(encoding=encoding),
+                collection=collection,
+            )

@@ -38,7 +38,11 @@ class Query(google.protobuf.message.Message):
     updated_at: builtins.str
     deleted_at: builtins.str
     @property
-    def versions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[clappform.proto.clappform.client.v1.version_pb2.Version]: ...
+    def versions(
+        self,
+    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
+        clappform.proto.clappform.client.v1.version_pb2.Version
+    ]: ...
     def __init__(
         self,
         *,
@@ -51,9 +55,38 @@ class Query(google.protobuf.message.Message):
         created_at: builtins.str = ...,
         updated_at: builtins.str = ...,
         deleted_at: builtins.str = ...,
-        versions: collections.abc.Iterable[clappform.proto.clappform.client.v1.version_pb2.Version] | None = ...,
+        versions: (
+            collections.abc.Iterable[
+                clappform.proto.clappform.client.v1.version_pb2.Version
+            ]
+            | None
+        ) = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["app", b"app", "collection", b"collection", "created_at", b"created_at", "deleted_at", b"deleted_at", "id", b"id", "name", b"name", "pipeline", b"pipeline", "source_query", b"source_query", "updated_at", b"updated_at", "versions", b"versions"]) -> None: ...
+    def ClearField(
+        self,
+        field_name: typing.Literal[
+            "app",
+            b"app",
+            "collection",
+            b"collection",
+            "created_at",
+            b"created_at",
+            "deleted_at",
+            b"deleted_at",
+            "id",
+            b"id",
+            "name",
+            b"name",
+            "pipeline",
+            b"pipeline",
+            "source_query",
+            b"source_query",
+            "updated_at",
+            b"updated_at",
+            "versions",
+            b"versions",
+        ],
+    ) -> None: ...
 
 global___Query = Query
 
@@ -77,9 +110,30 @@ class CreateRequest(google.protobuf.message.Message):
         source_query: builtins.str | None = ...,
         collection: builtins.str = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_source_query", b"_source_query", "source_query", b"source_query"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_source_query", b"_source_query", "collection", b"collection", "name", b"name", "pipeline", b"pipeline", "source_query", b"source_query"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing.Literal["_source_query", b"_source_query"]) -> typing.Literal["source_query"] | None: ...
+    def HasField(
+        self,
+        field_name: typing.Literal[
+            "_source_query", b"_source_query", "source_query", b"source_query"
+        ],
+    ) -> builtins.bool: ...
+    def ClearField(
+        self,
+        field_name: typing.Literal[
+            "_source_query",
+            b"_source_query",
+            "collection",
+            b"collection",
+            "name",
+            b"name",
+            "pipeline",
+            b"pipeline",
+            "source_query",
+            b"source_query",
+        ],
+    ) -> None: ...
+    def WhichOneof(
+        self, oneof_group: typing.Literal["_source_query", b"_source_query"]
+    ) -> typing.Literal["source_query"] | None: ...
 
 global___CreateRequest = CreateRequest
 
@@ -106,9 +160,32 @@ class UpdateRequest(google.protobuf.message.Message):
         source_query: builtins.str | None = ...,
         collection: builtins.str = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_source_query", b"_source_query", "source_query", b"source_query"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_source_query", b"_source_query", "collection", b"collection", "id", b"id", "name", b"name", "pipeline", b"pipeline", "source_query", b"source_query"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing.Literal["_source_query", b"_source_query"]) -> typing.Literal["source_query"] | None: ...
+    def HasField(
+        self,
+        field_name: typing.Literal[
+            "_source_query", b"_source_query", "source_query", b"source_query"
+        ],
+    ) -> builtins.bool: ...
+    def ClearField(
+        self,
+        field_name: typing.Literal[
+            "_source_query",
+            b"_source_query",
+            "collection",
+            b"collection",
+            "id",
+            b"id",
+            "name",
+            b"name",
+            "pipeline",
+            b"pipeline",
+            "source_query",
+            b"source_query",
+        ],
+    ) -> None: ...
+    def WhichOneof(
+        self, oneof_group: typing.Literal["_source_query", b"_source_query"]
+    ) -> typing.Literal["source_query"] | None: ...
 
 global___UpdateRequest = UpdateRequest
 
@@ -119,16 +196,31 @@ class Queries(google.protobuf.message.Message):
     QUERIES_FIELD_NUMBER: builtins.int
     PAGINATION_FIELD_NUMBER: builtins.int
     @property
-    def queries(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Query]: ...
+    def queries(
+        self,
+    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
+        global___Query
+    ]: ...
     @property
-    def pagination(self) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
+    def pagination(
+        self,
+    ) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
     def __init__(
         self,
         *,
         queries: collections.abc.Iterable[global___Query] | None = ...,
-        pagination: clappform.proto.clappform.v1.commons_pb2.Pagination | None = ...,
+        pagination: (
+            clappform.proto.clappform.v1.commons_pb2.Pagination | None
+        ) = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["pagination", b"pagination"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["pagination", b"pagination", "queries", b"queries"]) -> None: ...
+    def HasField(
+        self, field_name: typing.Literal["pagination", b"pagination"]
+    ) -> builtins.bool: ...
+    def ClearField(
+        self,
+        field_name: typing.Literal[
+            "pagination", b"pagination", "queries", b"queries"
+        ],
+    ) -> None: ...
 
 global___Queries = Queries

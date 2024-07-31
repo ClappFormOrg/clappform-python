@@ -109,6 +109,7 @@ class RpcCallOptions(TypedDict, total=False):
             # Use options in gRPC call
             response = stub.MyMethod(request, **options)
     """
+
     timeout: Optional[float]
     metadata: Optional[GrpcMetadata]
     credentials: Optional[grpc.CallCredentials]

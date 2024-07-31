@@ -4,8 +4,8 @@ isort:skip_file
 """
 
 import abc
-import clappform.client.v1.actionflow_task_pb2
-import clappform.v1.commons_pb2
+import clappform.proto.clappform.client.v1.actionflow_task_pb2
+import clappform.proto.clappform.v1.commons_pb2
 import collections.abc
 import grpc
 import grpc.aio
@@ -13,98 +13,128 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
+class _MaybeAsyncIterator(
+    collections.abc.AsyncIterator[_T],
+    collections.abc.Iterator[_T],
+    metaclass=abc.ABCMeta,
+): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
 
 class ActionflowTaskManagementStub:
-    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
+    def __init__(
+        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
+    ) -> None: ...
     GetAll: grpc.UnaryUnaryMultiCallable[
-        clappform.v1.commons_pb2.PaginationRequest,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTasks,
+        clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTasks,
     ]
 
     Get: grpc.UnaryUnaryMultiCallable[
-        clappform.v1.commons_pb2.Read,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        clappform.proto.clappform.v1.commons_pb2.Read,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
     ]
 
     Create: grpc.UnaryUnaryMultiCallable[
-        clappform.client.v1.actionflow_task_pb2.CreateRequest,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.CreateRequest,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
     ]
 
     Update: grpc.UnaryUnaryMultiCallable[
-        clappform.client.v1.actionflow_task_pb2.UpdateRequest,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.UpdateRequest,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
     ]
 
     Delete: grpc.UnaryUnaryMultiCallable[
-        clappform.v1.commons_pb2.Read,
-        clappform.v1.commons_pb2.Message,
+        clappform.proto.clappform.v1.commons_pb2.Read,
+        clappform.proto.clappform.v1.commons_pb2.Message,
     ]
 
 class ActionflowTaskManagementAsyncStub:
     GetAll: grpc.aio.UnaryUnaryMultiCallable[
-        clappform.v1.commons_pb2.PaginationRequest,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTasks,
+        clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTasks,
     ]
 
     Get: grpc.aio.UnaryUnaryMultiCallable[
-        clappform.v1.commons_pb2.Read,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        clappform.proto.clappform.v1.commons_pb2.Read,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
     ]
 
     Create: grpc.aio.UnaryUnaryMultiCallable[
-        clappform.client.v1.actionflow_task_pb2.CreateRequest,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.CreateRequest,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
     ]
 
     Update: grpc.aio.UnaryUnaryMultiCallable[
-        clappform.client.v1.actionflow_task_pb2.UpdateRequest,
-        clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.UpdateRequest,
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
     ]
 
     Delete: grpc.aio.UnaryUnaryMultiCallable[
-        clappform.v1.commons_pb2.Read,
-        clappform.v1.commons_pb2.Message,
+        clappform.proto.clappform.v1.commons_pb2.Read,
+        clappform.proto.clappform.v1.commons_pb2.Message,
     ]
 
 class ActionflowTaskManagementServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def GetAll(
         self,
-        request: clappform.v1.commons_pb2.PaginationRequest,
+        request: clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.client.v1.actionflow_task_pb2.ActionflowTasks, collections.abc.Awaitable[clappform.client.v1.actionflow_task_pb2.ActionflowTasks]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTasks,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTasks
+        ],
+    ]: ...
     @abc.abstractmethod
     def Get(
         self,
-        request: clappform.v1.commons_pb2.Read,
+        request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.client.v1.actionflow_task_pb2.ActionflowTask, collections.abc.Awaitable[clappform.client.v1.actionflow_task_pb2.ActionflowTask]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask
+        ],
+    ]: ...
     @abc.abstractmethod
     def Create(
         self,
-        request: clappform.client.v1.actionflow_task_pb2.CreateRequest,
+        request: clappform.proto.clappform.client.v1.actionflow_task_pb2.CreateRequest,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.client.v1.actionflow_task_pb2.ActionflowTask, collections.abc.Awaitable[clappform.client.v1.actionflow_task_pb2.ActionflowTask]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask
+        ],
+    ]: ...
     @abc.abstractmethod
     def Update(
         self,
-        request: clappform.client.v1.actionflow_task_pb2.UpdateRequest,
+        request: clappform.proto.clappform.client.v1.actionflow_task_pb2.UpdateRequest,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.client.v1.actionflow_task_pb2.ActionflowTask, collections.abc.Awaitable[clappform.client.v1.actionflow_task_pb2.ActionflowTask]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.client.v1.actionflow_task_pb2.ActionflowTask
+        ],
+    ]: ...
     @abc.abstractmethod
     def Delete(
         self,
-        request: clappform.v1.commons_pb2.Read,
+        request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.v1.commons_pb2.Message]]: ...
+    ) -> typing.Union[
+        clappform.proto.clappform.v1.commons_pb2.Message,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.v1.commons_pb2.Message
+        ],
+    ]: ...
 
-def add_ActionflowTaskManagementServicer_to_server(servicer: ActionflowTaskManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...
+def add_ActionflowTaskManagementServicer_to_server(
+    servicer: ActionflowTaskManagementServicer,
+    server: typing.Union[grpc.Server, grpc.aio.Server],
+) -> None: ...

@@ -45,7 +45,27 @@ class Version(google.protobuf.message.Message):
         updated_at: builtins.str = ...,
         deleted_at: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["created_at", b"created_at", "deleted_at", b"deleted_at", "id", b"id", "locked", b"locked", "owner_id", b"owner_id", "owner_type", b"owner_type", "settings", b"settings", "updated_at", b"updated_at"]) -> None: ...
+    def ClearField(
+        self,
+        field_name: typing.Literal[
+            "created_at",
+            b"created_at",
+            "deleted_at",
+            b"deleted_at",
+            "id",
+            b"id",
+            "locked",
+            b"locked",
+            "owner_id",
+            b"owner_id",
+            "owner_type",
+            b"owner_type",
+            "settings",
+            b"settings",
+            "updated_at",
+            b"updated_at",
+        ],
+    ) -> None: ...
 
 global___Version = Version
 
@@ -56,16 +76,31 @@ class Versions(google.protobuf.message.Message):
     VERSIONS_FIELD_NUMBER: builtins.int
     PAGINATION_FIELD_NUMBER: builtins.int
     @property
-    def versions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Version]: ...
+    def versions(
+        self,
+    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
+        global___Version
+    ]: ...
     @property
-    def pagination(self) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
+    def pagination(
+        self,
+    ) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
     def __init__(
         self,
         *,
         versions: collections.abc.Iterable[global___Version] | None = ...,
-        pagination: clappform.proto.clappform.v1.commons_pb2.Pagination | None = ...,
+        pagination: (
+            clappform.proto.clappform.v1.commons_pb2.Pagination | None
+        ) = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["pagination", b"pagination"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["pagination", b"pagination", "versions", b"versions"]) -> None: ...
+    def HasField(
+        self, field_name: typing.Literal["pagination", b"pagination"]
+    ) -> builtins.bool: ...
+    def ClearField(
+        self,
+        field_name: typing.Literal[
+            "pagination", b"pagination", "versions", b"versions"
+        ],
+    ) -> None: ...
 
 global___Versions = Versions

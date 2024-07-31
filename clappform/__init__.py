@@ -3,6 +3,14 @@ from typing import Callable, Iterator, Optional
 
 import grpc
 
+from .proto.clappform.client.v1 import (
+    actionflow_pb2,
+    actionflow_pb2_grpc,
+    collection_pb2,
+    collection_pb2_grpc,
+    query_pb2,
+    query_pb2_grpc,
+)
 from .proto.clappform.data.v1 import (
     aggregate_pb2,
     aggregate_pb2_grpc,
@@ -12,14 +20,6 @@ from .proto.clappform.data.v1 import (
     insert_pb2_grpc,
     update_pb2,
     update_pb2_grpc,
-)
-from .proto.clappform.client.v1 import (
-    actionflow_pb2,
-    actionflow_pb2_grpc,
-    collection_pb2,
-    collection_pb2_grpc,
-    query_pb2,
-    query_pb2_grpc,
 )
 from .proto.clappform.v1 import commons_pb2
 from .typedefs import GrpcChannelOptions, GrpcMetadata, RpcCallOptions
@@ -268,12 +268,15 @@ class Data(GrpcBase):
         Sends an aggregate request to the gRPC service and yields responses.
 
         :param request: The aggregate request to be sent.
-        :type request: :class:`~clappform.proto.clappform.data.v1.aggregate_pb2.AggregateStreamRequest`
+        :type request: :class:`~clappform.proto.clappform.data.v1.\
+aggregate_pb2.AggregateStreamRequest`
         :return: An iterator over aggregate responses.
-        :rtype: Iterator[:class:`~clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse`]
+        :rtype: Iterator[:class:`~clappform.proto.clappform.data.v1.\
+aggregate_pb2.AggregateResponse`]
 
-        This method sends an aggregate request to the gRPC service via the `AggregateStream` method
-        of the `AggregateManagementStub`. The responses from the service are yielded one by one.
+        This method sends an aggregate request to the gRPC service via the
+        `AggregateStream` method of the `AggregateManagementStub`. The
+        responses from the service are yielded one by one.
 
         Example usage:
 
@@ -294,8 +297,9 @@ class Data(GrpcBase):
                 print(response)
 
         .. note::
-            Ensure that the `clappform.proto.clappform.data.v1.aggregate_pb2` module is imported and
-            available in your code to use the `AggregateStreamRequest` and `AggregateResponse` classes.
+            Ensure that the `clappform.proto.clappform.data.v1.aggregate_pb2`
+            module is imported and available in your code to use the
+            `AggregateStreamRequest` and `AggregateResponse` classes.
         """
         yield from self.aggregate_stub.AggregateStream(
             request, **self._default_kwargs()
@@ -305,15 +309,19 @@ class Data(GrpcBase):
         self, request_iterator: Iterator[insert_pb2.InsertRequest]
     ) -> Iterator[insert_pb2.InsertResponse]:
         """
-        Sends multiple insert requests to the gRPC service and yields responses.
+        Sends multiple insert requests to the gRPC service and yields
+        responses.
 
         :param request_iterator: An iterator over insert requests.
-        :type request_iterator: Iterator[:class:`~clappform.proto.clappform.data.v1.insert_pb2.InsertRequest`]
+        :type request_iterator: Iterator[:class:`~clappform.proto.clappform.\
+data.v1.insert_pb2.InsertRequest`]
         :return: An iterator over insert responses.
-        :rtype: Iterator[:class:`~clappform.proto.clappform.data.v1.insert_pb2.InsertResponse`]
+        :rtype: Iterator[:class:`~clappform.proto.clappform.data.v1.\
+insert_pb2.InsertResponse`]
 
-        This method sends multiple insert requests to the gRPC service via the `InsertMany` method
-        of the `InsertManagementStub`. The responses from the service are yielded one by one.
+        This method sends multiple insert requests to the gRPC service via the
+        `InsertMany` method of the `InsertManagementStub`. The responses from
+        the service are yielded one by one.
 
         Example usage:
 
@@ -337,8 +345,9 @@ class Data(GrpcBase):
                 print(response)
 
         .. note::
-            Ensure that the `clappform.proto.clappform.data.v1.insert_pb2` module is imported and
-            available in your code to use the `InsertRequest` and `InsertResponse` classes.
+            Ensure that the `clappform.proto.clappform.data.v1.insert_pb2`
+            module is imported and available in your code to use the
+            `InsertRequest` and `InsertResponse` classes.
         """
         yield from self.insert_stub.InsertMany(
             request_iterator,
@@ -349,15 +358,18 @@ class Data(GrpcBase):
         self, request: delete_pb2.DeleteRequestOids
     ) -> commons_pb2.Message:
         """
-        Sends a delete request to the gRPC service to delete multiple items by OIDs.
+        Sends a delete request to the gRPC service to delete multiple items by
+        OIDs.
 
         :param request: The delete request containing OIDs.
-        :type request: :class:`~clappform.proto.clappform.data.v1.delete_pb2.DeleteRequestOids`
+        :type request: :class:`~clappform.proto.clappform.data.v1.delete_pb2.\
+DeleteRequestOids`
         :return: A message indicating the result of the delete operation.
         :rtype: :class:`~clappform.proto.clappform.data.v1.commons_pb2.Message`
 
-        This method sends a delete request to the gRPC service via the `DeleteManyByOids` method
-        of the `DeleteManagementStub`. The response from the service indicates the result of the operation.
+        This method sends a delete request to the gRPC service via the
+        `DeleteManyByOids` method of the `DeleteManagementStub`. The response
+        from the service indicates the result of the operation.
 
         Example usage:
 
@@ -379,8 +391,9 @@ class Data(GrpcBase):
 
         .. note::
             Ensure that the `clappform.proto.clappform.data.v1.delete_pb2` and
-            `clappform.proto.clappform.data.v1.commons_pb2` modules are imported and
-            available in your code to use the `DeleteRequestOids` and `Message` classes.
+            `clappform.proto.clappform.data.v1.commons_pb2` modules are
+            imported and available in your code to use the `DeleteRequestOids`
+            and `Message` classes.
         """
         return self.delete_stub.DeleteManyByOids(
             request, **self._default_kwargs()
@@ -393,12 +406,15 @@ class Data(GrpcBase):
         Sends an update request to the gRPC service to replace multiple items.
 
         :param request: The update request.
-        :type request: :class:`~clappform.proto.clappform.data.v1.update_pb2.UpdateRequestByOid`
+        :type request: :class:`~clappform.proto.clappform.data.v1.update_pb2.\
+UpdateRequestByOid`
         :return: The update request response.
-        :rtype: :class:`~clappform.proto.clappform.data.v1.update_pb2.UpdateRequest`
+        :rtype: :class:`~clappform.proto.clappform.data.v1.update_pb2.\
+UpdateRequest`
 
-        This method sends an update request to the gRPC service via the `ReplaceMany` method
-        of the `UpdateManagementStub`. The response from the service contains the updated request.
+        This method sends an update request to the gRPC service via the
+        `ReplaceMany` method of the `UpdateManagementStub`. The response from
+        the service contains the updated request.
 
         Example usage:
 
@@ -419,8 +435,9 @@ class Data(GrpcBase):
             print(response)
 
         .. note::
-            Ensure that the `clappform.proto.clappform.data.v1.update_pb2` module is imported and
-            available in your code to use the `UpdateRequestByOid` and `UpdateRequest` classes.
+            Ensure that the `clappform.proto.clappform.data.v1.update_pb2`
+            module is imported and available in your code to use the
+            `UpdateRequestByOid` and `UpdateRequest` classes.
         """
         return self.update_stub.ReplaceMany(request, **self._default_kwargs())
 
@@ -526,16 +543,17 @@ class Client(GrpcBase):
         self.query_stub = query_pb2_grpc.QueryManagementStub(self.channel)
 
     def actionflow_start(
-        self,
-        request: actionflow_pb2.StartActionflow
+        self, request: actionflow_pb2.StartActionflow
     ) -> actionflow_pb2.StartActionflowResponse:
         """
         Starts an actionflow using the gRPC service.
 
         :param request: The start actionflow request.
-        :type request: :class:`~clappform.proto.clappform.client.v1.actionflow_pb2.StartActionflow`
+        :type request: :class:`~clappform.proto.clappform.client.v1.\
+actionflow_pb2.StartActionflow`
         :return: The response for starting an actionflow.
-        :rtype: :class:`~clappform.proto.clappform.client.v1.actionflow_pb2.StartActionflowResponse`
+        :rtype: :class:`~clappform.proto.clappform.client.v1.actionflow_pb2.\
+StartActionflowResponse`
 
         Example:
             .. code-block:: python
@@ -553,14 +571,15 @@ class Client(GrpcBase):
                 print(response)
 
         .. note::
-            Ensure that the `clappform.proto.clappform.client.v1.actionflow_pb2` module is imported and
-            available in your code to use the `StartActionflow` and `StartActionflowResponse` classes.
+            Ensure that the
+            `clappform.proto.clappform.client.v1.actionflow_pb2` module is
+            imported and available in your code to use the
+            `StartActionflow` and `StartActionflowResponse` classes.
         """
         return self.actionflow_stub.Start(request, **self._default_kwargs())
 
     def collection_get(
-        self,
-        request: commons_pb2.Read
+        self, request: commons_pb2.Read
     ) -> collection_pb2.Collection:
         """
         Gets a collection using the gRPC service.
@@ -568,7 +587,8 @@ class Client(GrpcBase):
         :param request: The read request for the collection.
         :type request: :class:`~clappform.proto.clappform.v1.commons_pb2.Read`
         :return: The collection response.
-        :rtype: :class:`~clappform.proto.clappform.client.v1.collection_pb2.Collection`
+        :rtype: :class:`~clappform.proto.clappform.client.v1.collection_pb2.\
+Collection`
 
         Example:
             .. code-block:: python

@@ -35,6 +35,7 @@ python_use_unqualified_type_names = True
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "grpc": ('https://grpc.github.io/grpc/python/', None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
 }
 
 templates_path = ['_templates']

@@ -13,13 +13,19 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
+class _MaybeAsyncIterator(
+    collections.abc.AsyncIterator[_T],
+    collections.abc.Iterator[_T],
+    metaclass=abc.ABCMeta,
+): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
 
 class VersionManagementStub:
-    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
+    def __init__(
+        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
+    ) -> None: ...
     GetAll: grpc.UnaryUnaryMultiCallable[
         clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
         clappform.proto.clappform.client.v1.version_pb2.Versions,
@@ -77,34 +83,58 @@ class VersionManagementServicer(metaclass=abc.ABCMeta):
         self,
         request: clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.proto.clappform.client.v1.version_pb2.Versions, collections.abc.Awaitable[clappform.proto.clappform.client.v1.version_pb2.Versions]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.client.v1.version_pb2.Versions,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.client.v1.version_pb2.Versions
+        ],
+    ]: ...
     @abc.abstractmethod
     def Get(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.proto.clappform.client.v1.version_pb2.Version, collections.abc.Awaitable[clappform.proto.clappform.client.v1.version_pb2.Version]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.client.v1.version_pb2.Version,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.client.v1.version_pb2.Version
+        ],
+    ]: ...
     @abc.abstractmethod
     def Revert(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.proto.clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.proto.clappform.v1.commons_pb2.Message]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.v1.commons_pb2.Message,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.v1.commons_pb2.Message
+        ],
+    ]: ...
     @abc.abstractmethod
     def Lock(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.proto.clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.proto.clappform.v1.commons_pb2.Message]]: ...
-
+    ) -> typing.Union[
+        clappform.proto.clappform.v1.commons_pb2.Message,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.v1.commons_pb2.Message
+        ],
+    ]: ...
     @abc.abstractmethod
     def Unlock(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[clappform.proto.clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.proto.clappform.v1.commons_pb2.Message]]: ...
+    ) -> typing.Union[
+        clappform.proto.clappform.v1.commons_pb2.Message,
+        collections.abc.Awaitable[
+            clappform.proto.clappform.v1.commons_pb2.Message
+        ],
+    ]: ...
 
-def add_VersionManagementServicer_to_server(servicer: VersionManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...
+def add_VersionManagementServicer_to_server(
+    servicer: VersionManagementServicer,
+    server: typing.Union[grpc.Server, grpc.aio.Server],
+) -> None: ...
