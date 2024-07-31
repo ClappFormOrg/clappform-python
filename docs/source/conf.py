@@ -30,8 +30,14 @@ extensions = [
     "sphinx_autodoc_typehints",
 ]
 
-autodoc_typehints_format = 'short'
-python_use_unqualified_type_names = True
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-source": True,
+    "member-order": "bysource",
+}
+
+# python_use_unqualified_type_names = True
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "grpc": ('https://grpc.github.io/grpc/python/', None),

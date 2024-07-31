@@ -1,3 +1,5 @@
 [flake8]
 max-complexity = 10
-max-line-length = 88
+max-line-length = 79
+exclude = clappform/proto/*
+ignore = E203

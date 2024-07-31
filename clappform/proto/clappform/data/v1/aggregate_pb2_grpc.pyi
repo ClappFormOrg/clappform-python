@@ -12,11 +12,7 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(
-    collections.abc.AsyncIterator[_T],
-    collections.abc.Iterator[_T],
-    metaclass=abc.ABCMeta,
-): ...
+class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
@@ -26,9 +22,7 @@ class AggregateManagementStub:
     from a database collection based on a supplied query.
     """
 
-    def __init__(
-        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
-    ) -> None: ...
+    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
     AggregateStream: grpc.UnaryStreamMultiCallable[
         clappform.proto.clappform.data.v1.aggregate_pb2.AggregateStreamRequest,
         clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse,
@@ -76,14 +70,7 @@ class AggregateManagementServicer(metaclass=abc.ABCMeta):
         self,
         request: clappform.proto.clappform.data.v1.aggregate_pb2.AggregateStreamRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        collections.abc.Iterator[
-            clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse
-        ],
-        collections.abc.AsyncIterator[
-            clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse
-        ],
-    ]:
+    ) -> typing.Union[collections.abc.Iterator[clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse], collections.abc.AsyncIterator[clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse]]:
         """Retrieves data from a database collection based on a supplied query
         and returns a stream of aggregate responses.
         """
@@ -93,17 +80,9 @@ class AggregateManagementServicer(metaclass=abc.ABCMeta):
         self,
         request: clappform.proto.clappform.data.v1.aggregate_pb2.AggregateUnaryRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse
-        ],
-    ]:
+    ) -> typing.Union[clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse, collections.abc.Awaitable[clappform.proto.clappform.data.v1.aggregate_pb2.AggregateResponse]]:
         """Retrieves data from a database collection based on a supplied query
         and returns a single aggregate response.
         """
 
-def add_AggregateManagementServicer_to_server(
-    servicer: AggregateManagementServicer,
-    server: typing.Union[grpc.Server, grpc.aio.Server],
-) -> None: ...
+def add_AggregateManagementServicer_to_server(servicer: AggregateManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

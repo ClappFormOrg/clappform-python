@@ -4,38 +4,33 @@ import warnings
 
 import grpc
 
-from clappform.proto.clappform.client.v1 import (
-    actionflow_pb2 as clappform_dot_client_dot_v1_dot_actionflow__pb2,
-)
-from clappform.proto.clappform.v1 import (
-    commons_pb2 as clappform_dot_v1_dot_commons__pb2,
-)
+from clappform.proto.clappform.client.v1 import \
+    actionflow_pb2 as clappform_dot_client_dot_v1_dot_actionflow__pb2
+from clappform.proto.clappform.v1 import \
+    commons_pb2 as clappform_dot_v1_dot_commons__pb2
 
-GRPC_GENERATED_VERSION = "1.65.1"
+GRPC_GENERATED_VERSION = '1.65.2'
 GRPC_VERSION = grpc.__version__
-EXPECTED_ERROR_RELEASE = "1.66.0"
-SCHEDULED_RELEASE_DATE = "August 6, 2024"
+EXPECTED_ERROR_RELEASE = '1.66.0'
+SCHEDULED_RELEASE_DATE = 'August 6, 2024'
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     warnings.warn(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + f" but the generated code in clappform/client/v1/actionflow_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
-        + f" This warning will become an error in {EXPECTED_ERROR_RELEASE},"
-        + f" scheduled for release on {SCHEDULED_RELEASE_DATE}.",
-        RuntimeWarning,
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + f' but the generated code in clappform/client/v1/actionflow_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
+        + f' This warning will become an error in {EXPECTED_ERROR_RELEASE},'
+        + f' scheduled for release on {SCHEDULED_RELEASE_DATE}.',
+        RuntimeWarning
     )
 
 
@@ -49,41 +44,35 @@ class ActionflowManagementStub(object):
             channel: A grpc.Channel.
         """
         self.GetAll = channel.unary_unary(
-            "/clappform.client.v1.actionflow.ActionflowManagement/GetAll",
-            request_serializer=clappform_dot_v1_dot_commons__pb2.PaginationRequest.SerializeToString,
-            response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflows.FromString,
-            _registered_method=True,
-        )
+                '/clappform.client.v1.actionflow.ActionflowManagement/GetAll',
+                request_serializer=clappform_dot_v1_dot_commons__pb2.PaginationRequest.SerializeToString,
+                response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflows.FromString,
+                _registered_method=True)
         self.Get = channel.unary_unary(
-            "/clappform.client.v1.actionflow.ActionflowManagement/Get",
-            request_serializer=clappform_dot_v1_dot_commons__pb2.Read.SerializeToString,
-            response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
-            _registered_method=True,
-        )
+                '/clappform.client.v1.actionflow.ActionflowManagement/Get',
+                request_serializer=clappform_dot_v1_dot_commons__pb2.Read.SerializeToString,
+                response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
+                _registered_method=True)
         self.Create = channel.unary_unary(
-            "/clappform.client.v1.actionflow.ActionflowManagement/Create",
-            request_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.CreateRequest.SerializeToString,
-            response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
-            _registered_method=True,
-        )
+                '/clappform.client.v1.actionflow.ActionflowManagement/Create',
+                request_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.CreateRequest.SerializeToString,
+                response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
+                _registered_method=True)
         self.Update = channel.unary_unary(
-            "/clappform.client.v1.actionflow.ActionflowManagement/Update",
-            request_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.UpdateRequest.SerializeToString,
-            response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
-            _registered_method=True,
-        )
+                '/clappform.client.v1.actionflow.ActionflowManagement/Update',
+                request_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.UpdateRequest.SerializeToString,
+                response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
+                _registered_method=True)
         self.Delete = channel.unary_unary(
-            "/clappform.client.v1.actionflow.ActionflowManagement/Delete",
-            request_serializer=clappform_dot_v1_dot_commons__pb2.Read.SerializeToString,
-            response_deserializer=clappform_dot_v1_dot_commons__pb2.Message.FromString,
-            _registered_method=True,
-        )
+                '/clappform.client.v1.actionflow.ActionflowManagement/Delete',
+                request_serializer=clappform_dot_v1_dot_commons__pb2.Read.SerializeToString,
+                response_deserializer=clappform_dot_v1_dot_commons__pb2.Message.FromString,
+                _registered_method=True)
         self.Start = channel.unary_unary(
-            "/clappform.client.v1.actionflow.ActionflowManagement/Start",
-            request_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflow.SerializeToString,
-            response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflowResponse.FromString,
-            _registered_method=True,
-        )
+                '/clappform.client.v1.actionflow.ActionflowManagement/Start',
+                request_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflow.SerializeToString,
+                response_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflowResponse.FromString,
+                _registered_method=True)
 
 
 class ActionflowManagementServicer(object):
@@ -92,105 +81,98 @@ class ActionflowManagementServicer(object):
     def GetAll(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Get(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Create(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Update(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Delete(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Start(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_ActionflowManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "GetAll": grpc.unary_unary_rpc_method_handler(
-            servicer.GetAll,
-            request_deserializer=clappform_dot_v1_dot_commons__pb2.PaginationRequest.FromString,
-            response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflows.SerializeToString,
-        ),
-        "Get": grpc.unary_unary_rpc_method_handler(
-            servicer.Get,
-            request_deserializer=clappform_dot_v1_dot_commons__pb2.Read.FromString,
-            response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.SerializeToString,
-        ),
-        "Create": grpc.unary_unary_rpc_method_handler(
-            servicer.Create,
-            request_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.CreateRequest.FromString,
-            response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.SerializeToString,
-        ),
-        "Update": grpc.unary_unary_rpc_method_handler(
-            servicer.Update,
-            request_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.UpdateRequest.FromString,
-            response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.SerializeToString,
-        ),
-        "Delete": grpc.unary_unary_rpc_method_handler(
-            servicer.Delete,
-            request_deserializer=clappform_dot_v1_dot_commons__pb2.Read.FromString,
-            response_serializer=clappform_dot_v1_dot_commons__pb2.Message.SerializeToString,
-        ),
-        "Start": grpc.unary_unary_rpc_method_handler(
-            servicer.Start,
-            request_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflow.FromString,
-            response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflowResponse.SerializeToString,
-        ),
+            'GetAll': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAll,
+                    request_deserializer=clappform_dot_v1_dot_commons__pb2.PaginationRequest.FromString,
+                    response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflows.SerializeToString,
+            ),
+            'Get': grpc.unary_unary_rpc_method_handler(
+                    servicer.Get,
+                    request_deserializer=clappform_dot_v1_dot_commons__pb2.Read.FromString,
+                    response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.SerializeToString,
+            ),
+            'Create': grpc.unary_unary_rpc_method_handler(
+                    servicer.Create,
+                    request_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.CreateRequest.FromString,
+                    response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.SerializeToString,
+            ),
+            'Update': grpc.unary_unary_rpc_method_handler(
+                    servicer.Update,
+                    request_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.UpdateRequest.FromString,
+                    response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.SerializeToString,
+            ),
+            'Delete': grpc.unary_unary_rpc_method_handler(
+                    servicer.Delete,
+                    request_deserializer=clappform_dot_v1_dot_commons__pb2.Read.FromString,
+                    response_serializer=clappform_dot_v1_dot_commons__pb2.Message.SerializeToString,
+            ),
+            'Start': grpc.unary_unary_rpc_method_handler(
+                    servicer.Start,
+                    request_deserializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflow.FromString,
+                    response_serializer=clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflowResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "clappform.client.v1.actionflow.ActionflowManagement",
-        rpc_method_handlers,
-    )
+            'clappform.client.v1.actionflow.ActionflowManagement', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers(
-        "clappform.client.v1.actionflow.ActionflowManagement",
-        rpc_method_handlers,
-    )
+    server.add_registered_method_handlers('clappform.client.v1.actionflow.ActionflowManagement', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class ActionflowManagement(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetAll(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetAll(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.client.v1.actionflow.ActionflowManagement/GetAll",
+            '/clappform.client.v1.actionflow.ActionflowManagement/GetAll',
             clappform_dot_v1_dot_commons__pb2.PaginationRequest.SerializeToString,
             clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflows.FromString,
             options,
@@ -201,26 +183,23 @@ class ActionflowManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def Get(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def Get(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.client.v1.actionflow.ActionflowManagement/Get",
+            '/clappform.client.v1.actionflow.ActionflowManagement/Get',
             clappform_dot_v1_dot_commons__pb2.Read.SerializeToString,
             clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
             options,
@@ -231,26 +210,23 @@ class ActionflowManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def Create(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def Create(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.client.v1.actionflow.ActionflowManagement/Create",
+            '/clappform.client.v1.actionflow.ActionflowManagement/Create',
             clappform_dot_client_dot_v1_dot_actionflow__pb2.CreateRequest.SerializeToString,
             clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
             options,
@@ -261,26 +237,23 @@ class ActionflowManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def Update(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def Update(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.client.v1.actionflow.ActionflowManagement/Update",
+            '/clappform.client.v1.actionflow.ActionflowManagement/Update',
             clappform_dot_client_dot_v1_dot_actionflow__pb2.UpdateRequest.SerializeToString,
             clappform_dot_client_dot_v1_dot_actionflow__pb2.Actionflow.FromString,
             options,
@@ -291,26 +264,23 @@ class ActionflowManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def Delete(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def Delete(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.client.v1.actionflow.ActionflowManagement/Delete",
+            '/clappform.client.v1.actionflow.ActionflowManagement/Delete',
             clappform_dot_v1_dot_commons__pb2.Read.SerializeToString,
             clappform_dot_v1_dot_commons__pb2.Message.FromString,
             options,
@@ -321,26 +291,23 @@ class ActionflowManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def Start(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def Start(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.client.v1.actionflow.ActionflowManagement/Start",
+            '/clappform.client.v1.actionflow.ActionflowManagement/Start',
             clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflow.SerializeToString,
             clappform_dot_client_dot_v1_dot_actionflow__pb2.StartActionflowResponse.FromString,
             options,
@@ -351,5 +318,4 @@ class ActionflowManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)

@@ -26,7 +26,7 @@ from .typedefs import GrpcChannelOptions, GrpcMetadata, RpcCallOptions
 from .utils import default_options
 
 # Metadata
-__version__ = "5.0.0-alpha5"
+__version__ = "5.0.0-alpha6"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -274,6 +274,8 @@ aggregate_pb2.AggregateStreamRequest`
         :rtype: Iterator[:class:`~clappform.proto.clappform.data.v1.\
 aggregate_pb2.AggregateResponse`]
 
+        :raises grpc.RpcError: If an RPC error occurs
+
         This method sends an aggregate request to the gRPC service via the
         `AggregateStream` method of the `AggregateManagementStub`. The
         responses from the service are yielded one by one.
@@ -318,6 +320,8 @@ data.v1.insert_pb2.InsertRequest`]
         :return: An iterator over insert responses.
         :rtype: Iterator[:class:`~clappform.proto.clappform.data.v1.\
 insert_pb2.InsertResponse`]
+
+        :raises grpc.RpcError: If an RPC error occurs
 
         This method sends multiple insert requests to the gRPC service via the
         `InsertMany` method of the `InsertManagementStub`. The responses from
@@ -367,6 +371,8 @@ DeleteRequestOids`
         :return: A message indicating the result of the delete operation.
         :rtype: :class:`~clappform.proto.clappform.data.v1.commons_pb2.Message`
 
+        :raises grpc.RpcError: If an RPC error occurs
+
         This method sends a delete request to the gRPC service via the
         `DeleteManyByOids` method of the `DeleteManagementStub`. The response
         from the service indicates the result of the operation.
@@ -411,6 +417,8 @@ UpdateRequestByOid`
         :return: The update request response.
         :rtype: :class:`~clappform.proto.clappform.data.v1.update_pb2.\
 UpdateRequest`
+
+        :raises grpc.RpcError: If an RPC error occurs
 
         This method sends an update request to the gRPC service via the
         `ReplaceMany` method of the `UpdateManagementStub`. The response from
@@ -555,6 +563,8 @@ actionflow_pb2.StartActionflow`
         :rtype: :class:`~clappform.proto.clappform.client.v1.actionflow_pb2.\
 StartActionflowResponse`
 
+        :raises grpc.RpcError: If an RPC error occurs
+
         Example:
             .. code-block:: python
 
@@ -590,6 +600,8 @@ StartActionflowResponse`
         :rtype: :class:`~clappform.proto.clappform.client.v1.collection_pb2.\
 Collection`
 
+        :raises grpc.RpcError: If an RPC error occurs
+
         Example:
             .. code-block:: python
 
@@ -624,6 +636,8 @@ Collection`
         :type request: :class:`~clappform.proto.clappform.v1.commons_pb2.Read`
         :return: The query response.
         :rtype: :class:`~clappform.proto.clappform.client.v1.query_pb2.Query`
+
+        :raises grpc.RpcError: If an RPC error occurs
 
         Example:
             .. code-block:: python

@@ -12,19 +12,13 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(
-    collections.abc.AsyncIterator[_T],
-    collections.abc.Iterator[_T],
-    metaclass=abc.ABCMeta,
-): ...
+class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
 
 class InsertManagementStub:
-    def __init__(
-        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
-    ) -> None: ...
+    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
     InsertMany: grpc.StreamStreamMultiCallable[
         clappform.proto.clappform.data.v1.insert_pb2.InsertRequest,
         clappform.proto.clappform.data.v1.insert_pb2.InsertResponse,
@@ -50,31 +44,15 @@ class InsertManagementServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def InsertMany(
         self,
-        request_iterator: _MaybeAsyncIterator[
-            clappform.proto.clappform.data.v1.insert_pb2.InsertRequest
-        ],
+        request_iterator: _MaybeAsyncIterator[clappform.proto.clappform.data.v1.insert_pb2.InsertRequest],
         context: _ServicerContext,
-    ) -> typing.Union[
-        collections.abc.Iterator[
-            clappform.proto.clappform.data.v1.insert_pb2.InsertResponse
-        ],
-        collections.abc.AsyncIterator[
-            clappform.proto.clappform.data.v1.insert_pb2.InsertResponse
-        ],
-    ]: ...
+    ) -> typing.Union[collections.abc.Iterator[clappform.proto.clappform.data.v1.insert_pb2.InsertResponse], collections.abc.AsyncIterator[clappform.proto.clappform.data.v1.insert_pb2.InsertResponse]]: ...
+
     @abc.abstractmethod
     def InsertSingle(
         self,
         request: clappform.proto.clappform.data.v1.insert_pb2.InsertRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.data.v1.insert_pb2.InsertResponse,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.data.v1.insert_pb2.InsertResponse
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.data.v1.insert_pb2.InsertResponse, collections.abc.Awaitable[clappform.proto.clappform.data.v1.insert_pb2.InsertResponse]]: ...
 
-def add_InsertManagementServicer_to_server(
-    servicer: InsertManagementServicer,
-    server: typing.Union[grpc.Server, grpc.aio.Server],
-) -> None: ...
+def add_InsertManagementServicer_to_server(servicer: InsertManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

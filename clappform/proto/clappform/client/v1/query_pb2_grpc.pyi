@@ -13,19 +13,13 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(
-    collections.abc.AsyncIterator[_T],
-    collections.abc.Iterator[_T],
-    metaclass=abc.ABCMeta,
-): ...
+class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
 
 class QueryManagementStub:
-    def __init__(
-        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
-    ) -> None: ...
+    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
     GetAll: grpc.UnaryUnaryMultiCallable[
         clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
         clappform.proto.clappform.client.v1.query_pb2.Queries,
@@ -83,58 +77,34 @@ class QueryManagementServicer(metaclass=abc.ABCMeta):
         self,
         request: clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.query_pb2.Queries,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.query_pb2.Queries
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.query_pb2.Queries, collections.abc.Awaitable[clappform.proto.clappform.client.v1.query_pb2.Queries]]: ...
+
     @abc.abstractmethod
     def Get(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.query_pb2.Query,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.query_pb2.Query
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.query_pb2.Query, collections.abc.Awaitable[clappform.proto.clappform.client.v1.query_pb2.Query]]: ...
+
     @abc.abstractmethod
     def Create(
         self,
         request: clappform.proto.clappform.client.v1.query_pb2.CreateRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.query_pb2.Query,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.query_pb2.Query
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.query_pb2.Query, collections.abc.Awaitable[clappform.proto.clappform.client.v1.query_pb2.Query]]: ...
+
     @abc.abstractmethod
     def Update(
         self,
         request: clappform.proto.clappform.client.v1.query_pb2.UpdateRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.query_pb2.Query,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.query_pb2.Query
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.query_pb2.Query, collections.abc.Awaitable[clappform.proto.clappform.client.v1.query_pb2.Query]]: ...
+
     @abc.abstractmethod
     def Delete(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.v1.commons_pb2.Message,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.v1.commons_pb2.Message
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.proto.clappform.v1.commons_pb2.Message]]: ...
 
-def add_QueryManagementServicer_to_server(
-    servicer: QueryManagementServicer,
-    server: typing.Union[grpc.Server, grpc.aio.Server],
-) -> None: ...
+def add_QueryManagementServicer_to_server(servicer: QueryManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

@@ -27,21 +27,13 @@ class AggregateFilterOptions(google.protobuf.message.Message):
     main_key: builtins.str
     """Main key used for filtering."""
     @property
-    def keys(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.str
-    ]:
+    def keys(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
         """Keys to filter the data by.
         Repeated to allow multiple keys.
         """
 
     @property
-    def selected_options(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.str
-    ]:
+    def selected_options(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
         """Selected options for the filter.
         Repeated to allow multiple options.
         """
@@ -54,19 +46,7 @@ class AggregateFilterOptions(google.protobuf.message.Message):
         main_key: builtins.str = ...,
         selected_options: collections.abc.Iterable[builtins.str] | None = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "keys",
-            b"keys",
-            "main_key",
-            b"main_key",
-            "name",
-            b"name",
-            "selected_options",
-            b"selected_options",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["keys", b"keys", "main_key", b"main_key", "name", b"name", "selected_options", b"selected_options"]) -> None: ...
 
 global___AggregateFilterOptions = AggregateFilterOptions
 
@@ -114,113 +94,24 @@ class AggregateStreamRequest(google.protobuf.message.Message):
         options: builtins.bytes | None = ...,
         inner_options: builtins.bytes | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "_batch_size",
-            b"_batch_size",
-            "_collection",
-            b"_collection",
-            "_deep_dive",
-            b"_deep_dive",
-            "_filter_options",
-            b"_filter_options",
-            "_inner_options",
-            b"_inner_options",
-            "_options",
-            b"_options",
-            "_pipeline",
-            b"_pipeline",
-            "_query",
-            b"_query",
-            "batch_size",
-            b"batch_size",
-            "collection",
-            b"collection",
-            "deep_dive",
-            b"deep_dive",
-            "filter_options",
-            b"filter_options",
-            "inner_options",
-            b"inner_options",
-            "options",
-            b"options",
-            "pipeline",
-            b"pipeline",
-            "query",
-            b"query",
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "_batch_size",
-            b"_batch_size",
-            "_collection",
-            b"_collection",
-            "_deep_dive",
-            b"_deep_dive",
-            "_filter_options",
-            b"_filter_options",
-            "_inner_options",
-            b"_inner_options",
-            "_options",
-            b"_options",
-            "_pipeline",
-            b"_pipeline",
-            "_query",
-            b"_query",
-            "batch_size",
-            b"batch_size",
-            "collection",
-            b"collection",
-            "deep_dive",
-            b"deep_dive",
-            "filter_options",
-            b"filter_options",
-            "inner_options",
-            b"inner_options",
-            "options",
-            b"options",
-            "pipeline",
-            b"pipeline",
-            "query",
-            b"query",
-        ],
-    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_batch_size", b"_batch_size", "_collection", b"_collection", "_deep_dive", b"_deep_dive", "_filter_options", b"_filter_options", "_inner_options", b"_inner_options", "_options", b"_options", "_pipeline", b"_pipeline", "_query", b"_query", "batch_size", b"batch_size", "collection", b"collection", "deep_dive", b"deep_dive", "filter_options", b"filter_options", "inner_options", b"inner_options", "options", b"options", "pipeline", b"pipeline", "query", b"query"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_batch_size", b"_batch_size", "_collection", b"_collection", "_deep_dive", b"_deep_dive", "_filter_options", b"_filter_options", "_inner_options", b"_inner_options", "_options", b"_options", "_pipeline", b"_pipeline", "_query", b"_query", "batch_size", b"batch_size", "collection", b"collection", "deep_dive", b"deep_dive", "filter_options", b"filter_options", "inner_options", b"inner_options", "options", b"options", "pipeline", b"pipeline", "query", b"query"]) -> None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_batch_size", b"_batch_size"]
-    ) -> typing.Literal["batch_size"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_batch_size", b"_batch_size"]) -> typing.Literal["batch_size"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_collection", b"_collection"]
-    ) -> typing.Literal["collection"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_collection", b"_collection"]) -> typing.Literal["collection"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_deep_dive", b"_deep_dive"]
-    ) -> typing.Literal["deep_dive"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_deep_dive", b"_deep_dive"]) -> typing.Literal["deep_dive"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self,
-        oneof_group: typing.Literal["_filter_options", b"_filter_options"],
-    ) -> typing.Literal["filter_options"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_filter_options", b"_filter_options"]) -> typing.Literal["filter_options"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_inner_options", b"_inner_options"]
-    ) -> typing.Literal["inner_options"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_inner_options", b"_inner_options"]) -> typing.Literal["inner_options"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_options", b"_options"]
-    ) -> typing.Literal["options"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_options", b"_options"]) -> typing.Literal["options"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_pipeline", b"_pipeline"]
-    ) -> typing.Literal["pipeline"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_pipeline", b"_pipeline"]) -> typing.Literal["pipeline"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_query", b"_query"]
-    ) -> typing.Literal["query"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_query", b"_query"]) -> typing.Literal["query"] | None: ...
 
 global___AggregateStreamRequest = AggregateStreamRequest
 
@@ -272,125 +163,26 @@ class AggregateUnaryRequest(google.protobuf.message.Message):
         inner_options: builtins.bytes | None = ...,
         next_page: builtins.int | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "_batch_size",
-            b"_batch_size",
-            "_collection",
-            b"_collection",
-            "_deep_dive",
-            b"_deep_dive",
-            "_filter_options",
-            b"_filter_options",
-            "_inner_options",
-            b"_inner_options",
-            "_next_page",
-            b"_next_page",
-            "_options",
-            b"_options",
-            "_pipeline",
-            b"_pipeline",
-            "_query",
-            b"_query",
-            "batch_size",
-            b"batch_size",
-            "collection",
-            b"collection",
-            "deep_dive",
-            b"deep_dive",
-            "filter_options",
-            b"filter_options",
-            "inner_options",
-            b"inner_options",
-            "next_page",
-            b"next_page",
-            "options",
-            b"options",
-            "pipeline",
-            b"pipeline",
-            "query",
-            b"query",
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "_batch_size",
-            b"_batch_size",
-            "_collection",
-            b"_collection",
-            "_deep_dive",
-            b"_deep_dive",
-            "_filter_options",
-            b"_filter_options",
-            "_inner_options",
-            b"_inner_options",
-            "_next_page",
-            b"_next_page",
-            "_options",
-            b"_options",
-            "_pipeline",
-            b"_pipeline",
-            "_query",
-            b"_query",
-            "batch_size",
-            b"batch_size",
-            "collection",
-            b"collection",
-            "deep_dive",
-            b"deep_dive",
-            "filter_options",
-            b"filter_options",
-            "inner_options",
-            b"inner_options",
-            "next_page",
-            b"next_page",
-            "options",
-            b"options",
-            "pipeline",
-            b"pipeline",
-            "query",
-            b"query",
-        ],
-    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_batch_size", b"_batch_size", "_collection", b"_collection", "_deep_dive", b"_deep_dive", "_filter_options", b"_filter_options", "_inner_options", b"_inner_options", "_next_page", b"_next_page", "_options", b"_options", "_pipeline", b"_pipeline", "_query", b"_query", "batch_size", b"batch_size", "collection", b"collection", "deep_dive", b"deep_dive", "filter_options", b"filter_options", "inner_options", b"inner_options", "next_page", b"next_page", "options", b"options", "pipeline", b"pipeline", "query", b"query"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_batch_size", b"_batch_size", "_collection", b"_collection", "_deep_dive", b"_deep_dive", "_filter_options", b"_filter_options", "_inner_options", b"_inner_options", "_next_page", b"_next_page", "_options", b"_options", "_pipeline", b"_pipeline", "_query", b"_query", "batch_size", b"batch_size", "collection", b"collection", "deep_dive", b"deep_dive", "filter_options", b"filter_options", "inner_options", b"inner_options", "next_page", b"next_page", "options", b"options", "pipeline", b"pipeline", "query", b"query"]) -> None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_batch_size", b"_batch_size"]
-    ) -> typing.Literal["batch_size"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_batch_size", b"_batch_size"]) -> typing.Literal["batch_size"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_collection", b"_collection"]
-    ) -> typing.Literal["collection"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_collection", b"_collection"]) -> typing.Literal["collection"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_deep_dive", b"_deep_dive"]
-    ) -> typing.Literal["deep_dive"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_deep_dive", b"_deep_dive"]) -> typing.Literal["deep_dive"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self,
-        oneof_group: typing.Literal["_filter_options", b"_filter_options"],
-    ) -> typing.Literal["filter_options"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_filter_options", b"_filter_options"]) -> typing.Literal["filter_options"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_inner_options", b"_inner_options"]
-    ) -> typing.Literal["inner_options"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_inner_options", b"_inner_options"]) -> typing.Literal["inner_options"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_next_page", b"_next_page"]
-    ) -> typing.Literal["next_page"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_next_page", b"_next_page"]) -> typing.Literal["next_page"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_options", b"_options"]
-    ) -> typing.Literal["options"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_options", b"_options"]) -> typing.Literal["options"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_pipeline", b"_pipeline"]
-    ) -> typing.Literal["pipeline"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_pipeline", b"_pipeline"]) -> typing.Literal["pipeline"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_query", b"_query"]
-    ) -> typing.Literal["query"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_query", b"_query"]) -> typing.Literal["query"] | None: ...
 
 global___AggregateUnaryRequest = AggregateUnaryRequest
 
@@ -428,22 +220,6 @@ class AggregateResponse(google.protobuf.message.Message):
         previous_page: builtins.int = ...,
         last_page: builtins.int = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "data",
-            b"data",
-            "last_page",
-            b"last_page",
-            "next_page",
-            b"next_page",
-            "previous_page",
-            b"previous_page",
-            "total",
-            b"total",
-            "total_sent",
-            b"total_sent",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["data", b"data", "last_page", b"last_page", "next_page", b"next_page", "previous_page", b"previous_page", "total", b"total", "total_sent", b"total_sent"]) -> None: ...
 
 global___AggregateResponse = AggregateResponse

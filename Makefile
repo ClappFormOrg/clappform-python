@@ -30,7 +30,7 @@ ruff: ## Run ruff utility to check source files
 	@ruff check --no-fix --no-unsafe-fixes clappform
 	@ruff format --check clappform
 
-lint: black mypy pylint flake8 ruff ## Lint a whole project
+lint: mypy pylint flake8 ruff ## Lint a whole project
 
 clean: ## Delete all temporary files
 	@find clappform -type f -name '*.py[cod]' -delete

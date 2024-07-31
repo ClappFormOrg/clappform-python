@@ -43,17 +43,9 @@ class ActionflowTask(google.protobuf.message.Message):
     updated_at: builtins.str
     deleted_at: builtins.str
     @property
-    def actionflows(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.str
-    ]: ...
+    def actionflows(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     @property
-    def versions(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        clappform.proto.clappform.client.v1.version_pb2.Version
-    ]: ...
+    def versions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[clappform.proto.clappform.client.v1.version_pb2.Version]: ...
     def __init__(
         self,
         *,
@@ -69,44 +61,9 @@ class ActionflowTask(google.protobuf.message.Message):
         created_at: builtins.str = ...,
         updated_at: builtins.str = ...,
         deleted_at: builtins.str = ...,
-        versions: (
-            collections.abc.Iterable[
-                clappform.proto.clappform.client.v1.version_pb2.Version
-            ]
-            | None
-        ) = ...,
+        versions: collections.abc.Iterable[clappform.proto.clappform.client.v1.version_pb2.Version] | None = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "actionflows",
-            b"actionflows",
-            "created_at",
-            b"created_at",
-            "deleted_at",
-            b"deleted_at",
-            "id",
-            b"id",
-            "input",
-            b"input",
-            "name",
-            b"name",
-            "output",
-            b"output",
-            "script",
-            b"script",
-            "settings",
-            b"settings",
-            "timeout",
-            b"timeout",
-            "type",
-            b"type",
-            "updated_at",
-            b"updated_at",
-            "versions",
-            b"versions",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["actionflows", b"actionflows", "created_at", b"created_at", "deleted_at", b"deleted_at", "id", b"id", "input", b"input", "name", b"name", "output", b"output", "script", b"script", "settings", b"settings", "timeout", b"timeout", "type", b"type", "updated_at", b"updated_at", "versions", b"versions"]) -> None: ...
 
 global___ActionflowTask = ActionflowTask
 
@@ -136,23 +93,7 @@ class CreateRequest(google.protobuf.message.Message):
         type: builtins.str = ...,
         script: builtins.bytes = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "input",
-            b"input",
-            "name",
-            b"name",
-            "output",
-            b"output",
-            "script",
-            b"script",
-            "settings",
-            b"settings",
-            "type",
-            b"type",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["input", b"input", "name", b"name", "output", b"output", "script", b"script", "settings", b"settings", "type", b"type"]) -> None: ...
 
 global___CreateRequest = CreateRequest
 
@@ -185,25 +126,7 @@ class UpdateRequest(google.protobuf.message.Message):
         type: builtins.str = ...,
         script: builtins.bytes = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "id",
-            b"id",
-            "input",
-            b"input",
-            "name",
-            b"name",
-            "output",
-            b"output",
-            "script",
-            b"script",
-            "settings",
-            b"settings",
-            "type",
-            b"type",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["id", b"id", "input", b"input", "name", b"name", "output", b"output", "script", b"script", "settings", b"settings", "type", b"type"]) -> None: ...
 
 global___UpdateRequest = UpdateRequest
 
@@ -214,36 +137,16 @@ class ActionflowTasks(google.protobuf.message.Message):
     ACTIONFLOW_TASKS_FIELD_NUMBER: builtins.int
     PAGINATION_FIELD_NUMBER: builtins.int
     @property
-    def actionflow_tasks(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        global___ActionflowTask
-    ]: ...
+    def actionflow_tasks(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ActionflowTask]: ...
     @property
-    def pagination(
-        self,
-    ) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
+    def pagination(self) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
     def __init__(
         self,
         *,
-        actionflow_tasks: (
-            collections.abc.Iterable[global___ActionflowTask] | None
-        ) = ...,
-        pagination: (
-            clappform.proto.clappform.v1.commons_pb2.Pagination | None
-        ) = ...,
+        actionflow_tasks: collections.abc.Iterable[global___ActionflowTask] | None = ...,
+        pagination: clappform.proto.clappform.v1.commons_pb2.Pagination | None = ...,
     ) -> None: ...
-    def HasField(
-        self, field_name: typing.Literal["pagination", b"pagination"]
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "actionflow_tasks",
-            b"actionflow_tasks",
-            "pagination",
-            b"pagination",
-        ],
-    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["pagination", b"pagination"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["actionflow_tasks", b"actionflow_tasks", "pagination", b"pagination"]) -> None: ...
 
 global___ActionflowTasks = ActionflowTasks

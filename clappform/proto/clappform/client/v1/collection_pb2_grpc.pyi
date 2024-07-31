@@ -13,19 +13,13 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(
-    collections.abc.AsyncIterator[_T],
-    collections.abc.Iterator[_T],
-    metaclass=abc.ABCMeta,
-): ...
+class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
 
 class CollectionManagementStub:
-    def __init__(
-        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
-    ) -> None: ...
+    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
     GetAll: grpc.UnaryUnaryMultiCallable[
         clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
         clappform.proto.clappform.client.v1.collection_pb2.Collections,
@@ -83,58 +77,34 @@ class CollectionManagementServicer(metaclass=abc.ABCMeta):
         self,
         request: clappform.proto.clappform.v1.commons_pb2.PaginationRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.collection_pb2.Collections,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.collection_pb2.Collections
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.collection_pb2.Collections, collections.abc.Awaitable[clappform.proto.clappform.client.v1.collection_pb2.Collections]]: ...
+
     @abc.abstractmethod
     def Get(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.collection_pb2.Collection,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.collection_pb2.Collection
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.collection_pb2.Collection, collections.abc.Awaitable[clappform.proto.clappform.client.v1.collection_pb2.Collection]]: ...
+
     @abc.abstractmethod
     def Create(
         self,
         request: clappform.proto.clappform.client.v1.collection_pb2.CreateRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.collection_pb2.Collection,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.collection_pb2.Collection
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.collection_pb2.Collection, collections.abc.Awaitable[clappform.proto.clappform.client.v1.collection_pb2.Collection]]: ...
+
     @abc.abstractmethod
     def Update(
         self,
         request: clappform.proto.clappform.client.v1.collection_pb2.UpdateRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.client.v1.collection_pb2.Collection,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.client.v1.collection_pb2.Collection
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.client.v1.collection_pb2.Collection, collections.abc.Awaitable[clappform.proto.clappform.client.v1.collection_pb2.Collection]]: ...
+
     @abc.abstractmethod
     def Delete(
         self,
         request: clappform.proto.clappform.v1.commons_pb2.Read,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.v1.commons_pb2.Message,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.v1.commons_pb2.Message
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.proto.clappform.v1.commons_pb2.Message]]: ...
 
-def add_CollectionManagementServicer_to_server(
-    servicer: CollectionManagementServicer,
-    server: typing.Union[grpc.Server, grpc.aio.Server],
-) -> None: ...
+def add_CollectionManagementServicer_to_server(servicer: CollectionManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

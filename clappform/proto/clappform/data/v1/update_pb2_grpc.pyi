@@ -12,19 +12,13 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(
-    collections.abc.AsyncIterator[_T],
-    collections.abc.Iterator[_T],
-    metaclass=abc.ABCMeta,
-): ...
+class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
 
 class UpdateManagementStub:
-    def __init__(
-        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
-    ) -> None: ...
+    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
     ReplaceMany: grpc.UnaryUnaryMultiCallable[
         clappform.proto.clappform.data.v1.update_pb2.UpdateRequestByOid,
         clappform.proto.clappform.data.v1.update_pb2.UpdateRequest,
@@ -62,36 +56,20 @@ class UpdateManagementServicer(metaclass=abc.ABCMeta):
         self,
         request: clappform.proto.clappform.data.v1.update_pb2.UpdateRequestByOid,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.data.v1.update_pb2.UpdateRequest,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.data.v1.update_pb2.UpdateRequest
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.data.v1.update_pb2.UpdateRequest, collections.abc.Awaitable[clappform.proto.clappform.data.v1.update_pb2.UpdateRequest]]: ...
+
     @abc.abstractmethod
     def UpdateManyByOid(
         self,
         request: clappform.proto.clappform.data.v1.update_pb2.UpdateRequestByOid,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.data.v1.update_pb2.UpdateRequest,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.data.v1.update_pb2.UpdateRequest
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.data.v1.update_pb2.UpdateRequest, collections.abc.Awaitable[clappform.proto.clappform.data.v1.update_pb2.UpdateRequest]]: ...
+
     @abc.abstractmethod
     def UpdateManyByQuery(
         self,
         request: clappform.proto.clappform.data.v1.update_pb2.UpdateRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.data.v1.update_pb2.UpdateRequest,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.data.v1.update_pb2.UpdateRequest
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.data.v1.update_pb2.UpdateRequest, collections.abc.Awaitable[clappform.proto.clappform.data.v1.update_pb2.UpdateRequest]]: ...
 
-def add_UpdateManagementServicer_to_server(
-    servicer: UpdateManagementServicer,
-    server: typing.Union[grpc.Server, grpc.aio.Server],
-) -> None: ...
+def add_UpdateManagementServicer_to_server(servicer: UpdateManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

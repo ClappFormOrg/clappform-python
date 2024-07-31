@@ -24,12 +24,7 @@ class InsertRequest(google.protobuf.message.Message):
         data: builtins.bytes = ...,
         collection: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "collection", b"collection", "data", b"data"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["collection", b"collection", "data", b"data"]) -> None: ...
 
 global___InsertRequest = InsertRequest
 
@@ -44,8 +39,6 @@ class InsertResponse(google.protobuf.message.Message):
         *,
         processed_count: builtins.int = ...,
     ) -> None: ...
-    def ClearField(
-        self, field_name: typing.Literal["processed_count", b"processed_count"]
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["processed_count", b"processed_count"]) -> None: ...
 
 global___InsertResponse = InsertResponse

@@ -4,35 +4,31 @@ import warnings
 
 import grpc
 
-from clappform.proto.clappform.data.v1 import (
-    aggregate_pb2 as clappform_dot_data_dot_v1_dot_aggregate__pb2,
-)
+from clappform.proto.clappform.data.v1 import \
+    aggregate_pb2 as clappform_dot_data_dot_v1_dot_aggregate__pb2
 
-GRPC_GENERATED_VERSION = "1.65.1"
+GRPC_GENERATED_VERSION = '1.65.2'
 GRPC_VERSION = grpc.__version__
-EXPECTED_ERROR_RELEASE = "1.66.0"
-SCHEDULED_RELEASE_DATE = "August 6, 2024"
+EXPECTED_ERROR_RELEASE = '1.66.0'
+SCHEDULED_RELEASE_DATE = 'August 6, 2024'
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     warnings.warn(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + f" but the generated code in clappform/data/v1/aggregate_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
-        + f" This warning will become an error in {EXPECTED_ERROR_RELEASE},"
-        + f" scheduled for release on {SCHEDULED_RELEASE_DATE}.",
-        RuntimeWarning,
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + f' but the generated code in clappform/data/v1/aggregate_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
+        + f' This warning will become an error in {EXPECTED_ERROR_RELEASE},'
+        + f' scheduled for release on {SCHEDULED_RELEASE_DATE}.',
+        RuntimeWarning
     )
 
 
@@ -48,17 +44,15 @@ class AggregateManagementStub(object):
             channel: A grpc.Channel.
         """
         self.AggregateStream = channel.unary_stream(
-            "/clappform.data.v1.aggregate.AggregateManagement/AggregateStream",
-            request_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateStreamRequest.SerializeToString,
-            response_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.FromString,
-            _registered_method=True,
-        )
+                '/clappform.data.v1.aggregate.AggregateManagement/AggregateStream',
+                request_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateStreamRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.FromString,
+                _registered_method=True)
         self.AggregateUnary = channel.unary_unary(
-            "/clappform.data.v1.aggregate.AggregateManagement/AggregateUnary",
-            request_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateUnaryRequest.SerializeToString,
-            response_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.FromString,
-            _registered_method=True,
-        )
+                '/clappform.data.v1.aggregate.AggregateManagement/AggregateUnary',
+                request_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateUnaryRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.FromString,
+                _registered_method=True)
 
 
 class AggregateManagementServicer(object):
@@ -71,63 +65,58 @@ class AggregateManagementServicer(object):
         and returns a stream of aggregate responses.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def AggregateUnary(self, request, context):
         """Retrieves data from a database collection based on a supplied query
         and returns a single aggregate response.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_AggregateManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "AggregateStream": grpc.unary_stream_rpc_method_handler(
-            servicer.AggregateStream,
-            request_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateStreamRequest.FromString,
-            response_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.SerializeToString,
-        ),
-        "AggregateUnary": grpc.unary_unary_rpc_method_handler(
-            servicer.AggregateUnary,
-            request_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateUnaryRequest.FromString,
-            response_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.SerializeToString,
-        ),
+            'AggregateStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.AggregateStream,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateStreamRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.SerializeToString,
+            ),
+            'AggregateUnary': grpc.unary_unary_rpc_method_handler(
+                    servicer.AggregateUnary,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateUnaryRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "clappform.data.v1.aggregate.AggregateManagement", rpc_method_handlers
-    )
+            'clappform.data.v1.aggregate.AggregateManagement', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers(
-        "clappform.data.v1.aggregate.AggregateManagement", rpc_method_handlers
-    )
+    server.add_registered_method_handlers('clappform.data.v1.aggregate.AggregateManagement', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class AggregateManagement(object):
     """The AggregateManagement service provides methods for retrieving data
     from a database collection based on a supplied query.
     """
 
     @staticmethod
-    def AggregateStream(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def AggregateStream(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_stream(
             request,
             target,
-            "/clappform.data.v1.aggregate.AggregateManagement/AggregateStream",
+            '/clappform.data.v1.aggregate.AggregateManagement/AggregateStream',
             clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateStreamRequest.SerializeToString,
             clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.FromString,
             options,
@@ -138,26 +127,23 @@ class AggregateManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def AggregateUnary(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def AggregateUnary(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.data.v1.aggregate.AggregateManagement/AggregateUnary",
+            '/clappform.data.v1.aggregate.AggregateManagement/AggregateUnary',
             clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateUnaryRequest.SerializeToString,
             clappform_dot_data_dot_v1_dot_aggregate__pb2.AggregateResponse.FromString,
             options,
@@ -168,5 +154,4 @@ class AggregateManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)

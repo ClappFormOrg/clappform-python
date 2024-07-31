@@ -31,9 +31,7 @@ class Message(google.protobuf.message.Message):
         *,
         message: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self, field_name: typing.Literal["message", b"message"]
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["message", b"message"]) -> None: ...
 
 global___Message = Message
 
@@ -54,43 +52,12 @@ class Read(google.protobuf.message.Message):
         detail_level: builtins.int | None = ...,
         include_deleted: builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "_detail_level",
-            b"_detail_level",
-            "_include_deleted",
-            b"_include_deleted",
-            "detail_level",
-            b"detail_level",
-            "include_deleted",
-            b"include_deleted",
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "_detail_level",
-            b"_detail_level",
-            "_include_deleted",
-            b"_include_deleted",
-            "detail_level",
-            b"detail_level",
-            "id",
-            b"id",
-            "include_deleted",
-            b"include_deleted",
-        ],
-    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_detail_level", b"_detail_level", "_include_deleted", b"_include_deleted", "detail_level", b"detail_level", "include_deleted", b"include_deleted"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_detail_level", b"_detail_level", "_include_deleted", b"_include_deleted", "detail_level", b"detail_level", "id", b"id", "include_deleted", b"include_deleted"]) -> None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_detail_level", b"_detail_level"]
-    ) -> typing.Literal["detail_level"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_detail_level", b"_detail_level"]) -> typing.Literal["detail_level"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self,
-        oneof_group: typing.Literal["_include_deleted", b"_include_deleted"],
-    ) -> typing.Literal["include_deleted"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_include_deleted", b"_include_deleted"]) -> typing.Literal["include_deleted"] | None: ...
 
 global___Read = Read
 
@@ -123,102 +90,22 @@ class PaginationRequest(google.protobuf.message.Message):
         detail_level: builtins.int | None = ...,
         sort: builtins.str | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "_batch_size",
-            b"_batch_size",
-            "_detail_level",
-            b"_detail_level",
-            "_include_deleted",
-            b"_include_deleted",
-            "_limit",
-            b"_limit",
-            "_page",
-            b"_page",
-            "_query_parameters",
-            b"_query_parameters",
-            "_sort",
-            b"_sort",
-            "batch_size",
-            b"batch_size",
-            "detail_level",
-            b"detail_level",
-            "include_deleted",
-            b"include_deleted",
-            "limit",
-            b"limit",
-            "page",
-            b"page",
-            "query_parameters",
-            b"query_parameters",
-            "sort",
-            b"sort",
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "_batch_size",
-            b"_batch_size",
-            "_detail_level",
-            b"_detail_level",
-            "_include_deleted",
-            b"_include_deleted",
-            "_limit",
-            b"_limit",
-            "_page",
-            b"_page",
-            "_query_parameters",
-            b"_query_parameters",
-            "_sort",
-            b"_sort",
-            "batch_size",
-            b"batch_size",
-            "detail_level",
-            b"detail_level",
-            "include_deleted",
-            b"include_deleted",
-            "limit",
-            b"limit",
-            "page",
-            b"page",
-            "query_parameters",
-            b"query_parameters",
-            "sort",
-            b"sort",
-        ],
-    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_batch_size", b"_batch_size", "_detail_level", b"_detail_level", "_include_deleted", b"_include_deleted", "_limit", b"_limit", "_page", b"_page", "_query_parameters", b"_query_parameters", "_sort", b"_sort", "batch_size", b"batch_size", "detail_level", b"detail_level", "include_deleted", b"include_deleted", "limit", b"limit", "page", b"page", "query_parameters", b"query_parameters", "sort", b"sort"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_batch_size", b"_batch_size", "_detail_level", b"_detail_level", "_include_deleted", b"_include_deleted", "_limit", b"_limit", "_page", b"_page", "_query_parameters", b"_query_parameters", "_sort", b"_sort", "batch_size", b"batch_size", "detail_level", b"detail_level", "include_deleted", b"include_deleted", "limit", b"limit", "page", b"page", "query_parameters", b"query_parameters", "sort", b"sort"]) -> None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_batch_size", b"_batch_size"]
-    ) -> typing.Literal["batch_size"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_batch_size", b"_batch_size"]) -> typing.Literal["batch_size"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_detail_level", b"_detail_level"]
-    ) -> typing.Literal["detail_level"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_detail_level", b"_detail_level"]) -> typing.Literal["detail_level"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self,
-        oneof_group: typing.Literal["_include_deleted", b"_include_deleted"],
-    ) -> typing.Literal["include_deleted"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_include_deleted", b"_include_deleted"]) -> typing.Literal["include_deleted"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_limit", b"_limit"]
-    ) -> typing.Literal["limit"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_limit", b"_limit"]) -> typing.Literal["limit"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_page", b"_page"]
-    ) -> typing.Literal["page"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_page", b"_page"]) -> typing.Literal["page"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self,
-        oneof_group: typing.Literal["_query_parameters", b"_query_parameters"],
-    ) -> typing.Literal["query_parameters"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_query_parameters", b"_query_parameters"]) -> typing.Literal["query_parameters"] | None: ...
     @typing.overload
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_sort", b"_sort"]
-    ) -> typing.Literal["sort"] | None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_sort", b"_sort"]) -> typing.Literal["sort"] | None: ...
 
 global___PaginationRequest = PaginationRequest
 
@@ -242,18 +129,6 @@ class Pagination(google.protobuf.message.Message):
         total: builtins.int = ...,
         pages: builtins.int = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "limit",
-            b"limit",
-            "page",
-            b"page",
-            "pages",
-            b"pages",
-            "total",
-            b"total",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["limit", b"limit", "page", b"page", "pages", b"pages", "total", b"total"]) -> None: ...
 
 global___Pagination = Pagination

@@ -20,23 +20,14 @@ class DeleteRequestOids(google.protobuf.message.Message):
     COLLECTION_FIELD_NUMBER: builtins.int
     collection: builtins.str
     @property
-    def oids(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.str
-    ]: ...
+    def oids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     def __init__(
         self,
         *,
         oids: collections.abc.Iterable[builtins.str] | None = ...,
         collection: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "collection", b"collection", "oids", b"oids"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["collection", b"collection", "oids", b"oids"]) -> None: ...
 
 global___DeleteRequestOids = DeleteRequestOids
 
@@ -57,28 +48,9 @@ class DeleteRequestQuery(google.protobuf.message.Message):
         collection: builtins.str = ...,
         dry_run: builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "_dry_run", b"_dry_run", "dry_run", b"dry_run"
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "_dry_run",
-            b"_dry_run",
-            "collection",
-            b"collection",
-            "dry_run",
-            b"dry_run",
-            "query",
-            b"query",
-        ],
-    ) -> None: ...
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_dry_run", b"_dry_run"]
-    ) -> typing.Literal["dry_run"] | None: ...
+    def HasField(self, field_name: typing.Literal["_dry_run", b"_dry_run", "dry_run", b"dry_run"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_dry_run", b"_dry_run", "collection", b"collection", "dry_run", b"dry_run", "query", b"query"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_dry_run", b"_dry_run"]) -> typing.Literal["dry_run"] | None: ...
 
 global___DeleteRequestQuery = DeleteRequestQuery
 
@@ -93,9 +65,7 @@ class ClearRequest(google.protobuf.message.Message):
         *,
         collection: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self, field_name: typing.Literal["collection", b"collection"]
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["collection", b"collection"]) -> None: ...
 
 global___ClearRequest = ClearRequest
 
@@ -116,11 +86,6 @@ class DataResponse(google.protobuf.message.Message):
         total: builtins.int = ...,
         total_sent: builtins.int = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "data", b"data", "total", b"total", "total_sent", b"total_sent"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["data", b"data", "total", b"total", "total_sent", b"total_sent"]) -> None: ...
 
 global___DataResponse = DataResponse

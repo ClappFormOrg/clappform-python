@@ -25,12 +25,7 @@ class _databaseType:
     ValueType = typing.NewType("ValueType", builtins.int)
     V: typing_extensions.TypeAlias = ValueType
 
-class _databaseTypeEnumTypeWrapper(
-    google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[
-        _databaseType.ValueType
-    ],
-    builtins.type,
-):
+class _databaseTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_databaseType.ValueType], builtins.type):
     DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
     UNSPECIFIED: _databaseType.ValueType  # 0
     MONGO: _databaseType.ValueType  # 1
@@ -72,11 +67,7 @@ class Collection(google.protobuf.message.Message):
     updated_at: builtins.str
     deleted_at: builtins.str
     @property
-    def versions(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        clappform.proto.clappform.client.v1.version_pb2.Version
-    ]: ...
+    def versions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[clappform.proto.clappform.client.v1.version_pb2.Version]: ...
     def __init__(
         self,
         *,
@@ -88,47 +79,11 @@ class Collection(google.protobuf.message.Message):
         created_at: builtins.str = ...,
         updated_at: builtins.str = ...,
         deleted_at: builtins.str = ...,
-        versions: (
-            collections.abc.Iterable[
-                clappform.proto.clappform.client.v1.version_pb2.Version
-            ]
-            | None
-        ) = ...,
+        versions: collections.abc.Iterable[clappform.proto.clappform.client.v1.version_pb2.Version] | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "_database", b"_database", "database", b"database"
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "_database",
-            b"_database",
-            "app_id",
-            b"app_id",
-            "created_at",
-            b"created_at",
-            "database",
-            b"database",
-            "deleted_at",
-            b"deleted_at",
-            "id",
-            b"id",
-            "settings",
-            b"settings",
-            "slug",
-            b"slug",
-            "updated_at",
-            b"updated_at",
-            "versions",
-            b"versions",
-        ],
-    ) -> None: ...
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_database", b"_database"]
-    ) -> typing.Literal["database"] | None: ...
+    def HasField(self, field_name: typing.Literal["_database", b"_database", "database", b"database"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_database", b"_database", "app_id", b"app_id", "created_at", b"created_at", "database", b"database", "deleted_at", b"deleted_at", "id", b"id", "settings", b"settings", "slug", b"slug", "updated_at", b"updated_at", "versions", b"versions"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_database", b"_database"]) -> typing.Literal["database"] | None: ...
 
 global___Collection = Collection
 
@@ -152,30 +107,9 @@ class CreateRequest(google.protobuf.message.Message):
         app_id: builtins.str = ...,
         database: global___databaseType.ValueType | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "_database", b"_database", "database", b"database"
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "_database",
-            b"_database",
-            "app_id",
-            b"app_id",
-            "database",
-            b"database",
-            "settings",
-            b"settings",
-            "slug",
-            b"slug",
-        ],
-    ) -> None: ...
-    def WhichOneof(
-        self, oneof_group: typing.Literal["_database", b"_database"]
-    ) -> typing.Literal["database"] | None: ...
+    def HasField(self, field_name: typing.Literal["_database", b"_database", "database", b"database"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_database", b"_database", "app_id", b"app_id", "database", b"database", "settings", b"settings", "slug", b"slug"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_database", b"_database"]) -> typing.Literal["database"] | None: ...
 
 global___CreateRequest = CreateRequest
 
@@ -196,12 +130,7 @@ class UpdateRequest(google.protobuf.message.Message):
         settings: builtins.bytes = ...,
         slug: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "id", b"id", "settings", b"settings", "slug", b"slug"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["id", b"id", "settings", b"settings", "slug", b"slug"]) -> None: ...
 
 global___UpdateRequest = UpdateRequest
 
@@ -212,31 +141,16 @@ class Collections(google.protobuf.message.Message):
     COLLECTIONS_FIELD_NUMBER: builtins.int
     PAGINATION_FIELD_NUMBER: builtins.int
     @property
-    def collections(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        global___Collection
-    ]: ...
+    def collections(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Collection]: ...
     @property
-    def pagination(
-        self,
-    ) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
+    def pagination(self) -> clappform.proto.clappform.v1.commons_pb2.Pagination: ...
     def __init__(
         self,
         *,
         collections: collections.abc.Iterable[global___Collection] | None = ...,  # type: ignore
-        pagination: (
-            clappform.proto.clappform.v1.commons_pb2.Pagination | None
-        ) = ...,
+        pagination: clappform.proto.clappform.v1.commons_pb2.Pagination | None = ...,
     ) -> None: ...
-    def HasField(
-        self, field_name: typing.Literal["pagination", b"pagination"]
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "collections", b"collections", "pagination", b"pagination"
-        ],
-    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["pagination", b"pagination"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["collections", b"collections", "pagination", b"pagination"]) -> None: ...
 
 global___Collections = Collections

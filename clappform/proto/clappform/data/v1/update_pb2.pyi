@@ -24,12 +24,7 @@ class UpdateRequestByOid(google.protobuf.message.Message):
         data: builtins.bytes = ...,
         collection: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "collection", b"collection", "data", b"data"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["collection", b"collection", "data", b"data"]) -> None: ...
 
 global___UpdateRequestByOid = UpdateRequestByOid
 
@@ -47,12 +42,7 @@ class UpdateRequestByQuery(google.protobuf.message.Message):
         data: builtins.bytes = ...,
         collection: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "collection", b"collection", "data", b"data"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["collection", b"collection", "data", b"data"]) -> None: ...
 
 global___UpdateRequestByQuery = UpdateRequestByQuery
 
@@ -70,11 +60,6 @@ class UpdateRequest(google.protobuf.message.Message):
         data: builtins.bytes = ...,
         collection: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "collection", b"collection", "data", b"data"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["collection", b"collection", "data", b"data"]) -> None: ...
 
 global___UpdateRequest = UpdateRequest

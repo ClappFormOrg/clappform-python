@@ -5,12 +5,12 @@ RPC call options.
 
 import json
 import tempfile
-from typing import Optional, Union, Iterator
+from typing import Iterator, Optional, Union
 
 import pandas
 
-from .typedefs import GrpcChannelOptions
 from .proto.clappform.data.v1 import insert_pb2
+from .typedefs import GrpcChannelOptions
 
 
 def default_options(

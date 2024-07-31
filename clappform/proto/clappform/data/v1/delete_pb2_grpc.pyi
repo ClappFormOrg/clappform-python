@@ -13,19 +13,13 @@ import typing
 
 _T = typing.TypeVar("_T")
 
-class _MaybeAsyncIterator(
-    collections.abc.AsyncIterator[_T],
-    collections.abc.Iterator[_T],
-    metaclass=abc.ABCMeta,
-): ...
+class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta): ...
 
 class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore[misc, type-arg]
     ...
 
 class DeleteManagementStub:
-    def __init__(
-        self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]
-    ) -> None: ...
+    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
     DeleteManyByOids: grpc.UnaryUnaryMultiCallable[
         clappform.proto.clappform.data.v1.delete_pb2.DeleteRequestOids,
         clappform.proto.clappform.v1.commons_pb2.Message,
@@ -63,36 +57,20 @@ class DeleteManagementServicer(metaclass=abc.ABCMeta):
         self,
         request: clappform.proto.clappform.data.v1.delete_pb2.DeleteRequestOids,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.v1.commons_pb2.Message,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.v1.commons_pb2.Message
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.proto.clappform.v1.commons_pb2.Message]]: ...
+
     @abc.abstractmethod
     def DeleteManyByQuery(
         self,
         request: clappform.proto.clappform.data.v1.delete_pb2.DeleteRequestQuery,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.data.v1.delete_pb2.DataResponse,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.data.v1.delete_pb2.DataResponse
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.data.v1.delete_pb2.DataResponse, collections.abc.Awaitable[clappform.proto.clappform.data.v1.delete_pb2.DataResponse]]: ...
+
     @abc.abstractmethod
     def Clear(
         self,
         request: clappform.proto.clappform.data.v1.delete_pb2.ClearRequest,
         context: _ServicerContext,
-    ) -> typing.Union[
-        clappform.proto.clappform.v1.commons_pb2.Message,
-        collections.abc.Awaitable[
-            clappform.proto.clappform.v1.commons_pb2.Message
-        ],
-    ]: ...
+    ) -> typing.Union[clappform.proto.clappform.v1.commons_pb2.Message, collections.abc.Awaitable[clappform.proto.clappform.v1.commons_pb2.Message]]: ...
 
-def add_DeleteManagementServicer_to_server(
-    servicer: DeleteManagementServicer,
-    server: typing.Union[grpc.Server, grpc.aio.Server],
-) -> None: ...
+def add_DeleteManagementServicer_to_server(servicer: DeleteManagementServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

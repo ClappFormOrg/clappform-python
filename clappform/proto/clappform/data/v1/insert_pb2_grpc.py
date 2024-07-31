@@ -4,35 +4,31 @@ import warnings
 
 import grpc
 
-from clappform.proto.clappform.data.v1 import (
-    insert_pb2 as clappform_dot_data_dot_v1_dot_insert__pb2,
-)
+from clappform.proto.clappform.data.v1 import \
+    insert_pb2 as clappform_dot_data_dot_v1_dot_insert__pb2
 
-GRPC_GENERATED_VERSION = "1.65.1"
+GRPC_GENERATED_VERSION = '1.65.2'
 GRPC_VERSION = grpc.__version__
-EXPECTED_ERROR_RELEASE = "1.66.0"
-SCHEDULED_RELEASE_DATE = "August 6, 2024"
+EXPECTED_ERROR_RELEASE = '1.66.0'
+SCHEDULED_RELEASE_DATE = 'August 6, 2024'
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     warnings.warn(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + f" but the generated code in clappform/data/v1/insert_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
-        + f" This warning will become an error in {EXPECTED_ERROR_RELEASE},"
-        + f" scheduled for release on {SCHEDULED_RELEASE_DATE}.",
-        RuntimeWarning,
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + f' but the generated code in clappform/data/v1/insert_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
+        + f' This warning will become an error in {EXPECTED_ERROR_RELEASE},'
+        + f' scheduled for release on {SCHEDULED_RELEASE_DATE}.',
+        RuntimeWarning
     )
 
 
@@ -46,17 +42,15 @@ class InsertManagementStub(object):
             channel: A grpc.Channel.
         """
         self.InsertMany = channel.stream_stream(
-            "/clappform.data.v1.insert.InsertManagement/InsertMany",
-            request_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.SerializeToString,
-            response_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.FromString,
-            _registered_method=True,
-        )
+                '/clappform.data.v1.insert.InsertManagement/InsertMany',
+                request_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.FromString,
+                _registered_method=True)
         self.InsertSingle = channel.unary_unary(
-            "/clappform.data.v1.insert.InsertManagement/InsertSingle",
-            request_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.SerializeToString,
-            response_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.FromString,
-            _registered_method=True,
-        )
+                '/clappform.data.v1.insert.InsertManagement/InsertSingle',
+                request_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.FromString,
+                _registered_method=True)
 
 
 class InsertManagementServicer(object):
@@ -65,59 +59,54 @@ class InsertManagementServicer(object):
     def InsertMany(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def InsertSingle(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_InsertManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "InsertMany": grpc.stream_stream_rpc_method_handler(
-            servicer.InsertMany,
-            request_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.FromString,
-            response_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.SerializeToString,
-        ),
-        "InsertSingle": grpc.unary_unary_rpc_method_handler(
-            servicer.InsertSingle,
-            request_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.FromString,
-            response_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.SerializeToString,
-        ),
+            'InsertMany': grpc.stream_stream_rpc_method_handler(
+                    servicer.InsertMany,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.SerializeToString,
+            ),
+            'InsertSingle': grpc.unary_unary_rpc_method_handler(
+                    servicer.InsertSingle,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "clappform.data.v1.insert.InsertManagement", rpc_method_handlers
-    )
+            'clappform.data.v1.insert.InsertManagement', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers(
-        "clappform.data.v1.insert.InsertManagement", rpc_method_handlers
-    )
+    server.add_registered_method_handlers('clappform.data.v1.insert.InsertManagement', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class InsertManagement(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def InsertMany(
-        request_iterator,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def InsertMany(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.stream_stream(
             request_iterator,
             target,
-            "/clappform.data.v1.insert.InsertManagement/InsertMany",
+            '/clappform.data.v1.insert.InsertManagement/InsertMany',
             clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.SerializeToString,
             clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.FromString,
             options,
@@ -128,26 +117,23 @@ class InsertManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def InsertSingle(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def InsertSingle(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/clappform.data.v1.insert.InsertManagement/InsertSingle",
+            '/clappform.data.v1.insert.InsertManagement/InsertSingle',
             clappform_dot_data_dot_v1_dot_insert__pb2.InsertRequest.SerializeToString,
             clappform_dot_data_dot_v1_dot_insert__pb2.InsertResponse.FromString,
             options,
@@ -158,5 +144,4 @@ class InsertManagement(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
