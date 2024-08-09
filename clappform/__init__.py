@@ -1,32 +1,42 @@
+from __future__ import annotations
+
 from itertools import chain
-from typing import Callable, Iterator, Optional
+from typing import TYPE_CHECKING
 
 import grpc
 
 from .proto.clappform.client.v1 import (
-    actionflow_pb2,
     actionflow_pb2_grpc,
-    collection_pb2,
     collection_pb2_grpc,
-    query_pb2,
     query_pb2_grpc,
 )
 from .proto.clappform.data.v1 import (
-    aggregate_pb2,
     aggregate_pb2_grpc,
-    delete_pb2,
     delete_pb2_grpc,
-    insert_pb2,
     insert_pb2_grpc,
-    update_pb2,
     update_pb2_grpc,
 )
-from .proto.clappform.v1 import commons_pb2
-from .typedefs import GrpcChannelOptions, GrpcMetadata, RpcCallOptions
 from .utils import default_options
 
+if TYPE_CHECKING:
+    from typing import Callable, Iterator, Optional
+
+    from .proto.clappform.client.v1 import (
+        actionflow_pb2,
+        collection_pb2,
+        query_pb2,
+    )
+    from .proto.clappform.data.v1 import (
+        aggregate_pb2,
+        delete_pb2,
+        insert_pb2,
+        update_pb2,
+    )
+    from .proto.clappform.v1 import commons_pb2
+    from .typedefs import GrpcChannelOptions, GrpcMetadata, RpcCallOptions
+
 # Metadata
-__version__ = "5.0.0-alpha6"
+__version__ = "5.0.0-alpha7"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
@@ -121,6 +131,7 @@ class GrpcBase:
         self.metadata: GrpcMetadata = (
             ("location", location),
             ("x-api-key", token),
+            ("deadline", "3600s"),
         )
 
     def _metadata(self, metadata: GrpcMetadata) -> GrpcMetadata:
@@ -331,10 +342,11 @@ insert_pb2.InsertResponse`]
 
         .. code-block:: python
 
+            import clappform
             from clappform.proto.clappform.data.v1 import insert_pb2
 
             # Create an instance of the Data class
-            data_instance = Data(token="your_token", location="your_location")
+            d = clappform.Data(token="your_token", location="your_location")
 
             # Create an iterator of InsertRequest
             request_iterator = iter([
@@ -345,7 +357,7 @@ insert_pb2.InsertResponse`]
             ])
 
             # Iterate over the responses
-            for response in data_instance.insert_many(request_iterator):
+            for response in d.insert_many(request_iterator):
                 print(response)
 
         .. note::
@@ -381,10 +393,11 @@ DeleteRequestOids`
 
         .. code-block:: python
 
+            import clappform
             from clappform.proto.clappform.data.v1 import delete_pb2
 
             # Create an instance of the Data class
-            data_instance = Data(token="your_token", location="your_location")
+            d = clappform.Data(token="your_token", location="your_location")
 
             # Create a DeleteRequestOids
             request = delete_pb2.DeleteRequestOids(
@@ -392,7 +405,7 @@ DeleteRequestOids`
             )
 
             # Send the delete request and get the response
-            response = data_instance.delete_many_by_oids(request)
+            response = d.delete_many_by_oids(request)
             print(response)
 
         .. note::
@@ -428,10 +441,11 @@ UpdateRequest`
 
         .. code-block:: python
 
+            import clappform
             from clappform.proto.clappform.data.v1 import update_pb2
 
             # Create an instance of the Data class
-            data_instance = Data(token="your_token", location="your_location")
+            d = clappform.Data(token="your_token", location="your_location")
 
             # Create an UpdateRequestByOid
             request = update_pb2.UpdateRequestByOid(
@@ -439,7 +453,7 @@ UpdateRequest`
             )
 
             # Send the update request and get the response
-            response = data_instance.update_replace_many(request)
+            response = d.update_replace_many(request)
             print(response)
 
         .. note::
@@ -568,16 +582,18 @@ StartActionflowResponse`
         Example:
             .. code-block:: python
 
+                import clappform
                 from clappform.proto.clappform.data.v1 import actionflow_pb2
 
                 # Create an instance of the Data class
-                client = Client(token="your-token", location="your-location")
+                c = clappform.Client(token="your-token", location="your-locati\
+on")
 
                 # Create an StartActionflow
                 request = actionflow_pb2.StartActionflow(...)
 
                 # Send the start request and get the response
-                response = client.actionflow_start(request)
+                response = c.actionflow_start(request)
                 print(response)
 
         .. note::
@@ -605,16 +621,18 @@ Collection`
         Example:
             .. code-block:: python
 
+                import clappform
                 from clappform.proto.clappform.v1 import commons_pb2
 
                 # Create an instance of the Data class
-                client = Client(token="your-token", location="your-location")
+                c = clappform.Client(token="your-token", location="your-locati\
+on")
 
                 # Create a Read
                 request = commons_pb2.Read(...)
 
                 # Send the read request and get the response
-                response = client.collection_get(request)
+                response = c.collection_get(request)
                 print(response)
 
         .. note::
@@ -642,16 +660,18 @@ Collection`
         Example:
             .. code-block:: python
 
+                import clappform
                 from clappform.proto.clappform.v1 import commons_pb2
 
                 # Create an instance of the Data class
-                client = Client(token="your-token", location="your-location")
+                c = clappform.Client(token="your-token", location="your-locati\
+on")
 
                 # Create a Read
                 request = commons_pb2.Read(...)
 
                 # Send the read request and get the response
-                response = client.query_get(request)
+                response = c.query_get(request)
                 print(response)
 
         :note:

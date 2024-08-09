@@ -2,10 +2,15 @@
 This module defines type aliases and data structures used for gRPC RPC call
 options.
 """
+from __future__ import annotations
 
-from typing import Optional, Sequence, TypeAlias, TypedDict, Union
+from typing import TYPE_CHECKING
 
-import grpc
+
+if TYPE_CHECKING:
+    from typing import Sequence, Union, TypeAlias, TypedDict, Optional
+
+    import grpc
 
 GrpcChannelOptions: TypeAlias = Sequence[tuple[str, Union[int, str]]]
 """

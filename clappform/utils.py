@@ -3,14 +3,19 @@ This module defines type aliases and a data structure used for configuring gRPC
 RPC call options.
 """
 
+from __future__ import annotations
+
 import json
 import tempfile
-from typing import Iterator, Optional, Union
+from typing import TYPE_CHECKING
 
-import pandas
+if TYPE_CHECKING:
+    from typing import Iterator, Union, Optional
 
-from .proto.clappform.data.v1 import insert_pb2
-from .typedefs import GrpcChannelOptions
+    import pandas
+
+    from .typedefs import GrpcChannelOptions
+    from .proto.clappform.data.v1 import insert_pb2
 
 
 def default_options(
@@ -82,9 +87,16 @@ UNAVAILABLE"]}}]}')]
             ]
         }
     )
-    options: list[tuple[str, Union[int, str]]] = []
-    options.append(("grpc.enable_retries", 1))
-    options.append(("grpc.service_config", service_config_json))
+    options: list[tuple[str, Union[int, str]]] = [
+        ("grpc.keepalive_time_ms", 120000),
+        ("grpc.keepalive_timeout_ms", 20000),
+        ("grpc.keepalive_permit_without_calls", True),
+        ("grpc.http2.max_pings_without_data", 0),
+        ("grpc.http2.min_time_between_pings_ms", 120000),
+        ("grpc.http2.min_ping_interval_without_data_ms", 120000),
+        ("grpc.enable_retries", 1),
+        ("grpc.service_config", service_config_json),
+    ]
     return options
 
 
