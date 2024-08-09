@@ -9,13 +9,14 @@ import json
 import tempfile
 from typing import TYPE_CHECKING
 
+from .proto.clappform.data.v1 import insert_pb2
+
 if TYPE_CHECKING:
     from typing import Iterator, Union, Optional
 
     import pandas
 
     from .typedefs import GrpcChannelOptions
-    from .proto.clappform.data.v1 import insert_pb2
 
 
 def default_options(

@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from .typedefs import GrpcChannelOptions, GrpcMetadata, RpcCallOptions
 
 # Metadata
-__version__ = "5.0.0-alpha7"
+__version__ = "5.0.0-alpha8"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
