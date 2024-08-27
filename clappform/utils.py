@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from .proto.clappform.data.v1 import insert_pb2
 
 if TYPE_CHECKING:
-    from typing import Iterator, Union, Optional
+    from typing import Iterator, Optional, Union
 
     import pandas
 

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clappform"
-version = "5.0.0-alpha8"
+version = "5.0.0-alpha9"
 authors= [
     { name="Clappform B.V.", email="info@clappform.com" },
 ]
 description = "Clappform Python API wrapper"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
@@ -18,7 +18,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "grpcio==1.65.1",
+    "grpcio==1.65.2",
     "google-api-python-client==2.139.0",
 ]
 
@@ -68,10 +68,17 @@ disable = [
 ]
 ignore = ["proto"]
 
-
 [tool.ruff]
 exclude = ["proto"]
 line-length = 79
+
+[tool.ruff.lint]
+extend-select = ["I", "B", "C4"]
+typing-modules = ["clappform.typedefs"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
 
 [tool.flake8]
 exclude = [

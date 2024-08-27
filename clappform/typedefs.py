@@ -2,13 +2,13 @@
 This module defines type aliases and data structures used for gRPC RPC call
 options.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
-    from typing import Sequence, Union, TypeAlias, TypedDict, Optional
+    from typing import Optional, Sequence, TypeAlias, TypedDict, Union
 
     import grpc
 
