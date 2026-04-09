@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clappform"
-version = "5.0.0-alpha9"
+version = "5.0.0-alpha10"
 authors= [
     { name="Clappform B.V.", email="info@clappform.com" },
 ]
@@ -18,20 +18,16 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "grpcio==1.65.2",
-    "google-api-python-client==2.139.0",
+    "grpcio >= 1.65.6, < 2.0",
+    "google-api-python-client >= 2.139.0, < 3.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "ruff ~= 0.5.4",
-    "build ~= 1.2.1",
-    "pylint ~= 3.2.6",
-    "isort ~= 5.13.2",
-    "flake8 ~= 7.1.0",
-    "black ~= 24.4.2",
     "mypy ~= 1.11.0",
-    "grpcio-tools ~= 1.65.1",
+    "build ~= 1.2.1",
+    "grpcio-tools >= 1.65.6, < 2.0",
     "pandas-stubs ~= 2.2.2.240603",
     "types-protobuf ~= 5.27.0.20240626",
     "sphinx ~= 8.0.2",
@@ -48,41 +44,21 @@ dev = [
 show_column_numbers = true
 show_error_codes = true
 strict = true
-
-[tool.black]
-line-length = 79
-target-version = ['py310']
-include = '\.pyi?$'
-exclude = '''
-/(
-    clappform/proto
-)/
-'''
-
-[tool.pylint]
-max-line-length = 79
-disable = [
-    "E1101",  # (no-member)
-    "R0913",  # (too-many-arguments)
-    "R0903",  # (too-few-public-methods)
-]
-ignore = ["proto"]
+exclude = ["clappform/proto"]
 
 [tool.ruff]
 exclude = ["proto"]
 line-length = 79
+target-version = "py310"
 
 [tool.ruff.lint]
-extend-select = ["I", "B", "C4"]
+extend-select = ["I", "B", "C4", "E", "F", "W"]
 typing-modules = ["clappform.typedefs"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
 
-
-[tool.flake8]
-exclude = [
-    "clappform/proto/*"
-]
-max-complexity = 10
-max-line-length = 79
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

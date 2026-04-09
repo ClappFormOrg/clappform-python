@@ -1,38 +1,32 @@
-.PHONY: all help install required build release black mypy pylint flake8 ruff lint docker clean
-
-all: install required clean
+.PHONY: help install sync build format lint check mypy ruff clean
 
 help: ## Display this help screen
-	@grep -E '^[a-zA-Z0-9_]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-15s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install a dependencies for development
-	@pip install -r requirements-dev.txt --upgrade
+install: ## Install all dependencies including dev dependencies
+	@uv sync --all-groups
 
-required: ## Install requirements to run project.
-	@pip install -r requirements.txt --upgrade
+sync: install ## Alias for install
 
 build: ## Build the package
-	@python -m build --sdist
+	@uv build
 
-black: ## Run black utility to format source files
-	@black --check clappform
+format: ## Format source files with ruff
+	@uv run ruff format clappform
+	@uv run ruff check --fix clappform
 
-mypy: ## Run mypy utility to static type check
-	@mypy clappform
+mypy: ## Run mypy type checker
+	@uv run mypy clappform
 
-pylint: ## Run pylint utility to check source files
-	@pylint clappform
+ruff: ## Check code with ruff (no fixes)
+	@uv run ruff check --no-fix clappform
+	@uv run ruff format --check clappform
 
-flake8: ## Run flake8 utility to check source files
-	@flake8 clappform
+check: mypy ruff ## Run all checks (mypy + ruff)
 
-ruff: ## Run ruff utility to check source files
-	@ruff check --no-fix --no-unsafe-fixes clappform
-	@ruff format --check clappform
-
-lint: mypy pylint flake8 ruff ## Lint a whole project
+lint: check ## Alias for check
 
 clean: ## Delete all temporary files
 	@find clappform -type f -name '*.py[cod]' -delete
 	@find clappform -type d -name '__pycache__' -delete
-	@rm -rf *.egg *.egg-info build dist public
+	@rm -rf *.egg *.egg-info build dist public .mypy_cache .ruff_cache

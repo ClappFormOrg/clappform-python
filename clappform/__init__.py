@@ -36,11 +36,14 @@ if TYPE_CHECKING:
     from .typedefs import GrpcChannelOptions, GrpcMetadata, RpcCallOptions
 
 # Metadata
-__version__ = "5.0.0-alpha9"
+__version__ = "5.0.0-alpha10"
 __author__ = "Clappform B.V."
 __email__ = "info@clappform.com"
 __license__ = "MIT"
 __doc__ = "Clappform Python API wrapper"
+
+
+# lol = actionflow_pb2_grpc.ActionflowManagementStub
 
 
 class GrpcBase:
@@ -273,7 +276,9 @@ class Data(GrpcBase):
         self.update_stub = update_pb2_grpc.UpdateManagementStub(self.channel)
 
     def aggregate(
-        self, request: aggregate_pb2.AggregateStreamRequest
+        self,
+        request: aggregate_pb2.AggregateStreamRequest,
+        **kwargs: RpcCallOptions,
     ) -> Iterator[aggregate_pb2.AggregateResponse]:
         """
         Sends an aggregate request to the gRPC service and yields responses.
@@ -315,7 +320,7 @@ aggregate_pb2.AggregateResponse`]
             `AggregateStreamRequest` and `AggregateResponse` classes.
         """
         yield from self.aggregate_stub.AggregateStream(
-            request, **self._default_kwargs()
+            request, **self._default_kwargs(**kwargs)
         )
 
     def insert_many(

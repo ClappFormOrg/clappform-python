@@ -12,9 +12,9 @@ from typing import TYPE_CHECKING
 from .proto.clappform.data.v1 import insert_pb2
 
 if TYPE_CHECKING:
-    from typing import Iterator, Optional, Union
+    from collections.abc import Iterator
 
-    import pandas
+    from pandas import DataFrame
 
     from .typedefs import GrpcChannelOptions
 
@@ -24,7 +24,7 @@ def default_options(
     initial_backoff: str = "0.1s",
     max_backoff: str = "1s",
     backoff_multiplier: int = 2,
-    retryable_status_codes: Optional[list[str]] = None,
+    retryable_status_codes: list[str] | None = None,
 ) -> GrpcChannelOptions:
     """
     Generates default gRPC channel options with retry configuration.
@@ -88,7 +88,7 @@ UNAVAILABLE"]}}]}')]
             ]
         }
     )
-    options: list[tuple[str, Union[int, str]]] = [
+    options: list[tuple[str, int | str]] = [
         ("grpc.keepalive_time_ms", 120000),
         ("grpc.keepalive_timeout_ms", 20000),
         ("grpc.keepalive_permit_without_calls", True),
@@ -103,7 +103,7 @@ UNAVAILABLE"]}}]}')]
 
 def insert_many_dataframe(
     collection: str,
-    df: pandas.DataFrame,
+    df: DataFrame,
     size: int = 2500,
     encoding: str = "utf-8",
 ) -> Iterator[insert_pb2.InsertRequest]:
