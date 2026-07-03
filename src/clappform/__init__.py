@@ -1,7 +1,39 @@
 """Python client for the Clappform gRPC APIs."""
 
+from clappform import _runtime  # noqa: F401  (must precede _client: services import it)
+from clappform._auth import ApiKey, Credentials
+from clappform._client import Clappform
+from clappform._errors import (
+    AuthenticationError,
+    ClappformError,
+    ConfigurationError,
+    ConflictError,
+    InvalidRequestError,
+    NotFoundError,
+    NotSupportedError,
+    PermissionDeniedError,
+    TransientError,
+)
 from clappform._proto_version import __proto_version__
+from clappform._transport import DEFAULT_RETRIES, RetryPolicy
 
 __version__ = "6.0.0a0"
 
-__all__ = ["__proto_version__", "__version__"]
+__all__ = [
+    "DEFAULT_RETRIES",
+    "ApiKey",
+    "AuthenticationError",
+    "Clappform",
+    "ClappformError",
+    "ConfigurationError",
+    "ConflictError",
+    "Credentials",
+    "InvalidRequestError",
+    "NotFoundError",
+    "NotSupportedError",
+    "PermissionDeniedError",
+    "RetryPolicy",
+    "TransientError",
+    "__proto_version__",
+    "__version__",
+]
