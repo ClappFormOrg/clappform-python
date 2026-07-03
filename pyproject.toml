@@ -39,6 +39,7 @@ dev = [
     "mypy>=1.10",
     "grpcio-tools>=1.60,<2",
     "types-protobuf",
+    "types-grpcio",
 ]
 
 [project.urls]
