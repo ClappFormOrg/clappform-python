@@ -1,17 +1,33 @@
 # Clappform
-**Clappform** is a wrapper for a Clappform B.V. API written in Python.
 
-```python
->>> from clappform import Clappform
->>> import clappform.dataclasses as r
->>> c = Clappform("https://app.clappform.com", "j.doe@clappform.com", "S3cr3tP4ssw0rd!")
->>> apps = c.get(r.App())
->>> for app in apps:
-...     print(app.name)
-'Clappform'
-'Default'
+Python client for the Clappform gRPC APIs. Version 6 is a ground-up rewrite:
+the full API surface is generated from the shared proto definitions, with a
+hand-written ergonomic layer for DataFrame workflows, multi-cluster
+configuration, and typed errors.
+
+> **Status: under active development on the `Major/6` branch.** The published
+> 4.x/5.x packages are unrelated to this codebase.
+
+## Install
+
+```bash
+pip install clappform[pandas]
 ```
 
-Clappform allows you to interact with the Clappform API for a given domain. For many of the resources that the Clappform API provides the simple ``get``, ``create``, ``update`` and ``delete`` methods can be used. Authentication is done transparently, so there is no need to manually authenticate.
+Core dependencies are `grpcio` and `protobuf` only; `pandas`, `polars`, and
+`pyarrow` are optional extras.
 
-## Developer interface is available on [Read The Docs](https://clappform.readthedocs.io)
+## Development
+
+```bash
+pip install -e .[dev,pandas]
+make generate   # regenerate clappform/gen and clappform/services from protos
+make check      # ruff + mypy + pytest
+```
+
+Code generation reads the proto definitions from the commons repository at
+the tag pinned in `COMMONS_VERSION`. Point `CLAPPFORM_COMMONS_DIR` at a local
+clone of commons (defaults to a sibling `../commons` checkout).
+
+Generated code under `src/clappform/gen/` and `src/clappform/services/` is
+committed; do not edit it by hand.
