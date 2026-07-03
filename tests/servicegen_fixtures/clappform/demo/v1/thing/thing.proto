@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package clappform.demo.v1.thing;
+
+import "clappform/v1/commons/commons.proto";
+
+service ThingManagement {
+  // Fetch a single thing by id.
+  rpc Get(clappform.v1.commons.Read) returns (Thing) {};
+  // List things with pagination.
+  rpc GetAll(clappform.v1.commons.PaginationRequest) returns (Things) {};
+  // Upload things in bulk.
+  rpc Upload(stream UploadRequest) returns (UploadSummary) {};
+  // Watch things as they change.
+  rpc Watch(clappform.v1.commons.Read) returns (stream Thing) {};
+  rpc Exchange(stream UploadRequest) returns (stream Thing) {};
+  rpc Collide(CollisionRequest) returns (clappform.v1.commons.Message) {};
+}
+
+message Thing {
+  string id = 1;
+  string name = 2;
+  repeated string tags = 3;
+  map<string, int64> counters = 4;
+}
+
+message Things {
+  repeated Thing things = 1;
+  clappform.v1.commons.Pagination pagination = 2;
+}
+
+message UploadRequest {
+  bytes data = 1;
+}
+
+message UploadSummary {
+  uint32 processed = 1;
+}
+
+message CollisionRequest {
+  // Collides with the per-call tenant argument and must not be flattened.
+  string location = 1;
+  string payload = 2;
+}
