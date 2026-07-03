@@ -1,21 +1,21 @@
-run:
-	python -i src/debug.py
+.PHONY: generate lint typecheck test check build clean
 
-init: requirements-dev.txt
-	pip install -r requirements-dev.txt
+generate:
+	python tools/generate.py
 
-build: pyproject.toml
-	pip install build
+lint:
+	python -m ruff check .
+
+typecheck:
+	python -m mypy src/clappform tools
+
+test:
+	python -m pytest -q
+
+check: lint typecheck test
+
+build:
 	python -m build
 
 clean:
-	rm -r dist src/clappform.egg-info
-
-black:
-	black $$(git ls-files '*.py')
-
-lint:
-	pylint $$(git ls-files '*.py')
-	flake8 $$(git ls-files '*.py')
-	black --check $$(git ls-files '*.py')
-
+	rm -rf dist build src/clappform.egg-info .pytest_cache .mypy_cache .ruff_cache

@@ -1,0 +1,21 @@
+{
+  "base_branch": "Major/6",
+  "test_commands": [
+    "python -m ruff check .",
+    "python -m mypy src/clappform tools",
+    "python -m pytest -q"
+  ],
+  "install_commands": [
+    "python -m pip install -e .[dev,pandas]"
+  ],
+  "test_layers": {},
+  "project_tracker": {
+    "enabled": false,
+    "owner": "",
+    "project_number": 0,
+    "project_id": "",
+    "status_field_id": "",
+    "in_review_option_id": ""
+  },
+  "issue_link_convention": "Closes"
+}
