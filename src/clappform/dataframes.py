@@ -2,7 +2,7 @@
 
 This is the ergonomic layer people actually reach for:
 
-    col = cf.data.collection("sales_orders")   # slug or UUID (resolved via :mod:`clappform._resolve`)
+    col = cf.data.collection("sales_orders")   # slug or UUID (resolved in _resolve)
     df = col.read(where={"status": "open"}, fields=["id", "amount"], limit=1000)
     col.append(df); col.update(df); col.upsert(df, on="order_id")
 
