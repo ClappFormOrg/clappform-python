@@ -43,6 +43,19 @@ dev = [
     "types-protobuf",
     "types-grpcio",
 ]
+# Docs toolchain (§9): MkDocs + Material, with mkdocstrings rendering the API
+# reference straight from the wrapper layer's docstrings, and the snippets
+# extension pulling runnable code out of docs/snippets/ so guide code can't
+# drift from what actually executes. mike drives the per-release version selector on
+# Read the Docs. Pinned to majors so a doc build is reproducible across
+# releases without dragging in a breaking theme change unnoticed.
+docs = [
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.5,<10",
+    "mkdocstrings[python]>=0.25,<1",
+    "pymdown-extensions>=10.0",
+    "mike>=2.1,<3",
+]
 
 [project.urls]
 Documentation = "https://clappform.readthedocs.io"
@@ -58,10 +71,18 @@ extend-exclude = [
     "src/clappform/gen",
     "src/clappform/services",
     "tests/servicegen_golden",
+    # MkDocs build output — a copy of the source tree, not source to lint.
+    "site",
 ]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Doc snippet sources deliberately re-import inside each function so that every
+# fenced block the guides include reads as standalone, copy-pasteable code.
+# That trips F811 (redefinition) — expected here, not a defect.
+"docs/snippets/*.py" = ["F811"]
 
 [tool.mypy]
 python_version = "3.10"

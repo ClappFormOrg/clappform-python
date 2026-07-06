@@ -10,6 +10,9 @@ build/
 dist/
 *.egg-info/
 
+# MkDocs build output
+/site/
+
 # Virtual environments
 .venv/
 venv/
