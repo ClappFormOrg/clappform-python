@@ -1,8 +1,9 @@
 """Collection/query handles and ReadResult — the DataFrame surface.
 
 Drives the flows through the real ``Clappform`` client against ``LocalMock``,
-exactly as customers and ``examples/`` do: seed a collection, read it into a
-frame, mutate, and write back, asserting the store reflects each flow.
+exactly as customers and the guide snippets in ``docs/snippets/`` do: seed a
+collection, read it into a frame, mutate, and write back, asserting the store
+reflects each flow.
 """
 
 import pandas as pd

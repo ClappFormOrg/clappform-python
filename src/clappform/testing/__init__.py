@@ -4,8 +4,9 @@
 ``Clappform(transport=LocalMock())``. It serves canned responses, records
 calls for assertions, and can seed collections so DataFrame round-trips run
 without infrastructure — used by our tests, by customers testing pipelines,
-and by ``examples/`` so the documented examples actually execute. The
-transport seam it implements lives in :mod:`clappform._runtime`.
+and by the runnable guide snippets in ``docs/snippets/`` so the documented
+examples actually execute. The transport seam it implements lives in
+:mod:`clappform._runtime`.
 """
 
 from clappform.testing._local_mock import LocalMock, RecordedCall

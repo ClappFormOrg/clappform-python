@@ -36,7 +36,7 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
 
-# Per-release version selector (§9): staggered cluster rollouts mean users must
+# Per-release version selector: staggered cluster rollouts mean users must
 # read the docs for the version they are actually on. `mike` publishes one
 # versioned copy per release and RTD serves the selector from provider: mike.
 extra:
@@ -77,7 +77,7 @@ markdown_extensions:
   # Pulls runnable code out of docs/snippets/ into the guides. Those modules
   # run against LocalMock in the docs-test job, so a snippet that stops working
   # (or a bad include path) fails the build — the same guarantee tests give the
-  # code (§9).
+  # code.
   - pymdownx.snippets:
       base_path: [docs/snippets]
       check_paths: true
