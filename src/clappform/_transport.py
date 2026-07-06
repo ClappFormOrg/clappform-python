@@ -22,7 +22,6 @@ from clappform._errors import ConfigurationError, translate_rpc_error
 from clappform._runtime import CallKind
 
 BASE_DOMAIN = "clappform.com"
-DEFAULT_PORT = 443
 
 # Host prefix per API family, forming {prefix}{-extension}.clappform.com.
 # The authoriser serves under "auth", matching its family alias.
@@ -86,15 +85,18 @@ def resolve_endpoints(
     """Build the per-family endpoint map for a cluster extension.
 
     ``cluster`` is the host extension: ``""`` (or ``"prod"``) for the main
-    cluster, ``"qa"``-style values otherwise. Explicit ``overrides`` win per
-    family and may carry their own port.
+    cluster, ``"qa"``-style values otherwise. The supported (current) clusters
+    serve gRPC over TLS on 443, so the address is the bare host with no port —
+    gRPC defaults a secure channel to 443. Explicit ``overrides`` win per family
+    and may carry their own ``host:port`` (e.g. for an older cluster still on
+    ``:50051`` or a local dev endpoint).
     """
     extension = cluster.strip().lstrip("-").lower()
     if extension == "prod":
         extension = ""
     suffix = f"-{extension}" if extension else ""
     endpoints = {
-        family: f"{prefix}{suffix}.{BASE_DOMAIN}:{DEFAULT_PORT}"
+        family: f"{prefix}{suffix}.{BASE_DOMAIN}"
         for family, prefix in HOST_PREFIXES.items()
     }
     for family, address in (overrides or {}).items():
