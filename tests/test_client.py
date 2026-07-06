@@ -53,16 +53,20 @@ def test_default_location_injected_and_per_call_override_wins() -> None:
 # --- endpoint resolution ------------------------------------------------------
 
 def test_endpoint_resolution_variants() -> None:
-    assert resolve_endpoints("qa")["data"] == "data-qa.clappform.com:443"
-    assert resolve_endpoints("")["data"] == "data.clappform.com:443"
-    assert resolve_endpoints("prod")["auth"] == "auth.clappform.com:443"
-    assert resolve_endpoints("QA-LTS")["client"] == "client-qa-lts.clappform.com:443"
+    # Supported clusters serve gRPC on 443, so the address is the bare host and
+    # gRPC defaults the secure channel to 443 — no explicit port is appended.
+    assert resolve_endpoints("qa")["data"] == "data-qa.clappform.com"
+    assert resolve_endpoints("")["data"] == "data.clappform.com"
+    assert resolve_endpoints("prod")["auth"] == "auth.clappform.com"
+    assert resolve_endpoints("QA-LTS")["client"] == "client-qa-lts.clappform.com"
 
 
 def test_endpoint_override_wins_and_unknown_family_rejected() -> None:
+    # An override may still carry an explicit host:port — e.g. an older cluster
+    # still on :50051, or a local dev endpoint.
     resolved = resolve_endpoints("qa", {"data": "10.0.0.5:50051"})
     assert resolved["data"] == "10.0.0.5:50051"
-    assert resolved["auth"] == "auth-qa.clappform.com:443"
+    assert resolved["auth"] == "auth-qa.clappform.com"
     with pytest.raises(ConfigurationError, match="unknown API family"):
         resolve_endpoints("qa", {"nbflow": "x:1"})
 
