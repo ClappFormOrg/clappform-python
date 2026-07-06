@@ -41,6 +41,12 @@ class InsertServicer(insert_pb2_grpc.InsertManagementServicer):
 
 class AggregateServicer(aggregate_pb2_grpc.AggregateManagementServicer):
     def AggregateStream(self, request, context):
+        if request.collection == "vanishes":
+            # Yield one chunk, then fail mid-stream. Exercises the transport's
+            # translating iterator, which must map the error raised *during*
+            # iteration onto the typed hierarchy — not just errors at call time.
+            yield aggregate_pb2.AggregateResponse(data=b"[1]", total=3)
+            context.abort(grpc.StatusCode.NOT_FOUND, "collection vanished mid-scan")
         for chunk in (b"[1]", b"[2]", b"[3]"):
             yield aggregate_pb2.AggregateResponse(data=chunk, total=3)
 
@@ -93,6 +99,17 @@ def test_server_streaming_iterates_chunks(cf) -> None:
     chunks = list(cf.data.aggregate.aggregate_stream(collection="orders"))
     assert [c.data for c in chunks] == [b"[1]", b"[2]", b"[3]"]
     assert chunks[0].total == 3
+
+
+def test_streaming_error_mid_iteration_is_translated(cf) -> None:
+    stream = cf.data.aggregate.aggregate_stream(collection="vanishes")
+    first = next(stream)
+    assert first.data == b"[1]"  # one chunk streamed before the failure
+    with pytest.raises(NotFoundError, match="collection vanished mid-scan") as excinfo:
+        next(stream)
+    # context carried through even though the error surfaced mid-iteration
+    assert "cluster='qa'" in str(excinfo.value)
+    assert "location='acme'" in str(excinfo.value)
 
 
 def test_not_found_translates(cf) -> None:

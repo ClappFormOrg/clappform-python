@@ -122,6 +122,12 @@ def test_with_location_same_location_returns_self() -> None:
     assert cf.with_location("acme") is cf
 
 
+def test_with_location_requires_a_location() -> None:
+    cf, _ = make_client()
+    with pytest.raises(ConfigurationError, match="location is required"):
+        cf.with_location("")
+
+
 def test_with_location_rediscovers_only_for_discovered_cluster(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

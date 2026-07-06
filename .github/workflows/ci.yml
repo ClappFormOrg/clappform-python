@@ -13,6 +13,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - run: python -m pip install -e .[dev]
       - run: python -m ruff check .
 
@@ -23,6 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - run: python -m pip install -e .[dev,pandas]
       - run: python -m mypy src/clappform tools
 
@@ -38,5 +42,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          # Cache pip's downloads and built wheels. Versions without prebuilt
+          # wheels for a dependency (currently 3.14 for grpcio/pandas/pyarrow)
+          # compile from source on the first run; the cache means that ~5-12min
+          # build is paid once, not on every run. Keyed on pyproject.toml, so
+          # the cache busts when dependencies change.
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - run: python -m pip install -e .[dev,pandas]
-      - run: python -m pytest -q
+      # --cov enforces the fail_under gate in [tool.coverage.report] on every
+      # PR (pull_request above has no branch filter, so this runs on all PRs).
+      - run: python -m pytest -q --cov --cov-report=term-missing

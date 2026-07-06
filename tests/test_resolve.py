@@ -14,6 +14,7 @@ from clappform.testing import LocalMock
 CID = "1c9a7f3e-0000-4000-8000-000000000001"
 QID = "8f14e45f-ceea-467f-a34e-95b7f7f7a9d1"
 COLLECTION_GET_ALL = "/clappform.client.v1.collection.CollectionManagement/GetAll"
+QUERY_GET_ALL = "/clappform.client.v1.query.QueryManagement/GetAll"
 AGG = "/clappform.data.v1.aggregate.AggregateManagement/AggregateStream"
 
 
@@ -210,3 +211,76 @@ def test_unknown_query_name_raises(cf) -> None:
     mock.seed_query("exists", collection=CID, id=QID)
     with pytest.raises(NotFoundError, match="phantom"):
         client.data.query("phantom").read()
+
+
+def test_query_name_resolution_is_cached_across_handles(cf) -> None:
+    client, mock = cf
+    mock.seed(CID, [{"r": 1}])
+    mock.seed_query("monthly-revenue", collection=CID, id=QID)
+    # Fresh handles each round: the resolver (not the handle) must serve the
+    # second lookup from cache, so only one listing RPC hits the wire.
+    client.data.query("monthly-revenue").read()
+    client.data.query("monthly-revenue").read()
+    client.data.query("monthly-revenue").read()
+    lookups = [c for c in mock.calls if c.method == QUERY_GET_ALL]
+    assert len(lookups) == 1  # name->UUID resolved once per location, then cached
+
+
+def test_stale_cached_query_uuid_reresolves_once(cf) -> None:
+    """A cached name->UUID that NOT_FOUNDs must re-resolve before surfacing.
+
+    Mirrors the collection stale-cache path for QueryHandle: the first read
+    resolves the name to a now-defunct UUID; on the NOT_FOUND probing the first
+    chunk the handle invalidates the cache, re-resolves, and retries once.
+    """
+    client, mock = cf
+    from clappform import _codec
+    from clappform.gen.clappform.data.v1.aggregate import aggregate_pb2
+
+    old_id, new_id = QID, "4444cccc-0000-4000-8000-000000000004"
+    mock.seed(CID, [{"revenue": 100}])
+    mock.seed_query("monthly-revenue", collection=CID, id=old_id)
+
+    def _agg(request):
+        if request.query == old_id:
+            raise NotFoundError("query gone", location="acme")
+        rows = mock.records(CID)
+        return [aggregate_pb2.AggregateResponse(data=_codec.records_to_bytes(rows))]
+
+    mock.on(AGG, _agg)
+
+    q = client.data.query("monthly-revenue")
+    assert q.query_id == old_id  # resolves + caches old_id
+    mock.seed_query("monthly-revenue", collection=CID, id=new_id)  # name remapped
+
+    df = q.read()  # first attempt hits old_id -> NOT_FOUND -> re-resolve
+    assert list(df["revenue"]) == [100]
+    assert q.query_id == new_id
+
+
+def test_query_not_found_after_first_chunk_is_not_retried(cf) -> None:
+    """A NOT_FOUND once rows have streamed surfaces raw — no silent replay.
+
+    The QueryHandle counterpart to the collection mid-stream test: re-resolving
+    after rows were yielded would re-deliver them, so the retry is limited to a
+    NOT_FOUND on the probing first chunk.
+    """
+    client, mock = cf
+    from clappform import _codec
+    from clappform.gen.clappform.data.v1.aggregate import aggregate_pb2
+
+    mock.seed(CID, [{"r": 1}])
+    mock.seed_query("monthly-revenue", collection=CID, id=QID)
+
+    def _agg(_request):
+        def _stream():
+            yield aggregate_pb2.AggregateResponse(
+                data=_codec.records_to_bytes([{"r": 1}])
+            )
+            raise NotFoundError("query vanished mid-scan", location="acme")
+
+        return _stream()
+
+    mock.on(AGG, _agg)
+    with pytest.raises(NotFoundError, match="mid-scan"):
+        client.data.query("monthly-revenue").read()
