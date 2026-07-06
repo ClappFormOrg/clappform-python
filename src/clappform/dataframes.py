@@ -470,6 +470,15 @@ class CollectionHandle(_AggregateReader):
         """
         if (where is None) == (oids is None):
             raise ValueError("pass exactly one of where= or oids=")
+        if where is not None and not where:
+            # An empty filter matches every document. Deleting the whole
+            # collection must be explicit, so refuse it here and point at the
+            # deliberate full-wipe method rather than let an empty where=
+            # silently clear everything.
+            raise ValueError(
+                "where={} matches every document; use clear() to wipe the "
+                "whole collection explicitly"
+            )
         if oids is not None:
             self._client.data.delete.delete_many_by_oids(
                 collection=self.collection_id,
