@@ -27,15 +27,16 @@ repos:
       - id: check-toml
       - id: check-added-large-files
 
-  # ruff is the single source of truth for lint + format (see [tool.ruff] in
-  # pyproject.toml). CI runs `ruff check .`; the format hook adds the formatter
-  # check CI does not run explicitly, so style drift is caught before commit.
+  # ruff lint, matching the CI lint job (`ruff check .`, config in [tool.ruff]
+  # of pyproject.toml). Deliberately no ruff-format hook: this repo is not
+  # maintained with the ruff formatter (it uses hand-managed line breaks that
+  # the formatter would rewrite), and CI does not format-check either — so the
+  # hook mirrors exactly what CI enforces, nothing more.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.7
     hooks:
       - id: ruff
         args: [--fix]
-      - id: ruff-format
 
   # Scoped and typed exactly like the CI typecheck job: `mypy src/clappform
   # tools` with the same stub packages installed, so the hook and CI agree.
