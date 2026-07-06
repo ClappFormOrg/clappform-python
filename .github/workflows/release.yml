@@ -2,21 +2,36 @@ name: Release
 
 # Human-gated publish to PyPI. Nothing publishes automatically: a maintainer
 # cuts a GitHub Release (which carries the release notes, incl. the proto diff
-# of the sync), the build runs, and the upload then waits on the protected
-# `pypi` environment's required-reviewer approval before anything leaves CI.
-# Releases are timed by a human who knows the staggered 6-cluster rollout state.
+# of the sync) or dispatches this workflow, the build runs, and the upload then
+# waits on the target environment's required-reviewer approval before anything
+# leaves CI. Releases are timed by a human who knows the staggered 6-cluster
+# rollout state.
+#
+# Two targets:
+#   * A published GitHub Release always goes to production PyPI.
+#   * A manual dispatch defaults to TestPyPI (a throwaway index) so the OIDC +
+#     build + upload plumbing can be validated end-to-end without burning a real
+#     version on the public `clappform` project; choose `pypi` to dispatch a
+#     production publish instead.
 #
 # Auth is PyPI Trusted Publishing (OIDC) — no long-lived tokens live in the
-# repo. This requires a one-time setup on PyPI: add a trusted publisher for
-# this repository + workflow (`release.yml`) + environment (`pypi`), and create
-# a GitHub Environment named `pypi` with the maintainers as required reviewers.
+# repo. One-time setup: add a trusted publisher on BOTH indexes you use
+# (pypi.org and/or test.pypi.org) for this repository + workflow (`release.yml`)
+# + the matching environment name (`pypi` / `testpypi`), and create GitHub
+# Environments `pypi` and `testpypi` with maintainers as required reviewers.
 
 on:
   release:
     types: [published]
-  # Escape hatch for a re-run without cutting a new Release. Still gated by the
-  # same protected environment, so it cannot publish without approval.
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Index to publish to"
+        type: choice
+        default: testpypi
+        options:
+          - testpypi
+          - pypi
 
 permissions:
   contents: read
@@ -64,15 +79,15 @@ jobs:
           if-no-files-found: error
 
   publish:
-    name: Publish to PyPI
+    name: Publish
     needs: build
     runs-on: ubuntu-latest
-    # The protected environment is the human gate: the job pauses here until a
-    # required reviewer approves. Configure required reviewers on this
-    # environment in the repository settings.
+    # A published Release always targets production; a manual dispatch uses the
+    # chosen `target` input (default testpypi). The environment name is derived
+    # from that so each index keeps its own protected approval gate.
     environment:
-      name: pypi
-      url: https://pypi.org/project/clappform/
+      name: ${{ (github.event_name == 'release' || inputs.target == 'pypi') && 'pypi' || 'testpypi' }}
+      url: ${{ (github.event_name == 'release' || inputs.target == 'pypi') && 'https://pypi.org/project/clappform/' || 'https://test.pypi.org/project/clappform/' }}
     permissions:
       # OIDC token for trusted publishing. No API token is stored anywhere.
       id-token: write
@@ -83,7 +98,14 @@ jobs:
           name: dist
           path: dist/
 
-      - name: Publish to PyPI (Trusted Publishing / OIDC)
+      - name: Publish to production PyPI (Trusted Publishing / OIDC)
+        if: github.event_name == 'release' || inputs.target == 'pypi'
         uses: pypa/gh-action-pypi-publish@release/v1
         # No `password:` — OIDC trusted publishing authenticates via the
         # id-token above. Defaults to the production index (pypi.org).
+
+      - name: Publish to TestPyPI (Trusted Publishing / OIDC)
+        if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
