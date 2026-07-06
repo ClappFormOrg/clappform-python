@@ -75,11 +75,27 @@ def _normalise_value(value: Any) -> Any:
         return {str(k): _normalise_value(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [_normalise_value(v) for v in value]
-    # pandas NaT / NA and numpy NaN are floats-that-lie or singletons; catch the
-    # "not equal to itself" ones that slipped past the float branch (e.g. NaT).
-    if value != value:  # noqa: PLR0124 -- NaN/NaT sentinel check
+    # Missing-value singletons (pandas NaT/NA, numpy NaT) that slipped past the
+    # float branch compare unequal to themselves. pandas NA is doubly awkward:
+    # ``NA != NA`` returns NA, not a bool, and coercing that to bool raises
+    # "boolean value of NA is ambiguous" — so route any non-bool / raising
+    # comparison to None too, since only these missing sentinels behave that way.
+    if _is_missing_sentinel(value):
         return None
     return value
+
+
+def _is_missing_sentinel(value: Any) -> bool:
+    """True for a value that is unequal to itself (NaN/NaT/NA-style missing).
+
+    Written to survive comparison operators that do not return a plain bool
+    (pandas ``NA`` returns ``NA`` from ``!=`` and raises on truth-testing):
+    such values are themselves missing sentinels, so treat them as missing.
+    """
+    try:
+        return bool(value != value)  # noqa: PLR0124 -- NaN/NaT/NA sentinel check
+    except (TypeError, ValueError):
+        return True
 
 
 def _parse_extended_json(value: Any) -> Any:

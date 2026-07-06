@@ -105,6 +105,67 @@ def test_encode_elastic_pipeline_normalises_and_serialises() -> None:
     assert json.loads(encoded) == [{"match": {"ts": "2020-01-01"}}]
 
 
+def test_non_float_nat_sentinel_becomes_null() -> None:
+    # numpy datetime64('NaT') is not a float, datetime, or container, but
+    # compares unequal to itself; it must fall through to the sentinel guard
+    # and collapse to null rather than serialising as a string.
+    import numpy as np
+
+    data = _codec.records_to_bytes([{"ts": np.datetime64("NaT"), "ok": 1}])
+    assert json.loads(data) == [{"ts": None, "ok": 1}]
+
+
+def test_nested_nat_sentinel_becomes_null() -> None:
+    # Same sentinel guard, reached through a nested container.
+    import numpy as np
+
+    data = _codec.records_to_bytes([{"items": [{"ts": np.datetime64("NaT")}]}])
+    assert json.loads(data) == [{"items": [{"ts": None}]}]
+
+
+def test_pandas_na_becomes_null_and_does_not_raise() -> None:
+    # Regression: pandas NA returns NA (not a bool) from `!= self`, and coercing
+    # that to bool raises "boolean value of NA is ambiguous". A DataFrame with a
+    # nullable dtype (convert_dtypes / Int64 / string) yields NA for missing
+    # cells, so an unguarded sentinel check crashed on encode. It must collapse
+    # to null instead.
+    import pandas as pd
+
+    data = _codec.records_to_bytes([{"amount": pd.NA, "ok": 1}])
+    assert json.loads(data) == [{"amount": None, "ok": 1}]
+
+
+def test_nested_pandas_na_becomes_null() -> None:
+    import pandas as pd
+
+    data = _codec.records_to_bytes([{"items": [{"amount": pd.NA}], "ok": 1}])
+    assert json.loads(data) == [{"items": [{"amount": None}], "ok": 1}]
+
+
+def test_pandas_nullable_dtype_frame_round_trips_missing_as_null() -> None:
+    # End-to-end: the realistic path that triggered the bug — a nullable-dtype
+    # frame with a genuinely missing cell, normalised straight from records.
+    import pandas as pd
+
+    frame = pd.DataFrame({"amount": [10, None]}).convert_dtypes()
+    data = _codec.records_to_bytes(frame.to_dict(orient="records"))
+    assert json.loads(data) == [{"amount": 10}, {"amount": None}]
+
+
+def test_extended_json_wrappers_inside_a_list_are_collapsed() -> None:
+    # _parse_extended_json must recurse into JSON arrays, not just objects.
+    payload = b'[{"ids":[{"$oid":"aa"},{"$oid":"bb"}]}]'
+    assert _codec.bytes_to_records(payload) == [{"ids": ["aa", "bb"]}]
+
+
+def test_extended_json_date_unparseable_inner_passes_through() -> None:
+    # A $date whose value is neither epoch-ms nor a string (here a bool) is not
+    # coercible and is returned structurally unchanged (the line-110 branch);
+    # a $date string, by contrast, is handled by the int()-fallback above it.
+    payload = b'[{"created":{"$date":true}}]'
+    assert _codec.bytes_to_records(payload) == [{"created": True}]
+
+
 def test_float_nan_helper_is_json_null_not_string() -> None:
     # Regression guard: NaN must not leak through as the literal "NaN" that
     # json.dumps would otherwise emit for an unguarded float.
