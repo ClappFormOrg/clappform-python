@@ -36,6 +36,7 @@ arrow = ["pyarrow>=15.0"]
 all = ["clappform[pandas,polars,arrow]"]
 dev = [
     "pytest>=8.0",
+    "pytest-cov>=5.0",
     "ruff>=0.5",
     "mypy>=1.10",
     "grpcio-tools>=1.60,<2",
@@ -83,3 +84,27 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["clappform"]
+omit = [
+    # Generated protobuf stubs and the generated service wrappers: mechanical,
+    # covered by behaviour (test_generated_services) and golden (servicegen)
+    # tests rather than per-method line coverage. Measuring them buries the
+    # hand-written surface in a misleading aggregate.
+    "src/clappform/gen/*",
+    "src/clappform/services/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+# The hand-written surface sits ~97%; hold the line and fail loudly on a
+# regression rather than letting new untested code slide in unnoticed.
+fail_under = 90
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.$",
+]

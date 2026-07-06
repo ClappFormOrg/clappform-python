@@ -39,4 +39,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -e .[dev,pandas]
-      - run: python -m pytest -q
+      # --cov enforces the fail_under gate in [tool.coverage.report] on every
+      # PR (pull_request above has no branch filter, so this runs on all PRs).
+      - run: python -m pytest -q --cov --cov-report=term-missing
