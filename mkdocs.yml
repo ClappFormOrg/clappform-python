@@ -87,6 +87,7 @@ nav:
   - Quickstart: quickstart.md
   - How-to guides:
       - DataFrame flows: guides/dataframes.md
+      - Actionflows & listings: guides/actionflows-and-listings.md
       - Multi-cluster & multi-tenant: guides/multi-cluster.md
       - Error handling & retries: guides/errors-and-retries.md
       - Testing with LocalMock: guides/testing.md
