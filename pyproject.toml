@@ -47,7 +47,7 @@ dev = [
     "build>=1.2",
     "twine>=5.0",
 ]
-# Docs toolchain (§9): MkDocs + Material, with mkdocstrings rendering the API
+# Docs toolchain: MkDocs + Material, with mkdocstrings rendering the API
 # reference straight from the wrapper layer's docstrings, and the snippets
 # extension pulling runnable code out of docs/snippets/ so guide code can't
 # drift from what actually executes. mike drives the per-release version selector on

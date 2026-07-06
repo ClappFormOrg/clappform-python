@@ -383,6 +383,9 @@ def generate_sources(descriptor_set: bytes) -> dict[str, str]:
                     _MethodPlan(file, service_idx, method_idx, method, index)
                     for method_idx, method in enumerate(service.method)
                 ]
+                # Collect the pb2 modules this service touches, for imports.
+                # A pagination plan's item type needs no separate entry — it is
+                # a field of the output message, whose file is added here.
                 for plan in plans:
                     pb2_paths.add(index.owning_file(plan.input_type).name)
                     pb2_paths.add(index.owning_file(plan.output_type).name)
@@ -391,9 +394,6 @@ def generate_sources(descriptor_set: bytes) -> dict[str, str]:
                             field.type_name
                         ).options.map_entry:
                             pb2_paths.add(index.owning_file(field.type_name).name)
-                    if plan.pagination is not None:
-                        _, _, item_ref = plan.pagination
-                        # item type's file is already registered via output type
                 out: list[str] = []
                 out.append(f"class {service.name}(_runtime.ServiceBase):")
                 out.append(f'    """Wrapper for {file.package}.{service.name}."""')

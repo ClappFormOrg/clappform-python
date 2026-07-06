@@ -1,4 +1,4 @@
-"""Slug/name -> UUID resolution for collection and query handles (issue #42).
+"""Slug/name -> UUID resolution for collection and query handles.
 
 Exercises the resolver through the real client and ``LocalMock``: UUIDs pass
 through untouched, slugs resolve via the Client API and cache per location, a

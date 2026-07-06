@@ -22,10 +22,11 @@ It offers two layers:
   - ``DeleteManyByOids`` and ``Clear``.
 
   That is what lets the full DataFrame surface — read, filter, mutate, update,
-  upsert, replace-where, delete — round-trip end-to-end in tests and in
-  ``examples/``. :meth:`seed_collection_slug` and :meth:`seed_query` register
-  the Client API listings so slug/name resolution also runs without a server.
-  An explicit stub for a method always wins over the built-in handler.
+  upsert, replace-where, delete — round-trip end-to-end in tests and in the
+  guide snippets under ``docs/snippets/``. :meth:`seed_collection_slug` and
+  :meth:`seed_query` register the Client API listings so slug/name resolution
+  also runs without a server. An explicit stub for a method always wins over
+  the built-in handler.
 
 Every call is recorded on :attr:`LocalMock.calls` for assertions.
 """

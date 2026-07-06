@@ -1,7 +1,8 @@
 """LocalMock transport double: stubs, call recording, and data round-trips.
 
 Drives the mock through the real ``Clappform`` client and generated service
-layer, which is how customers and ``examples/`` use it.
+layer, which is how customers and the guide snippets in ``docs/snippets/``
+use it.
 """
 
 import pytest
