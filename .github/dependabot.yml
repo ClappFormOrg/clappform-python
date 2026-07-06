@@ -1,0 +1,29 @@
+# Dependabot keeps the two dependency surfaces this repo has up to date:
+# the Python deps declared in pyproject.toml and the GitHub Actions pinned in
+# .github/workflows/. Security updates are on by default; the schedules below
+# add routine version PRs. See https://docs.github.com/code-security/dependabot.
+version: 2
+updates:
+  # Python dependencies (grpcio, protobuf, and the dev/docs/extras groups in
+  # pyproject.toml). Grouped so a routine bump is one PR, not one per package.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+
+  # Workflow actions (currently a mix of checkout/setup-python @v4/@v5/@v6 and
+  # the PyPI publish action) — consolidate them onto current major versions.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
