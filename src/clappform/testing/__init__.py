@@ -1,9 +1,13 @@
 """Test doubles for the Clappform client.
 
-This package will provide ``LocalMock``, a transport double that serves
-canned responses and records calls, so pipelines can be tested without
-infrastructure. The transport seam it plugs into lives in
-:mod:`clappform._runtime`.
+:class:`LocalMock` is a transport double that plugs into
+``Clappform(transport=LocalMock())``. It serves canned responses, records
+calls for assertions, and can seed collections so DataFrame round-trips run
+without infrastructure — used by our tests, by customers testing pipelines,
+and by ``examples/`` so the documented examples actually execute. The
+transport seam it implements lives in :mod:`clappform._runtime`.
 """
 
-__all__: list[str] = []
+from clappform.testing._local_mock import LocalMock, RecordedCall
+
+__all__ = ["LocalMock", "RecordedCall"]
