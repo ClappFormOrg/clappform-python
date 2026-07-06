@@ -1,4 +1,4 @@
-.PHONY: generate lint typecheck test check build clean docs docs-serve docs-test
+.PHONY: generate lint typecheck test check build release-check clean docs docs-serve docs-test
 
 generate:
 	python tools/generate.py
@@ -16,6 +16,11 @@ check: lint typecheck test
 
 build:
 	python -m build
+
+# Build the distributions and validate their metadata — the same checks the
+# Release workflow runs before the gated PyPI publish. Does not upload.
+release-check: build
+	python -m twine check dist/*
 
 # Run the documented snippets against LocalMock, then build the site strictly
 # (a broken include, dead reference or nav typo fails the build).
