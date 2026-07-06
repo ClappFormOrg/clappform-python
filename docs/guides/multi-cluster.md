@@ -27,6 +27,26 @@ a write on the other:
 --8<-- "multi_cluster.py:cross-cluster"
 ```
 
+## Moving a whole app between instances
+
+The copy above moves *rows*. To move an entire **app** — its collections and,
+optionally, its queries, actionflows and questionnaires — use the transfer
+RPCs. `export_app()` reads the bundle from the source instance and returns it as
+four byte blobs; `import_app()` writes those same blobs into the target. It's
+inherently a two-instance operation: read from one client, write to the other.
+
+```python
+--8<-- "multi_cluster.py:transfer-app"
+```
+
+The `include_*` flags on `export_app()` choose what travels with the app, and
+the `AppExport` it returns exposes exactly the `app` / `queries` / `actionflows`
+/ `questionnaires` fields `import_app()` consumes — so the hand-off is a direct
+pass-through with no reshaping. Pass `overwrite=True` on the import only when you
+intend to replace an app that already exists on the target; the default refuses
+to clobber it. `export_actionflow()` / `import_actionflow()` move a single
+actionflow the same way when you don't need the whole app.
+
 ## Another tenant on the same cluster
 
 `with_location()` gives a cheap clone bound to a different tenant. When the
