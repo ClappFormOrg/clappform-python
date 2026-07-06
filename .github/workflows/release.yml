@@ -1,0 +1,111 @@
+name: Release
+
+# Human-gated publish to PyPI. Nothing publishes automatically: a maintainer
+# cuts a GitHub Release (which carries the release notes, incl. the proto diff
+# of the sync) or dispatches this workflow, the build runs, and the upload then
+# waits on the target environment's required-reviewer approval before anything
+# leaves CI. Releases are timed by a human who knows the staggered 6-cluster
+# rollout state.
+#
+# Two targets:
+#   * A published GitHub Release always goes to production PyPI.
+#   * A manual dispatch defaults to TestPyPI (a throwaway index) so the OIDC +
+#     build + upload plumbing can be validated end-to-end without burning a real
+#     version on the public `clappform` project; choose `pypi` to dispatch a
+#     production publish instead.
+#
+# Auth is PyPI Trusted Publishing (OIDC) — no long-lived tokens live in the
+# repo. One-time setup: add a trusted publisher on BOTH indexes you use
+# (pypi.org and/or test.pypi.org) for this repository + workflow (`release.yml`)
+# + the matching environment name (`pypi` / `testpypi`), and create GitHub
+# Environments `pypi` and `testpypi` with maintainers as required reviewers.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Index to publish to"
+        type: choice
+        default: testpypi
+        options:
+          - testpypi
+          - pypi
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & verify distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install build tooling
+        run: python -m pip install build twine
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      # On a Release trigger, fail loudly if the tag and the packaged version
+      # disagree — a mismatched tag is the classic way a wrong version ships.
+      # Tag may be `v6.0.0a1` or `6.0.0a1`; compare on the normalized value.
+      - name: Check tag matches package version
+        if: github.event_name == 'release'
+        run: |
+          PKG_VERSION="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "package version: $PKG_VERSION   release tag: $TAG"
+          if [ "$PKG_VERSION" != "$TAG" ]; then
+            echo "::error::Release tag ($TAG) does not match pyproject version ($PKG_VERSION). Bump the version or fix the tag."
+            exit 1
+          fi
+
+      - name: Verify metadata renders on PyPI
+        run: python -m twine check dist/*
+
+      - name: Upload distributions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    # A published Release always targets production; a manual dispatch uses the
+    # chosen `target` input (default testpypi). The environment name is derived
+    # from that so each index keeps its own protected approval gate.
+    environment:
+      name: ${{ (github.event_name == 'release' || inputs.target == 'pypi') && 'pypi' || 'testpypi' }}
+      url: ${{ (github.event_name == 'release' || inputs.target == 'pypi') && 'https://pypi.org/project/clappform/' || 'https://test.pypi.org/project/clappform/' }}
+    permissions:
+      # OIDC token for trusted publishing. No API token is stored anywhere.
+      id-token: write
+    steps:
+      - name: Download built distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to production PyPI (Trusted Publishing / OIDC)
+        if: github.event_name == 'release' || inputs.target == 'pypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No `password:` — OIDC trusted publishing authenticates via the
+        # id-token above. Defaults to the production index (pypi.org).
+
+      - name: Publish to TestPyPI (Trusted Publishing / OIDC)
+        if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
