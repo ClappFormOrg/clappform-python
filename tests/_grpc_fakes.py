@@ -23,12 +23,16 @@ from typing import Any
 import grpc
 
 from clappform import _codec
+from clappform.gen.clappform.authoriser.v1.apikey import apikey_pb2, apikey_pb2_grpc
 from clappform.gen.clappform.client.v1.collection import (
     collection_pb2,
     collection_pb2_grpc,
 )
 from clappform.gen.clappform.data.v1.aggregate import aggregate_pb2, aggregate_pb2_grpc
+from clappform.gen.clappform.data.v1.delete import delete_pb2, delete_pb2_grpc
 from clappform.gen.clappform.data.v1.insert import insert_pb2, insert_pb2_grpc
+from clappform.gen.clappform.data.v1.update import update_pb2, update_pb2_grpc
+from clappform.gen.clappform.notifier.v1.health import health_pb2, health_pb2_grpc
 from clappform.gen.clappform.v1.commons import commons_pb2
 
 
@@ -181,6 +185,107 @@ class InsertServicer(insert_pb2_grpc.InsertManagementServicer):
             )
 
 
+class UpdateServicer(update_pb2_grpc.UpdateManagementServicer):
+    """Client-streaming update that patches stored rows matched by ``_id``.
+
+    ``UpdateMany`` consumes the request stream, and for each JSON chunk applies
+    the non-``_id`` fields onto the row in the target collection whose ``_id``
+    matches — enough to drive the read -> mutate -> update round-trip over the
+    wire and confirm the ``location`` header rides a client-streaming call.
+    """
+
+    def __init__(self, collections: CollectionListServicer) -> None:
+        self._collections = collections
+        self.seen_location: str | None = None
+
+    def UpdateMany(self, request_iterator, context):  # noqa: N802
+        self.seen_location = location_of(context)
+        collection = ""
+        for request in request_iterator:
+            collection = request.collection
+            store = self._collections.store_for(self.seen_location, collection)
+            if store is None:
+                continue
+            by_id = {str(row.get("_id")): row for row in store.rows}
+            for record in _codec.bytes_to_records(request.data):
+                target = by_id.get(str(record.get("_id")))
+                if target is not None:
+                    target.update({k: v for k, v in record.items() if k != "_id"})
+        return update_pb2.UpdateRequestResponse(data=b"[]", collection=collection)
+
+
+class DeleteServicer(delete_pb2_grpc.DeleteManagementServicer):
+    """Removes stored rows by explicit oids or by an equality query filter.
+
+    Enough to drive the delete -> read-empty lifecycle over the wire.
+    ``DeleteManyByQuery`` matches equality on top-level fields, mirroring the
+    aggregate handler's supported filter shape.
+    """
+
+    def __init__(self, collections: CollectionListServicer) -> None:
+        self._collections = collections
+
+    def DeleteManyByOids(self, request, context):  # noqa: N802
+        store = self._collections.store_for(location_of(context), request.collection)
+        removed = 0
+        if store is not None:
+            targets = {str(oid) for oid in request.oids}
+            kept = [r for r in store.rows if str(r.get("_id")) not in targets]
+            removed = len(store.rows) - len(kept)
+            store.rows[:] = kept
+        return delete_pb2.DataResponse(total=0, total_sent=removed)
+
+    def DeleteManyByQuery(self, request, context):  # noqa: N802
+        import json
+
+        store = self._collections.store_for(location_of(context), request.collection)
+        removed = 0
+        if store is not None:
+            query = json.loads(request.query) if request.query else {}
+            kept = [r for r in store.rows if not all(r.get(k) == v for k, v in query.items())]
+            removed = len(store.rows) - len(kept)
+            store.rows[:] = kept
+        return delete_pb2.DataResponse(total=0, total_sent=removed)
+
+    def Clear(self, request, context):  # noqa: N802
+        store = self._collections.store_for(location_of(context), request.collection)
+        if store is not None:
+            store.rows.clear()
+        return delete_pb2.DataResponse(total=0, total_sent=0)
+
+
+class ApiKeyServicer(apikey_pb2_grpc.APIKeyManagementServicer):
+    """Fake authoriser: mints an APIKey and records the request.
+
+    The authoriser family is otherwise unexercised end-to-end. ``GenerateKey``
+    echoes the requested name back in a freshly-minted key and captures the
+    tenant location, so an ``cf.auth.api_key.generate_key(...)`` flow can be
+    driven over a real channel including the location header.
+    """
+
+    def __init__(self) -> None:
+        self.seen_location: str | None = None
+        self.seen_name: str | None = None
+        self._counter = 0
+
+    def GenerateKey(self, request, context):  # noqa: N802
+        self.seen_location = location_of(context)
+        self.seen_name = request.name
+        self._counter += 1
+        return apikey_pb2.APIKey(
+            id=f"key-{self._counter}",
+            name=request.name,
+            api_key=f"cf_test_{self._counter}",
+        )
+
+
+class HealthServicer(health_pb2_grpc.HealthManagementServicer):
+    """Fake notifier health check — the notifier family's E2E smoke."""
+
+    def Health(self, request, context):  # noqa: N802
+        return health_pb2.HealthStatus(service="notifier", status=health_pb2.OK)
+
+
 @dataclass
 class FakeCluster:
     """A started in-process gRPC server exposing every fake servicer.
@@ -195,6 +300,10 @@ class FakeCluster:
     collections: CollectionListServicer
     aggregate: AggregateReadServicer
     insert: InsertServicer
+    update: UpdateServicer
+    delete: DeleteServicer
+    api_key: ApiKeyServicer
+    health: HealthServicer
 
     @property
     def endpoints(self) -> dict[str, str]:
@@ -229,11 +338,19 @@ def start_fake_cluster(page_size: int = 2) -> FakeCluster:
     collections = CollectionListServicer(page_size=page_size)
     aggregate = AggregateReadServicer(collections)
     insert = InsertServicer(collections)
+    update = UpdateServicer(collections)
+    delete = DeleteServicer(collections)
+    api_key = ApiKeyServicer()
+    health = HealthServicer()
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=8))
     collection_pb2_grpc.add_CollectionManagementServicer_to_server(collections, server)
     aggregate_pb2_grpc.add_AggregateManagementServicer_to_server(aggregate, server)
     insert_pb2_grpc.add_InsertManagementServicer_to_server(insert, server)
+    update_pb2_grpc.add_UpdateManagementServicer_to_server(update, server)
+    delete_pb2_grpc.add_DeleteManagementServicer_to_server(delete, server)
+    apikey_pb2_grpc.add_APIKeyManagementServicer_to_server(api_key, server)
+    health_pb2_grpc.add_HealthManagementServicer_to_server(health, server)
     port = server.add_insecure_port("127.0.0.1:0")
     server.start()
     return FakeCluster(
@@ -242,6 +359,10 @@ def start_fake_cluster(page_size: int = 2) -> FakeCluster:
         collections=collections,
         aggregate=aggregate,
         insert=insert,
+        update=update,
+        delete=delete,
+        api_key=api_key,
+        health=health,
     )
 
 

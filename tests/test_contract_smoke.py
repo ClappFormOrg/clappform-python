@@ -70,3 +70,26 @@ def test_staging_collections_listing_round_trips(staging_client) -> None:
     # Shape, not contents: pagination must be populated regardless of tenant data.
     assert page.pagination.page >= 1
     assert page.pagination.pages >= 0
+
+
+def test_staging_auth_key_listing_round_trips(staging_client) -> None:
+    """List API keys against staging: extends drift detection to the authoriser
+    family (a different host/service than the client API above), catching auth
+    wire-shape drift the collection listing can't."""
+    try:
+        page = staging_client.auth.api_key.read_all(page=1, limit=1)
+    except ClappformError as exc:
+        pytest.fail(f"staging auth contract check failed: {exc}")
+    assert page.pagination.page >= 1
+    assert page.pagination.pages >= 0
+
+
+def test_staging_notifier_health_round_trips(staging_client) -> None:
+    """Health-check the notifier family against staging — a tenant-data-free
+    round-trip that flags drift on a third API family (and its host)."""
+    try:
+        status = staging_client.notifier.health.health()
+    except ClappformError as exc:
+        pytest.fail(f"staging notifier contract check failed: {exc}")
+    # Shape only: the service reports itself and a status enum value.
+    assert status.service or status.status is not None
