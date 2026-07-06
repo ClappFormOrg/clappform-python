@@ -171,3 +171,17 @@ def test_float_nan_helper_is_json_null_not_string() -> None:
     # json.dumps would otherwise emit for an unguarded float.
     data = _codec.records_to_bytes([{"x": math.nan}])
     assert b"NaN" not in data
+
+
+@pytest.mark.parametrize("value", [math.inf, -math.inf, float("inf"), float("-inf")])
+def test_infinite_floats_are_rejected(value: float) -> None:
+    # JSON has no representation for inf/-inf; json.dumps would emit the
+    # non-standard "Infinity" token the server cannot parse. Encoding must fail
+    # loudly rather than corrupt the payload.
+    with pytest.raises(ValueError, match="infinite float"):
+        _codec.records_to_bytes([{"x": value}])
+
+
+def test_infinite_float_nested_in_container_is_rejected() -> None:
+    with pytest.raises(ValueError, match="infinite float"):
+        _codec.records_to_bytes([{"nested": {"deep": [math.inf]}}])
