@@ -16,6 +16,7 @@ from clappform._errors import (
 )
 from clappform._proto_version import __proto_version__
 from clappform._transport import DEFAULT_RETRIES, RetryPolicy
+from clappform.dataframes import CollectionHandle, QueryHandle, ReadResult
 
 __version__ = "6.0.0a0"
 
@@ -25,10 +26,13 @@ __all__ = [
     "AuthenticationError",
     "Clappform",
     "ClappformError",
+    "CollectionHandle",
     "ConfigurationError",
     "ConflictError",
     "Credentials",
     "InvalidRequestError",
+    "QueryHandle",
+    "ReadResult",
     "NotFoundError",
     "NotSupportedError",
     "PermissionDeniedError",
