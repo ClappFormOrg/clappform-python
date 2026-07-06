@@ -8,9 +8,9 @@ clone for another tenant, sharing connections and configuration.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from clappform import _discovery, _runtime
+from clappform import _discovery, _resolve, _runtime, dataframes
 from clappform._auth import ApiKey, Credentials
 from clappform._errors import ConfigurationError
 from clappform._transport import (
@@ -20,6 +20,12 @@ from clappform._transport import (
     resolve_endpoints,
 )
 from clappform.services import API_FAMILIES
+
+if TYPE_CHECKING:
+    from clappform.services.auth import AuthAPI
+    from clappform.services.client import ClientAPI
+    from clappform.services.data import DataAPI
+    from clappform.services.notifier import NotifierAPI
 
 
 class _BoundCaller:
@@ -54,6 +60,15 @@ class Clappform:
     All configuration is explicit constructor input: the library reads no
     config files and no environment variables.
     """
+
+    # Sub-clients are bound dynamically from API_FAMILIES in _bind_services;
+    # these annotations give the generated surface (cf.data, cf.client, ...)
+    # static types without hand-maintaining the binding.
+    if TYPE_CHECKING:
+        data: DataAPI
+        client: ClientAPI
+        auth: AuthAPI
+        notifier: NotifierAPI
 
     def __init__(
         self,
@@ -104,12 +119,33 @@ class Clappform:
             )
             self._owns_transport = True
 
+        self._resolver = _resolve.Resolver(self)
         self._bind_services()
 
     def _bind_services(self) -> None:
         caller = _BoundCaller(self._transport, self.location)
         for family, api_cls in API_FAMILIES.items():
             setattr(self, family, api_cls(caller))
+        self._attach_dataframe_handles()
+
+    def _attach_dataframe_handles(self) -> None:
+        """Hang the DataFrame entry points off the generated ``data`` API.
+
+        ``cf.data.collection(ref)`` / ``cf.data.query(ref)`` are the flagship
+        surface, but ``data`` is generated ("do not edit"), so they are
+        attached here rather than baked into the codegen. Each closes over this
+        client so the handle inherits the location and shares the resolver
+        cache; the raw generated RPCs on ``cf.data`` are untouched.
+        """
+
+        def collection(ref: str) -> dataframes.CollectionHandle:
+            return dataframes.CollectionHandle(self, ref)
+
+        def query(ref: str) -> dataframes.QueryHandle:
+            return dataframes.QueryHandle(self, ref)
+
+        self.data.collection = collection  # type: ignore[attr-defined]
+        self.data.query = query  # type: ignore[attr-defined]
 
     def with_location(self, location: str) -> Clappform:
         """A clone bound to another tenant, sharing connections when possible.
