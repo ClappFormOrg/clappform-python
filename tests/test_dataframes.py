@@ -303,3 +303,34 @@ def test_collection_handle_repr(cf) -> None:
     assert "CollectionHandle" in repr(client.data.collection(CID))
     assert isinstance(client.data.collection(CID), CollectionHandle)
     assert isinstance(client.data.query(CID), QueryHandle)
+
+
+QID = "8f14e45f-ceea-467f-a34e-95b7f7f7a9d1"
+
+
+def test_query_handle_fetch_returns_readresult(cf) -> None:
+    client, mock = cf
+    _seed_orders(mock)
+    mock.seed_query(QID, collection=CID, id=QID)
+    result = client.data.query(QID).fetch()
+    assert isinstance(result, ReadResult)
+    assert len(list(result)) == 3
+
+
+def test_query_handle_iter_batches_streams_per_chunk(cf) -> None:
+    client, mock = cf
+    _seed_orders(mock)
+    mock.seed_query(QID, collection=CID, id=QID)
+    batches = list(client.data.query(QID).iter_batches(batch_size=2))
+    # 3 seeded rows, batch_size=2 -> [2, 1]
+    assert [len(b) for b in batches] == [2, 1]
+
+
+def test_query_handle_repr_shows_resolved_id_after_use(cf) -> None:
+    client, mock = cf
+    _seed_orders(mock)
+    mock.seed_query(QID, collection=CID, id=QID)
+    q = client.data.query(QID)
+    assert "->" not in repr(q)  # unresolved before use
+    q.read()
+    assert f"-> {QID}" in repr(q)  # resolved id shown after use

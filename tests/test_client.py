@@ -180,3 +180,29 @@ def test_channel_for_rejected_on_custom_transport() -> None:
     cf, _ = make_client()
     with pytest.raises(ConfigurationError, match="custom transport"):
         cf.channel_for("data")
+
+
+def test_channel_for_returns_live_channel_on_owned_transport() -> None:
+    # With an owned GrpcTransport, channel_for exposes the real grpc.Channel and
+    # returns the same cached instance on repeat calls.
+    import grpc
+
+    cf = Clappform("acme", "qa", api_key="k", endpoints={"data": "127.0.0.1:1"}, insecure=True)
+    try:
+        channel = cf.channel_for("data")
+        assert isinstance(channel, grpc.Channel)
+        assert cf.channel_for("data") is channel
+    finally:
+        cf.close()
+
+
+def test_with_location_clone_close_does_not_break_parent() -> None:
+    # A shared-transport clone is not the transport owner; closing it must be a
+    # no-op that leaves the parent (and its channels) usable — the multi-tenant
+    # safety invariant.
+    cf, transport = make_client(cluster="qa")
+    clone = cf.with_location("umbrella")
+    clone.close()  # clone does not own the transport
+    # parent still serves calls after the clone is closed
+    cf.data.insert.insert_single(collection="orders")
+    assert transport.calls[-1][1] == "acme"
