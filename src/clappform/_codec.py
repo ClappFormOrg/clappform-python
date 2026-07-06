@@ -181,11 +181,19 @@ def records_from_chunks(
         yield from bytes_to_records(data, fmt)
 
 
-def encode_elastic_pipeline(pipeline: Any) -> bytes:
-    """Encode an Elastic-backed pipeline (Elastic DSL) as JSON bytes.
+def encode_pipeline(pipeline: Any) -> bytes:
+    """Encode an aggregation pipeline as JSON bytes for the wire.
 
-    Mongo-backed collections expect a BSON-encoded pipeline instead; that
-    encoding is not handled here and is applied by the read layer when it
-    resolves the collection's storage backend.
+    The pipeline goes across as JSON regardless of the collection's storage
+    backend: the server reads the bytes into a map and, for Mongo-backed
+    collections, converts that map to BSON itself; Elastic-backed collections
+    consume the JSON (Elastic DSL) directly. Values are normalised the same
+    way record data is (``NaN``/``NaT`` -> ``null``, datetimes -> ISO-8601), so
+    a pipeline referencing timestamps encodes consistently with the rows.
     """
     return json.dumps(_normalise_value(pipeline), separators=(",", ":")).encode("utf-8")
+
+
+# Retained alias: the pipeline encoding was originally named for the Elastic
+# path before it was confirmed to be the single JSON encoding for all backends.
+encode_elastic_pipeline = encode_pipeline
