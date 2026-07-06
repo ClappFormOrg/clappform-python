@@ -73,3 +73,37 @@ def test_errors_are_catchable_as_clappform_error() -> None:
     resolver = lambda host: "wrong.example.com"  # noqa: E731
     with pytest.raises(ClappformError):
         discover_cluster("acme", resolver=resolver)
+
+
+def test_default_resolver_uses_socket_gethostbyname_ex(monkeypatch) -> None:
+    # With no resolver= injected, discovery falls back to the real socket
+    # lookup and takes the canonical name (index 0 of the returned tuple).
+    seen: list[str] = []
+
+    def fake_gethostbyname_ex(host: str):
+        seen.append(host)
+        return ("bigip-qa-lts.clappform.com", ["acme.clappform.com"], ["10.0.0.1"])
+
+    monkeypatch.setattr(socket, "gethostbyname_ex", fake_gethostbyname_ex)
+    assert discover_cluster("acme") == "qa-lts"
+    assert seen == ["acme.clappform.com"]
+
+
+def test_bigip_without_extension_but_trailing_hyphen_is_rejected() -> None:
+    # `bigip-` with an empty extension does not match the [a-z0-9-]+ group.
+    resolver = lambda host: "bigip-.clappform.com"  # noqa: E731
+    with pytest.raises(ConfigurationError, match="does not match"):
+        discover_cluster("acme", resolver=resolver)
+
+
+def test_loose_bigip_prefix_is_not_matched() -> None:
+    # `bigipextra` must not be treated as bigip + extension; only a `.` or `-`
+    # separator after `bigip` is valid.
+    resolver = lambda host: "bigipextra.clappform.com"  # noqa: E731
+    with pytest.raises(ConfigurationError, match="does not match"):
+        discover_cluster("acme", resolver=resolver)
+
+
+def test_extension_with_digits_is_extracted() -> None:
+    resolver = lambda host: "bigip-v2.clappform.com"  # noqa: E731
+    assert discover_cluster("acme", resolver=resolver) == "v2"
