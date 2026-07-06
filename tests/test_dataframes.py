@@ -226,6 +226,17 @@ def test_delete_requires_exactly_one_selector(cf) -> None:
         col.delete(where={"x": 1}, oids=["a"])
 
 
+def test_delete_with_empty_where_is_refused_and_leaves_data(cf) -> None:
+    # An empty filter matches everything; deleting the whole collection must be
+    # explicit via clear(), never a side effect of an empty where=.
+    client, mock = cf
+    _seed_orders(mock)
+    col = client.data.collection(CID)
+    with pytest.raises(ValueError, match="use clear"):
+        col.delete(where={})
+    assert len(mock.records(CID)) == 3  # nothing was deleted
+
+
 def test_clear_empties_collection(cf) -> None:
     client, mock = cf
     _seed_orders(mock)

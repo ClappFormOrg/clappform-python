@@ -68,6 +68,15 @@ def _normalise_value(value: Any) -> Any:
         # to themselves. isnan rejects non-floats, so guard on float first.
         if math.isnan(value):
             return None
+        # Infinities have no JSON representation — json.dumps would emit the
+        # non-standard ``Infinity`` token, which the server cannot parse. Fail
+        # loudly so an infinity (almost always a computation bug) is surfaced
+        # here rather than silently corrupting the payload on the wire.
+        if math.isinf(value):
+            raise ValueError(
+                "cannot encode infinite float value; JSON has no representation "
+                "for inf/-inf — clean the data before writing"
+            )
         return value
     if isinstance(value, (datetime, date)):
         return value.isoformat()
