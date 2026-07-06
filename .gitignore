@@ -21,3 +21,4 @@ venv/
 # Local planning artifacts (never committed)
 /DESIGN.md
 /examples/
+/planning/
