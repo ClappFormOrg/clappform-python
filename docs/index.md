@@ -7,7 +7,8 @@ multi-tenant support.
 ```python
 from clappform import Clappform
 
-cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...")
+# The cluster is discovered from DNS — location and an API key are all you need.
+cf = Clappform(location="acme", api_key="cf_live_...")
 df = cf.data.collection("sales_orders").read(where={"status": "open"})
 ```
 
