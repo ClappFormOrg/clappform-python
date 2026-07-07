@@ -85,18 +85,23 @@ def resolve_endpoints(
     """Build the per-family endpoint map for a cluster extension.
 
     ``cluster`` is the host extension: ``""`` (or ``"prod"``) for the main
-    cluster, ``"qa"``-style values otherwise. The supported (current) clusters
-    serve gRPC over TLS on 443, so the address is the bare host with no port —
-    gRPC defaults a secure channel to 443. Explicit ``overrides`` win per family
-    and may carry their own ``host:port`` (e.g. for an older cluster still on
-    ``:50051`` or a local dev endpoint).
+    cluster, ``"qa"``-style values otherwise. The newer clusters serve gRPC
+    over TLS on 443, so their address is the bare host with no port — gRPC
+    defaults a secure channel to 443. The main cluster still listens on
+    ``:50051``, so its defaults carry that port explicitly. Explicit
+    ``overrides`` win per family and are used verbatim (no port is appended),
+    so an override may carry its own ``host:port`` — e.g. to point the main
+    cluster at 443 once it migrates, or at a local dev endpoint.
     """
     extension = cluster.strip().lstrip("-").lower()
     if extension == "prod":
         extension = ""
     suffix = f"-{extension}" if extension else ""
+    # The main cluster's gRPC services are still on :50051; every other cluster
+    # has moved to TLS on 443 (gRPC's secure-channel default, so no port).
+    port = ":50051" if extension == "" else ""
     endpoints = {
-        family: f"{prefix}{suffix}.{BASE_DOMAIN}"
+        family: f"{prefix}{suffix}.{BASE_DOMAIN}{port}"
         for family, prefix in HOST_PREFIXES.items()
     }
     for family, address in (overrides or {}).items():
