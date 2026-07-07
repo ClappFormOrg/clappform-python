@@ -107,6 +107,13 @@ ignore_errors = true
 module = "pandas.*"
 ignore_missing_imports = true
 
+# Optional columnar deps: reserved for the server-gated Arrow read path, imported
+# lazily and behind the [arrow]/[polars] extras. pyarrow ships no py.typed marker
+# and polars may be absent entirely, so treat both like pandas above.
+[[tool.mypy.overrides]]
+module = ["pyarrow.*", "polars.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

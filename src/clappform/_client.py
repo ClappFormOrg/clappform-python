@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from clappform import _discovery, _resolve, _runtime, dataframes
+from clappform import _discovery, _namespace, _resolve, _runtime, dataframes
 from clappform._auth import ApiKey, Credentials
 from clappform._errors import ConfigurationError
 from clappform._transport import (
@@ -69,6 +69,21 @@ class Clappform:
         client: ClientAPI
         auth: AuthAPI
         notifier: NotifierAPI
+
+    # Curated top-level conveniences hoisted onto ``cf`` from a deeper path,
+    # as an explicit allowlist of ``shortcut -> owning family``. Deliberately
+    # tiny: only *globally-unambiguous*, high-traffic entry points belong here,
+    # and _attach_dataframe_handles refuses to hoist any name the derived index
+    # shows on more than one family. The two-level ``cf.<family>.<service>``
+    # path stays the canonical form regardless of what is hoisted.
+    #
+    # Intentionally empty for now. The obvious DataFrame candidates —
+    # ``collection`` / ``query`` — are NOT globally unambiguous: both are real
+    # service names on cf.client, so hoisting them onto ``cf`` would shadow a
+    # different family's surface. They stay at their canonical home,
+    # ``cf.data.collection(...)`` / ``cf.data.query(...)``. New entries are
+    # added here only after review confirms the name is unambiguous.
+    _SHORTCUTS: dict[str, str] = {}
 
     def __init__(
         self,
@@ -147,6 +162,26 @@ class Clappform:
         self.data.collection = collection  # type: ignore[attr-defined]
         self.data.query = query  # type: ignore[attr-defined]
 
+        # Hoist the curated shortcuts onto the client itself so cf.collection(...)
+        # resolves to the same callable as cf.data.collection(...). The
+        # allowlist is checked against the derived name index so an ambiguous
+        # name can never be hoisted silently.
+        index = _namespace.name_index()
+        for shortcut, family in self._SHORTCUTS.items():
+            owners = index.get(shortcut)
+            if owners is not None and owners != [family]:
+                raise ConfigurationError(
+                    f"refusing to hoist ambiguous shortcut {shortcut!r}: "
+                    f"it also names a service/method on {owners}"
+                )
+            target = getattr(self, family)
+            if not hasattr(target, shortcut):
+                raise ConfigurationError(
+                    f"cannot hoist shortcut {shortcut!r}: "
+                    f"cf.{family} has no attribute {shortcut!r}"
+                )
+            setattr(self, shortcut, getattr(target, shortcut))
+
     def with_location(self, location: str) -> Clappform:
         """A clone bound to another tenant, sharing connections when possible.
 
@@ -201,6 +236,52 @@ class Clappform:
 
     def __exit__(self, *exc_info: object) -> None:
         self.close()
+
+    def __getattr__(self, name: str) -> Any:
+        """Turn a wrong-family / typo access into an actionable error.
+
+        Only reached when normal lookup misses (the bound families and curated
+        shortcuts resolve first). If ``name`` is a real service or method name
+        living on a family, say so — ``cf.insert`` -> "``insert`` lives on
+        cf.data". Otherwise fall back to the standard ``AttributeError``.
+        """
+        # Dunder / private probes (copy, pickle, etc.) must miss cleanly.
+        if name.startswith("_"):
+            raise AttributeError(name)
+        hint = _namespace.wrong_family_hint(name)
+        if hint is not None:
+            raise AttributeError(hint)
+        raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
+
+    def __dir__(self) -> list[str]:
+        """List the four families and the curated shortcuts alongside the
+        regular attributes, so tab-completion surfaces the entry points."""
+        from clappform.services import API_FAMILIES
+
+        names = set(super().__dir__())
+        names.update(API_FAMILIES)
+        names.update(self._SHORTCUTS)
+        return sorted(names)
+
+    def help(self, name: str | None = None) -> str:
+        """Answer "which family owns ``<name>``?", or list the families.
+
+        With no argument, returns the four family names plus curated shortcuts.
+        With a name, returns the wrong-family hint (or notes it is unknown).
+        """
+        from clappform.services import API_FAMILIES
+
+        if name is None:
+            families = ", ".join(f"cf.{f}" for f in sorted(API_FAMILIES))
+            summary = f"API families: {families}."
+            if self._SHORTCUTS:
+                shortcuts = ", ".join(f"cf.{s}" for s in sorted(self._SHORTCUTS))
+                summary += f" Shortcuts: {shortcuts}."
+            return summary
+        hint = _namespace.wrong_family_hint(name)
+        if hint is not None:
+            return hint
+        return f"{name!r} is not a known Clappform service or method"
 
     def __repr__(self) -> str:
         from clappform import __proto_version__, __version__

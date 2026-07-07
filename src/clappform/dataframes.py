@@ -48,6 +48,42 @@ def _require_pandas() -> Any:
     return pd
 
 
+def _require_pyarrow() -> Any:
+    """Import pyarrow, turning the ImportError into an actionable message."""
+    try:
+        import pyarrow as pa
+    except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
+        raise ClappformError(
+            "pyarrow is required for Arrow conversion; "
+            "install it with: pip install clappform[arrow]"
+        ) from exc
+    return pa
+
+
+def _require_polars() -> Any:
+    """Import polars, turning the ImportError into an actionable message."""
+    try:
+        import polars as pl
+    except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
+        raise ClappformError(
+            "polars is required for Polars conversion; "
+            "install it with: pip install clappform[polars]"
+        ) from exc
+    return pl
+
+
+# The server does not yet emit Arrow IPC on the streaming data plane, so the
+# columnar surfaces below cannot produce a result even with pyarrow/polars
+# installed. They exist now — failing loudly rather than as AttributeError — so
+# the names are reserved and callers discover the capability; they light up
+# (as a purely additive change) once a cluster negotiates the Arrow format.
+_ARROW_NOT_READY = (
+    "Arrow output is not available yet: this client version always reads JSON, "
+    "and Arrow lands as an additive surface once server Arrow support ships on "
+    "your cluster. Track the v6 Arrow read-path work for availability."
+)
+
+
 def _records_from_frame(df: pd.DataFrame) -> list[Record]:
     """Turn a DataFrame into plain records (the codec's input form).
 
@@ -69,9 +105,10 @@ class ReadResult:
 
     Shipping this now (rather than returning a DataFrame straight from
     ``read()``) is deliberate: ``to_polars`` / ``to_arrow`` / the Arrow
-    PyCapsule protocol land as new methods here without changing any existing
-    return type, and the batch-wise internals let a future Arrow reader map one
-    Arrow batch per gRPC chunk.
+    PyCapsule protocol are reserved as methods here (they raise until server
+    Arrow support ships) so they can light up as a purely additive change, and
+    the batch-wise internals let that future Arrow reader map one Arrow batch
+    per gRPC chunk.
     """
 
     __slots__ = ("_chunks", "_consumed")
@@ -108,6 +145,46 @@ class ReadResult:
         pd = _require_pandas()
         records = list(self)
         return pd.DataFrame.from_records(records)
+
+    def to_arrow(self) -> Any:
+        """Materialise the result set as a ``pyarrow.Table`` (reserved).
+
+        The fast, zero-per-row-object base the other columnar surfaces build on:
+        once the server negotiates Arrow IPC, one gRPC chunk maps to one Arrow
+        record batch and this returns a ``Table`` without ever materialising
+        Python rows. Requires ``pip install clappform[arrow]``.
+
+        Reserved for the v6 Arrow read path; raises until server Arrow support
+        ships (the JSON path via :meth:`to_pandas` handles today's reads).
+        """
+        _require_pyarrow()
+        raise NotImplementedError(_ARROW_NOT_READY)
+
+    def to_polars(self) -> Any:
+        """Materialise the result set as a ``polars.DataFrame`` (reserved).
+
+        Built on :meth:`to_arrow` (zero-copy ``pl.from_arrow``), so once
+        implemented it needs pyarrow as well as polars — install
+        ``clappform[polars,arrow]`` (or ``clappform[all]``). This stub only
+        checks for polars, as it raises before any Arrow conversion runs.
+
+        Reserved for the v6 Arrow read path; raises until server Arrow support
+        ships.
+        """
+        _require_polars()
+        raise NotImplementedError(_ARROW_NOT_READY)
+
+    def __arrow_c_stream__(self, requested_schema: object | None = None) -> Any:
+        """Arrow PyCapsule stream interface (reserved).
+
+        Lets Arrow-native consumers (Polars, DuckDB, ...) pull results directly
+        with no clappform glue. Requires ``pip install clappform[arrow]``.
+
+        Reserved for the v6 Arrow read path; raises until server Arrow support
+        ships.
+        """
+        _require_pyarrow()
+        raise NotImplementedError(_ARROW_NOT_READY)
 
 
 class _AggregateReader:
