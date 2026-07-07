@@ -1,7 +1,8 @@
 """Runnable source for the DataFrame-flows guide snippets.
 
-Covers the read/filter, batch, append/update/upsert, replace-where and delete
-paths. Runs against ``LocalMock`` in CI so the guide's code matches the client.
+Covers the read/filter, batch, aggregate (collection pipeline + saved query),
+append/update/upsert/sync, replace-where and delete paths. Runs against
+``LocalMock`` in CI so the guide's code matches the client.
 """
 
 from __future__ import annotations
@@ -44,19 +45,31 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:aggregate]
         # For stages the sugar does not emit ($group, $sort, ...) pass a full
-        # pipeline. It is sent through untouched.
-        by_region = orders.aggregate(
+        # pipeline to aggregate(). It is sent to the server untouched and the
+        # result comes back as a DataFrame — one row per group here.
+        revenue_by_region = orders.aggregate(
             [
                 {"$match": {"status": "open"}},
                 {"$group": {"_id": "$region", "total": {"$sum": "$amount"}}},
+                {"$sort": {"total": -1}},
             ]
         )
         # --8<-- [end:aggregate]
         # The pipeline reaches the collection intact; LocalMock executes the
-        # $match it understands (2 open rows) and passes $group through without
-        # evaluating it, so this asserts the call round-trips, not that the mock
-        # reimplements $group.
-        assert len(by_region) == 2
+        # $match it understands (2 open rows) and passes $group/$sort through
+        # without evaluating them, so this asserts the call round-trips, not
+        # that the mock reimplements an aggregation engine.
+        assert len(revenue_by_region) == 2
+
+        # --8<-- [start:aggregate-query]
+        # A saved server-side query already carries its own collection and
+        # pipeline, so you just read it — no pipeline to write client-side.
+        revenue = cf.data.query("monthly-revenue-per-region")
+        revenue_df = revenue.read()
+        # --8<-- [end:aggregate-query]
+        # The saved query reads the same backing collection, so it tracks the
+        # live store rather than a hard-coded count.
+        assert len(revenue_df) == len(transport.records("sales_orders-id"))
 
         # --8<-- [start:batches]
         # Memory-bounded reads: one list of records per gRPC chunk, nothing
@@ -65,36 +78,65 @@ def run(transport: LocalMock) -> None:
             handle(batch)
         # --8<-- [end:batches]
 
-        # --8<-- [start:write]
+        # --8<-- [start:insert]
+        # append() inserts every row as a brand-new document. Build the frame
+        # however you like — here from a list of dicts.
+        import pandas as pd
+
+        new_orders = pd.DataFrame(
+            [
+                {"order_id": "A-9", "amount": 10.0, "status": "open", "region": "EU"},
+                {"order_id": "A-10", "amount": 25.0, "status": "open", "region": "US"},
+            ]
+        )
+        written = orders.append(new_orders)  # returns the row count written
+        # --8<-- [end:insert]
+        assert written == 2
+
+        # --8<-- [start:update]
         # read -> mutate -> write-back. update() keys on _id by default, which
-        # read() keeps as a column, so the round-trip needs no `on=`.
-        df["amount"] = df["amount"] * 1.08
-        orders.update(df)
+        # read() keeps as a column, so the round-trip needs no `on=`. Only the
+        # rows you changed are sent.
+        open_orders = orders.read(where={"status": "open"})
+        open_orders["amount"] = open_orders["amount"] * 1.08  # 8% uplift
+        orders.update(open_orders)
+        # --8<-- [end:update]
 
-        # insert brand-new rows
-        new_rows = df.head(0).assign(order_id=["A-9"], amount=[10.0], region=["EU"])
-        orders.append(new_rows)
-
-        # insert-or-update on a business key (no default — `on` is required)
-        orders.upsert(df, on="order_id")
-        # --8<-- [end:write]
+        # --8<-- [start:upsert]
+        # upsert() inserts-or-updates on a business key — no _id needed. `on`
+        # has no default: you must name the key column. Rows whose key exists
+        # are updated in place; the rest are inserted.
+        incoming = pd.DataFrame(
+            [
+                {"order_id": "A-1", "amount": 200.0, "status": "open", "region": "EU"},
+                {"order_id": "A-99", "amount": 5.0, "status": "open", "region": "APAC"},
+            ]
+        )
+        orders.upsert(incoming, on="order_id")
+        # --8<-- [end:upsert]
+        # A-1 updated in place, A-99 inserted — no duplicate A-1.
+        by_key = {row["order_id"]: row for row in transport.records("sales_orders-id")}
+        assert by_key["A-1"]["amount"] == 200.0
+        assert by_key["A-99"]["region"] == "APAC"
 
         # --8<-- [start:server-side]
-        # Mutate or delete without pulling rows through the client.
+        # Mutate or delete without pulling rows through the client. Both run
+        # entirely on the server — nothing is round-tripped.
         orders.replace_where({"status": "open"}, {"reviewed": True})
         orders.delete(where={"status": "closed"})
-        # --8<-- [end:server-side]
 
-        # --8<-- [start:saved-query]
-        # A saved server-side query carries its own collection + pipeline.
-        revenue = cf.data.query("monthly-revenue-per-region")
-        revenue_df = revenue.read()
-        # --8<-- [end:saved-query]
-        # The saved query reads the same backing collection this snippet has
-        # been mutating, so it returns whatever rows now remain — assert it
-        # tracks the live store rather than a hard-coded count.
-        assert len(revenue_df) == len(transport.records("sales_orders-id"))
-        assert len(revenue_df) > 0
+        # Delete specific rows by their _id instead of a filter.
+        stale = orders.read(where={"region": "APAC"})
+        orders.delete(oids=list(stale["_id"]))
+        # --8<-- [end:server-side]
+        assert not any(row.get("region") == "APAC" for row in transport.records("sales_orders-id"))
+
+        # --8<-- [start:clear]
+        # clear() empties the whole collection. It is separate from delete() by
+        # design, so a full wipe is never an accident of an empty filter.
+        orders.clear()
+        # --8<-- [end:clear]
+        assert transport.records("sales_orders-id") == []
 
 
 def handle(batch: list) -> None:

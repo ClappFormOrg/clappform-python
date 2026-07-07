@@ -35,6 +35,7 @@ def test_snippets_directory_is_present() -> None:
     assert {
         "quickstart",
         "dataframes",
+        "client_operations",
         "multi_cluster",
         "errors_and_retries",
         "testing",
@@ -53,6 +54,11 @@ def test_dataframes_snippet_runs() -> None:
     module.run(mock)
 
 
+def test_client_operations_snippet_runs() -> None:
+    module = _load("client_operations")
+    module.run(module.build_mock())
+
+
 def test_multi_cluster_snippet_runs() -> None:
     module = _load("multi_cluster")
     module.run(module.build_mock(), module.build_mock())
@@ -68,7 +74,9 @@ def test_testing_snippet_runs() -> None:
     module.run()
 
 
-@pytest.mark.parametrize("name", ["quickstart", "dataframes", "multi_cluster"])
+@pytest.mark.parametrize(
+    "name", ["quickstart", "dataframes", "client_operations", "multi_cluster"]
+)
 def test_snippet_modules_import_clean(name: str) -> None:
     """Importing a snippet module must have no side effects (no top-level run)."""
     module = _load(name)
