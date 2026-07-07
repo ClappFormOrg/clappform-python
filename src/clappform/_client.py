@@ -127,6 +127,7 @@ class Clappform:
                 endpoints=resolve_endpoints(self.cluster, endpoints),
                 credentials=self._credentials,
                 cluster=self.cluster,
+                cluster_discovered=self.cluster_discovered,
                 insecure=insecure,
                 default_timeout=timeout,
                 retries=retries,

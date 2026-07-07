@@ -36,11 +36,16 @@ def run(transport: LocalMock) -> None:
     # --8<-- [start:connect]
     from clappform import Clappform
 
+    # location is your tenant subdomain (sent on every call); the cluster it
+    # lives on is discovered from DNS, so this is all you normally need.
     cf = Clappform(
-        location="acme",            # your tenant subdomain, sent on every call
-        cluster="prod",             # host extension; omit to discover it via DNS
+        location="acme",            # your tenant subdomain
         api_key="cf_live_...",      # the only credential v6 ships
     )
+
+    # In air-gapped or split-DNS environments where discovery can't run, pin
+    # the cluster explicitly — that skips DNS entirely.
+    cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...")
     # --8<-- [end:connect]
 
     # The docs example connects for real; the test swaps in a stubbed transport

@@ -131,6 +131,7 @@ class GrpcTransport:
     endpoints: dict[str, str]
     credentials: Credentials
     cluster: str
+    cluster_discovered: bool = False
     insecure: bool = False
     default_timeout: float | None = 60.0
     retries: RetryPolicy | None = DEFAULT_RETRIES
@@ -212,7 +213,12 @@ class GrpcTransport:
             "timeout": timeout if timeout is not None else self.default_timeout,
             "metadata": self._metadata(location, metadata),
         }
-        context = {"method": method, "cluster": self.cluster, "location": location}
+        context: dict[str, Any] = {
+            "method": method,
+            "cluster": self.cluster,
+            "cluster_discovered": self.cluster_discovered,
+            "location": location,
+        }
         try:
             result = multicallable(request, **call_kwargs)
         except grpc.RpcError as exc:

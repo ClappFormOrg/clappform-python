@@ -26,7 +26,8 @@ Nothing is read from the environment; you pass everything in.
 ```python
 from clappform import Clappform
 
-cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...")
+# The cluster is discovered from DNS, so location and an API key are all you need.
+cf = Clappform(location="acme", api_key="cf_live_...")
 
 with cf:
     orders = cf.data.collection("sales_orders")
