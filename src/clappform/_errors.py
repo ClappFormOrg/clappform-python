@@ -24,19 +24,24 @@ class ClappformError(Exception):
         status: str | None = None,
         method: str | None = None,
         cluster: str | None = None,
+        cluster_discovered: bool = False,
         location: str | None = None,
         details: str | None = None,
     ) -> None:
         self.status = status
         self.method = method
         self.cluster = cluster
+        self.cluster_discovered = cluster_discovered
         self.location = location
         self.details = details
         context = []
         if method:
             context.append(f"method={method}")
         if cluster is not None:
-            context.append(f"cluster={(cluster or 'main')!r}")
+            # Mark a DNS-discovered cluster so a wrong discovery is visible in
+            # the failure itself, not just in repr(client).
+            discovered = " (discovered)" if cluster_discovered else ""
+            context.append(f"cluster={(cluster or 'main')!r}{discovered}")
         if location:
             context.append(f"location={location!r}")
         if status:
@@ -106,6 +111,7 @@ def translate_rpc_error(
     *,
     method: str | None = None,
     cluster: str | None = None,
+    cluster_discovered: bool = False,
     location: str | None = None,
 ) -> ClappformError:
     """Map a grpc.RpcError onto the typed hierarchy, preserving call context."""
@@ -120,6 +126,7 @@ def translate_rpc_error(
             status=status_name,
             method=method,
             cluster=cluster,
+            cluster_discovered=cluster_discovered,
             location=location,
             details=details,
         )
@@ -136,6 +143,7 @@ def translate_rpc_error(
         status=status_name,
         method=method,
         cluster=cluster,
+        cluster_discovered=cluster_discovered,
         location=location,
         details=details,
     )
