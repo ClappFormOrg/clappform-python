@@ -119,6 +119,31 @@ def test_not_found_translates(cf) -> None:
     assert "location='acme'" in str(excinfo.value)
 
 
+def test_discovered_cluster_flag_reaches_a_real_rpc_error(server, monkeypatch) -> None:
+    # When the cluster was discovered (no explicit cluster=), a real RPC failure
+    # carries the (discovered) marker end to end, so an operator seeing the
+    # error can tell a wrong discovery from a wrong explicit cluster.
+    from clappform import _discovery
+
+    address, _servicer = server
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "qa")
+    client = Clappform(
+        "acme",
+        api_key="test-key",
+        endpoints={"data": address},
+        insecure=True,
+        timeout=5.0,
+        retries=RetryPolicy(max_attempts=2),
+    )
+    try:
+        assert client.cluster_discovered is True
+        with pytest.raises(NotFoundError) as excinfo:
+            client.data.insert.insert_single(collection="missing")
+        assert "cluster='qa' (discovered)" in str(excinfo.value)
+    finally:
+        client.close()
+
+
 def test_missing_location_server_detail_becomes_configuration_error(cf) -> None:
     with pytest.raises(ConfigurationError, match="location="):
         cf.data.insert.insert_single(collection="no-tenant")

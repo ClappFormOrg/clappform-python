@@ -72,6 +72,40 @@ def test_empty_cluster_reads_as_main() -> None:
     assert "cluster='main'" in str(error)
 
 
+def test_discovered_cluster_is_flagged_in_the_error() -> None:
+    # A DNS-discovered cluster is marked so a wrong discovery is visible in the
+    # failure itself, not only in repr(client).
+    error = translate_rpc_error(
+        FakeRpcError(grpc.StatusCode.NOT_FOUND, "x"),
+        cluster="prod-lts",
+        cluster_discovered=True,
+        location="acme",
+    )
+    assert "cluster='prod-lts' (discovered)" in str(error)
+    assert error.cluster_discovered is True
+
+
+def test_explicit_cluster_is_not_flagged_as_discovered() -> None:
+    error = translate_rpc_error(
+        FakeRpcError(grpc.StatusCode.NOT_FOUND, "x"),
+        cluster="prod-lts",
+        cluster_discovered=False,
+        location="acme",
+    )
+    assert "(discovered)" not in str(error)
+    assert error.cluster_discovered is False
+
+
+def test_discovered_main_cluster_reads_as_main_discovered() -> None:
+    error = translate_rpc_error(
+        FakeRpcError(grpc.StatusCode.NOT_FOUND, "x"),
+        cluster="",
+        cluster_discovered=True,
+        location="acme",
+    )
+    assert "cluster='main' (discovered)" in str(error)
+
+
 def test_missing_location_header_becomes_configuration_error() -> None:
     error = translate_rpc_error(
         FakeRpcError(grpc.StatusCode.ABORTED, "invalid/missing header: 'location'"),

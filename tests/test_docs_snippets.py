@@ -42,7 +42,13 @@ def test_snippets_directory_is_present() -> None:
     } <= found
 
 
-def test_quickstart_snippet_runs() -> None:
+def test_quickstart_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The quickstart leads with location-only construction, which discovers the
+    # cluster from DNS. CI has no such record, so stub the resolver; the snippet
+    # itself stays clean and reader-facing.
+    from clappform import _discovery
+
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
     module = _load("quickstart")
     module.run(module.build_mock())
 
