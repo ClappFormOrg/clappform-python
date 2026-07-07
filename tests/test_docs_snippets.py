@@ -74,7 +74,9 @@ def test_testing_snippet_runs() -> None:
     module.run()
 
 
-@pytest.mark.parametrize("name", ["quickstart", "dataframes", "client_operations", "multi_cluster"])
+@pytest.mark.parametrize(
+    "name", ["quickstart", "dataframes", "client_operations", "multi_cluster"]
+)
 def test_snippet_modules_import_clean(name: str) -> None:
     """Importing a snippet module must have no side effects (no top-level run)."""
     module = _load(name)
