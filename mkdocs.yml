@@ -108,8 +108,6 @@ nav:
   - Concepts:
       - Key concepts & glossary: guides/concepts.md
       - Security & credentials: guides/security.md
-  - Examples:
-      - Export every actionflow script: guides/examples.md
   - Troubleshooting: guides/troubleshooting.md
   - Reference:
       - Client: reference/client.md
