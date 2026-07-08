@@ -46,6 +46,32 @@ def run(transport: LocalMock) -> None:
             retry_later()
         # --8<-- [end:typed-errors]
 
+        good = cf.data.collection("real-collection")
+
+        # --8<-- [start:retry-flow]
+        # A TransientError means retries were exhausted at the RPC level. Because
+        # the chunked write flows are safe to re-run, retry the whole operation
+        # rather than a single chunk — a tiny loop is usually enough.
+        import time
+
+        for attempt in range(3):
+            try:
+                df = good.read()
+                good.update(df)
+                break
+            except TransientError:
+                if attempt == 2:
+                    raise
+                time.sleep(2**attempt)  # back off, then re-run the whole flow
+        # --8<-- [end:retry-flow]
+
+        # --8<-- [start:per-call-timeout]
+        # The client has a default deadline; override it for one slow call with
+        # timeout= (seconds) without changing the client-wide default.
+        df = good.read(timeout=120.0)
+        # --8<-- [end:per-call-timeout]
+        assert df is not None
+
 
 def handle_missing(exc: Exception) -> None:
     assert "location" in str(exc)

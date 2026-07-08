@@ -42,6 +42,8 @@ def test_snippets_directory_is_present() -> None:
         "migrating",
         "cookbook",
         "actionflow_scripts",
+        "troubleshooting",
+        "performance",
     } <= found
 
 
@@ -104,6 +106,16 @@ def test_actionflow_scripts_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> Non
 
     monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
     module = _load("actionflow_scripts")
+    module.run(module.build_mock())
+
+
+def test_troubleshooting_snippet_runs() -> None:
+    module = _load("troubleshooting")
+    module.run(module.build_mock())
+
+
+def test_performance_snippet_runs() -> None:
+    module = _load("performance")
     module.run(module.build_mock())
 
 

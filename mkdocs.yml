@@ -85,18 +85,30 @@ markdown_extensions:
       base_path: [docs/snippets]
       check_paths: true
 
+# Grouped by intent, not by document type: readers who already know the
+# concepts jump to the section that matches what they're trying to do —
+# get started, perform a task, understand a term, unblock an error, or look
+# something up — rather than scanning a flat guide list.
 nav:
   - Home: index.md
-  - Quickstart: quickstart.md
-  - How-to guides:
+  - Get started:
+      - Quickstart: quickstart.md
       - Migrating from 4.x / 5.x: guides/migrating.md
-      - Cookbook: guides/cookbook.md
-      - DataFrame flows: guides/dataframes.md
-      - Running inside an actionflow: guides/actionflow-scripts.md
+  - Tasks:
+      # The Cookbook is the fast, copy-paste action index; the guides below it
+      # are the deeper "how it works" for each area. Cross-linked both ways.
+      - All recipes (Cookbook): guides/cookbook.md
+      - Read & query data: guides/dataframes.md
+      - Performance & large datasets: guides/performance.md
+      - Actionflows: guides/actionflow-scripts.md
       - Actionflows & listings: guides/actionflows-and-listings.md
       - Multi-cluster & multi-tenant: guides/multi-cluster.md
-      - Error handling & retries: guides/errors-and-retries.md
+      - Errors & retries: guides/errors-and-retries.md
       - Testing with LocalMock: guides/testing.md
+  - Concepts:
+      - Key concepts & glossary: guides/concepts.md
+      - Security & credentials: guides/security.md
+  - Troubleshooting: guides/troubleshooting.md
   - Reference:
       - Client: reference/client.md
       - DataFrame surface: reference/dataframes.md

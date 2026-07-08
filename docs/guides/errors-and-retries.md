@@ -45,4 +45,32 @@ exponential backoff. Override it per client with a
     retries are exhausted, retry the whole flow rather than a single chunk — the
     write is designed to be safe to re-run.
 
-See the [Errors reference](../reference/errors.md) for the full hierarchy.
+### Retrying a whole flow
+
+The built-in retries cover a single RPC's transient failures. When one still
+escapes as a `TransientError`, re-run the whole operation — the read/write flows
+are idempotent enough to repeat safely (`update`/`upsert` key on an id or
+business column, so a repeat converges rather than duplicating). A small
+back-off loop is usually all you need:
+
+```python
+--8<-- "errors_and_retries.py:retry-flow"
+```
+
+## Per-call deadlines
+
+Every call inherits the client's default deadline. When one operation is
+legitimately slow — a large read or aggregation — raise the deadline for that
+call alone with `timeout=` (seconds), rather than loosening the client-wide
+default:
+
+```python
+--8<-- "errors_and_retries.py:per-call-timeout"
+```
+
+For results too large to finish within any reasonable deadline, stream them in
+batches instead — see
+[Stream a large aggregation](cookbook.md#stream-a-large-aggregation-into-dataframes).
+
+See the [Errors reference](../reference/errors.md) for the full hierarchy, and
+[Troubleshooting](troubleshooting.md) for symptom-first fixes.
