@@ -28,12 +28,12 @@ def run() -> None:
         # --8<-- [start:roundtrip]
         customers = cf.data.collection("customers")
 
-        pro = customers.read(where={"plan": "pro"})
+        pro = customers.read(pipeline=[{"$match": {"plan": "pro"}}])
         assert list(pro["email"]) == ["a@example.com"]
 
         # writes mutate the store, so a follow-up read sees them
         customers.replace_where({"plan": "free"}, {"plan": "pro"})
-        assert len(customers.read(where={"plan": "pro"})) == 2
+        assert len(customers.read(pipeline=[{"$match": {"plan": "pro"}}])) == 2
         # --8<-- [end:roundtrip]
 
         # --8<-- [start:assert-calls]

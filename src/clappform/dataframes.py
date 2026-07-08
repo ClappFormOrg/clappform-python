@@ -3,7 +3,8 @@
 This is the ergonomic layer people actually reach for:
 
     col = cf.data.collection("sales_orders")   # slug or UUID (resolved in _resolve)
-    df = col.read(where={"status": "open"}, fields=["id", "amount"], limit=1000)
+    df = col.read()                             # whole collection
+    df = col.read(pipeline=[{"$match": {"status": "open"}}])   # filtered slice
     col.append(df); col.update(df); col.upsert(df, on="order_id")
 
 A handle holds only ``(client, reference)`` — no connection, no state — and
@@ -256,30 +257,6 @@ class _AggregateReader:
         yield from stream
 
 
-def _compile_pipeline(
-    where: Mapping[str, Any] | None,
-    fields: Sequence[str] | None,
-    limit: int | None,
-) -> list[dict[str, Any]]:
-    """Compile ``where``/``fields``/``limit`` sugar into a Mongo pipeline.
-
-    These kwargs are purely client-side — the API never sees them. Each maps
-    to one stage in a plain aggregation pipeline (``$match`` / ``$project`` /
-    ``$limit``), producing exactly what an equivalent ``aggregate()`` call
-    would send. Order matches Mongo semantics: filter, then project, then cap.
-    """
-    pipeline: list[dict[str, Any]] = []
-    if where:
-        pipeline.append({"$match": dict(where)})
-    if fields:
-        pipeline.append({"$project": {field: 1 for field in fields}})
-    if limit is not None:
-        if limit < 0:
-            raise ValueError(f"limit must be non-negative, got {limit}")
-        pipeline.append({"$limit": limit})
-    return pipeline
-
-
 class CollectionHandle(_AggregateReader):
     """A handle to one collection: reads, writes, and ad-hoc aggregation.
 
@@ -312,27 +289,19 @@ class CollectionHandle(_AggregateReader):
     def fetch(
         self,
         *,
-        where: Mapping[str, Any] | None = None,
-        fields: Sequence[str] | None = None,
-        limit: int | None = None,
         pipeline: Sequence[Mapping[str, Any]] | None = None,
         batch_size: int | None = None,
         timeout: float | None = None,
     ) -> ReadResult:
         """Stream the collection into a :class:`ReadResult`.
 
-        ``where``/``fields``/``limit`` are client-side sugar compiled into a
-        ``$match``/``$project``/``$limit`` pipeline. ``pipeline=`` supplies a
-        full aggregation pipeline instead and is mutually exclusive with the
-        sugar — passing both is a caller error.
+        ``pipeline=`` is an aggregation pipeline applied server-side; omit it to
+        stream the whole collection. The pipeline is sent untouched, so it must
+        be in the syntax the collection's backend expects (Mongo stages for a
+        Mongo-backed collection, Elastic DSL for an Elastic-backed one).
+        :meth:`read` / :meth:`aggregate` are the DataFrame-returning twins.
         """
-        if pipeline is not None and (where or fields or limit is not None):
-            raise ValueError("pass either pipeline= or the where/fields/limit sugar, not both")
-        stages = (
-            [dict(stage) for stage in pipeline]
-            if pipeline is not None
-            else _compile_pipeline(where, fields, limit)
-        )
+        stages = [dict(stage) for stage in pipeline] if pipeline is not None else []
         encoded = _codec.encode_pipeline(stages)
         chunks = self._read_with_retry(encoded, batch_size, timeout)
         return ReadResult(chunks)
@@ -340,21 +309,19 @@ class CollectionHandle(_AggregateReader):
     def read(
         self,
         *,
-        where: Mapping[str, Any] | None = None,
-        fields: Sequence[str] | None = None,
-        limit: int | None = None,
+        pipeline: Sequence[Mapping[str, Any]] | None = None,
         batch_size: int | None = None,
         timeout: float | None = None,
     ) -> pd.DataFrame:
-        """The whole collection (or a filtered slice) as a pandas DataFrame.
+        """The whole collection (or a ``pipeline``-filtered slice) as a DataFrame.
 
-        Exactly ``fetch(...).to_pandas()``. ``_id`` is kept as a column so the
-        frame can be mutated and passed straight to :meth:`update`.
+        Exactly ``fetch(...).to_pandas()``. Omit ``pipeline`` for the whole
+        collection, or pass one to filter/project/reshape server-side. ``_id``
+        is kept as a column so the frame can be mutated and passed straight to
+        :meth:`update`.
         """
         return self.fetch(
-            where=where,
-            fields=fields,
-            limit=limit,
+            pipeline=pipeline,
             batch_size=batch_size,
             timeout=timeout,
         ).to_pandas()
@@ -362,21 +329,18 @@ class CollectionHandle(_AggregateReader):
     def iter_batches(
         self,
         *,
-        where: Mapping[str, Any] | None = None,
-        fields: Sequence[str] | None = None,
-        limit: int | None = None,
+        pipeline: Sequence[Mapping[str, Any]] | None = None,
         batch_size: int | None = None,
         timeout: float | None = None,
     ) -> Iterator[list[Record]]:
         """Stream records in memory-bounded batches (one list per gRPC chunk).
 
         ``batch_size`` asks the server to cap each chunk's row count; the
-        client yields whatever chunking the server sends back.
+        client yields whatever chunking the server sends back. ``pipeline=``
+        filters/reshapes server-side, exactly as on :meth:`read`.
         """
         return self.fetch(
-            where=where,
-            fields=fields,
-            limit=limit,
+            pipeline=pipeline,
             batch_size=batch_size,
             timeout=timeout,
         ).iter_batches()
@@ -390,9 +354,10 @@ class CollectionHandle(_AggregateReader):
     ) -> pd.DataFrame:
         """Run a caller-supplied aggregation pipeline, returning a DataFrame.
 
-        The pipeline is passed through untouched — use this for Elastic-backed
-        collections (whose DSL the ``where``/``fields`` sugar does not emit) or
-        any stage the sugar does not cover (``$group``, ``$sort``, ...).
+        The DataFrame-returning form of ``fetch(pipeline=...)``. The pipeline is
+        passed through untouched, so use the syntax the collection's backend
+        expects — Mongo stages (``$match``, ``$project``, ``$group``, ``$sort``,
+        ...) for a Mongo-backed collection, Elastic DSL for an Elastic-backed one.
         """
         return self.fetch(pipeline=pipeline, batch_size=batch_size, timeout=timeout).to_pandas()
 

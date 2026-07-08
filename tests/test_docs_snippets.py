@@ -39,6 +39,9 @@ def test_snippets_directory_is_present() -> None:
         "multi_cluster",
         "errors_and_retries",
         "testing",
+        "migrating",
+        "cookbook",
+        "actionflow_scripts",
     } <= found
 
 
@@ -80,8 +83,41 @@ def test_testing_snippet_runs() -> None:
     module.run()
 
 
+def test_migrating_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The connect block constructs location-only (DNS discovery); stub it, same
+    # as the quickstart, so the reader-facing snippet stays clean.
+    from clappform import _discovery
+
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
+    module = _load("migrating")
+    module.run(module.build_mock())
+
+
+def test_cookbook_snippet_runs() -> None:
+    module = _load("cookbook")
+    module.run(module.build_mock(), module.build_second_cluster_mock())
+
+
+def test_actionflow_scripts_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The connect-in-worker block constructs location-only (DNS discovery).
+    from clappform import _discovery
+
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
+    module = _load("actionflow_scripts")
+    module.run(module.build_mock())
+
+
 @pytest.mark.parametrize(
-    "name", ["quickstart", "dataframes", "client_operations", "multi_cluster"]
+    "name",
+    [
+        "quickstart",
+        "dataframes",
+        "client_operations",
+        "multi_cluster",
+        "migrating",
+        "cookbook",
+        "actionflow_scripts",
+    ],
 )
 def test_snippet_modules_import_clean(name: str) -> None:
     """Importing a snippet module must have no side effects (no top-level run)."""

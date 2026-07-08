@@ -33,20 +33,24 @@ def run(transport: LocalMock) -> None:
         # --8<-- [start:read]
         orders = cf.data.collection("sales_orders")
 
-        # `where`, `fields` and `limit` are client-side sugar compiled into a
-        # $match / $project / $limit pipeline — the API never sees the kwargs.
+        # read() with no arguments streams the whole collection. To filter,
+        # project or cap, pass an aggregation pipeline — it is sent to the
+        # server untouched, so use the syntax the collection's backend expects
+        # (Mongo stages here).
         df = orders.read(
-            where={"status": "open"},
-            fields=["order_id", "amount", "region"],
-            limit=1000,
+            pipeline=[
+                {"$match": {"status": "open"}},
+                {"$project": {"order_id": 1, "amount": 1, "region": 1}},
+                {"$limit": 1000},
+            ]
         )
         # --8<-- [end:read]
         assert len(df) == 2
 
         # --8<-- [start:aggregate]
-        # For stages the sugar does not emit ($group, $sort, ...) pass a full
-        # pipeline to aggregate(). It is sent to the server untouched and the
-        # result comes back as a DataFrame — one row per group here.
+        # aggregate() is the DataFrame-returning twin of read(pipeline=...).
+        # Reach for it for grouping/reshaping stages ($group, $sort, ...). The
+        # pipeline is sent to the server untouched — one row per group here.
         revenue_by_region = orders.aggregate(
             [
                 {"$match": {"status": "open"}},
@@ -74,7 +78,9 @@ def run(transport: LocalMock) -> None:
         # --8<-- [start:batches]
         # Memory-bounded reads: one list of records per gRPC chunk, nothing
         # fully materialised. Ask the server to cap each chunk with batch_size.
-        for batch in orders.iter_batches(where={"status": "open"}, batch_size=500):
+        for batch in orders.iter_batches(
+            pipeline=[{"$match": {"status": "open"}}], batch_size=500
+        ):
             handle(batch)
         # --8<-- [end:batches]
 
@@ -97,7 +103,7 @@ def run(transport: LocalMock) -> None:
         # read -> mutate -> write-back. update() keys on _id by default, which
         # read() keeps as a column, so the round-trip needs no `on=`. Only the
         # rows you changed are sent.
-        open_orders = orders.read(where={"status": "open"})
+        open_orders = orders.read(pipeline=[{"$match": {"status": "open"}}])
         open_orders["amount"] = open_orders["amount"] * 1.08  # 8% uplift
         orders.update(open_orders)
         # --8<-- [end:update]
@@ -126,7 +132,7 @@ def run(transport: LocalMock) -> None:
         orders.delete(where={"status": "closed"})
 
         # Delete specific rows by their _id instead of a filter.
-        stale = orders.read(where={"region": "APAC"})
+        stale = orders.read(pipeline=[{"$match": {"region": "APAC"}}])
         orders.delete(oids=list(stale["_id"]))
         # --8<-- [end:server-side]
         assert not any(row.get("region") == "APAC" for row in transport.records("sales_orders-id"))

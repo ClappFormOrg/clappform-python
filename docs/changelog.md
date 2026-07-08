@@ -20,7 +20,10 @@ generated from the `commons` protos, with:
   credentials)`, with namespaced sub-clients (`data`, `client`, `auth`,
   `notifier`).
 - First-class pandas DataFrame flows (`read` / `append` / `update` / `upsert` /
-  `replace_where` / `delete`) and saved-query reads.
+  `replace_where` / `delete`) and saved-query reads. Reads take an aggregation
+  `pipeline` (or none, for the whole collection); the client sends it verbatim
+  and never interprets a query language of its own. `aggregate(p)` is the
+  DataFrame-returning twin of `read(pipeline=p)`.
 - Native multi-cluster / multi-tenant support with optional DNS-based cluster
   discovery.
 - A typed error hierarchy that never leaks `grpc` to the caller.
