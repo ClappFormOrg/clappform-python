@@ -65,6 +65,20 @@ performed.
     cluster. With an explicitly configured cluster, `with_location()` never
     performs DNS.
 
+### Fanning out across many tenants
+
+Because `with_location()` is cheap and shares connections, running the same job
+across a list of tenants is just a loop — clone per tenant, do the work, move
+on. Only the tenant metadata changes between iterations.
+
+```python
+--8<-- "multi_cluster.py:fan-out-tenants"
+```
+
+Each clone reuses the parent's channels (same cluster), so this doesn't open a
+connection per tenant. If the tenants span *different* clusters, construct a
+`Clappform` per cluster instead — see [two clusters, one process](#two-clusters-one-process).
+
 ## Staggered rollouts
 
 Clusters update at different times, so a newer client may call an RPC an older

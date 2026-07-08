@@ -99,11 +99,15 @@ nav:
       # are the deeper "how it works" for each area. Cross-linked both ways.
       - All recipes (Cookbook): guides/cookbook.md
       - Read & query data: guides/dataframes.md
+      - Performance & large datasets: guides/performance.md
       - Actionflows: guides/actionflow-scripts.md
       - Actionflows & listings: guides/actionflows-and-listings.md
       - Multi-cluster & multi-tenant: guides/multi-cluster.md
       - Errors & retries: guides/errors-and-retries.md
       - Testing with LocalMock: guides/testing.md
+  - Concepts:
+      - Key concepts & glossary: guides/concepts.md
+      - Security & credentials: guides/security.md
   - Examples:
       - Export every actionflow script: guides/examples.md
   - Troubleshooting: guides/troubleshooting.md

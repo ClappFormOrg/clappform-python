@@ -43,6 +43,7 @@ def test_snippets_directory_is_present() -> None:
         "cookbook",
         "actionflow_scripts",
         "troubleshooting",
+        "performance",
     } <= found
 
 
@@ -110,6 +111,11 @@ def test_actionflow_scripts_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> Non
 
 def test_troubleshooting_snippet_runs() -> None:
     module = _load("troubleshooting")
+    module.run(module.build_mock())
+
+
+def test_performance_snippet_runs() -> None:
+    module = _load("performance")
     module.run(module.build_mock())
 
 

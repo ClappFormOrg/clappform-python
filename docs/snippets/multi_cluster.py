@@ -48,6 +48,18 @@ def run(prod_transport: LocalMock, qa_transport: LocalMock) -> None:
         # the clone shares prod's transport, so it reads prod's seeded row
         assert len(beta_orders) == 1
 
+        # --8<-- [start:fan-out-tenants]
+        # Run the same operation across many tenants on one cluster: clone per
+        # tenant with with_location() (connections are shared, so this is cheap)
+        # and loop. Each iteration only changes the location metadata.
+        totals = {}
+        for tenant in ("acme", "beta", "gamma"):
+            client = prod.with_location(tenant)
+            df = client.data.collection("orders").read()
+            totals[tenant] = len(df)
+        # --8<-- [end:fan-out-tenants]
+        assert totals == {"acme": 1, "beta": 1, "gamma": 1}
+
         # --8<-- [start:transfer-app]
         # Move a whole app — its collections, and optionally its queries,
         # actionflows and questionnaires — from one instance to another.
