@@ -1,6 +1,11 @@
 # Quickstart
 
-Install, connect, and round-trip a DataFrame in about twenty lines.
+Install, connect, and round-trip a DataFrame in about twenty lines — then see
+the shape almost every real task takes.
+
+Coming from the 4.x or 5.x package? Start with the
+[Migrating from 4.x / 5.x](guides/migrating.md) guide instead — it maps every
+old call to its v6 equivalent.
 
 ## Install
 
@@ -26,8 +31,13 @@ main cluster). Omit it and the client discovers it from the DNS record of
 setups. `location` is your tenant subdomain and is sent as metadata on every
 call.
 
-API keys are the only credential v6 ships. Keep the key out of source — read it
-from your own secret store and pass it in.
+API keys are the only credential v6 ships. Keep the key out of source — the
+library never reads the environment for you, so pull it from your own secret
+store and pass it in:
+
+```python
+--8<-- "quickstart.py:connect-env"
+```
 
 ## Read, mutate, write back
 
@@ -39,13 +49,56 @@ That is the whole loop: `read()` gives you a pandas DataFrame with `_id` kept as
 a column, you change it with plain pandas, and `update()` writes the changed
 rows back — matched on `_id` by default, so the common case needs no arguments.
 
+!!! tip "Slugs and UUIDs both work"
+    `cf.data.collection("sales_orders")` takes a slug or a UUID. A slug is
+    resolved to its id once and cached per tenant, so you never paste UUIDs into
+    a script to save a lookup.
+
+## A complete task, end to end
+
+Almost every job has the same shape: connect, read a slice, transform it with
+plain pandas, write it back, and often kick off a downstream flow. Here is the
+whole thing — this is what a real script looks like once the boilerplate is
+gone.
+
+```python
+--8<-- "quickstart.py:full-task"
+```
+
+Running it prints:
+
+```text
+pulled 2 open orders
+started run run-abc123
+```
+
+No request objects, no `json.dumps(...).encode()`, no manual pagination, no
+`grpc` imports — the client absorbs all of it.
+
+## What you just did
+
+- **Connected** with one `(cluster, location, credential)` binding — nothing
+  global, so two clusters or tenants can coexist in one process.
+- **Read** a filtered slice straight into pandas over a streaming RPC.
+- **Wrote** the changed rows back, matched on `_id`.
+- **Started** a second-API call (the Client API) through the same client.
+- **Stayed typed** — any failure would have raised a `ClappformError`
+  subclass carrying the cluster and tenant, never a raw `grpc.RpcError`.
+
 ## Next steps
 
+- [Migrating from 4.x / 5.x](guides/migrating.md) — old call → new call, for
+  every operation the previous package had.
+- [Cookbook](guides/cookbook.md) — copy-paste recipes for the tasks people
+  write most: file ingest, aggregation, change requests, cross-cluster copy.
 - [DataFrame flows](guides/dataframes.md) — filtering, batching, append /
   upsert, server-side updates and deletes.
+- [Running inside an actionflow](guides/actionflow-scripts.md) — the in-worker
+  context: where `location` and the key come from, and passing start parameters.
 - [Multi-cluster & multi-tenant](guides/multi-cluster.md) — several clusters
   and tenants in one process.
 - [Error handling & retries](guides/errors-and-retries.md) — the typed error
   hierarchy and retry configuration.
 - [Testing with LocalMock](guides/testing.md) — run your pipelines with no
   infrastructure.
+```

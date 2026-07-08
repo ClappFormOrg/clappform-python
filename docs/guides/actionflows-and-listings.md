@@ -14,7 +14,9 @@ one you've seen them all.
 Trigger an actionflow by id. The response carries the run's `uuid`, so you can
 correlate the run with the tasks it spawns or surface it to a caller. Pass
 `user_id=` to attribute the run, or `custom_keys=` (JSON bytes) to hand it
-start parameters.
+start parameters — see
+[Passing start parameters](actionflow-scripts.md#passing-start-parameters) for
+how to build them from a dict.
 
 ```python
 --8<-- "client_operations.py:start-actionflow"

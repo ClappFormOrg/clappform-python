@@ -65,6 +65,9 @@ plugins:
 
 markdown_extensions:
   - admonition
+  # Collapsible admonitions (`??? note`) — used to fold the old-API reference
+  # blocks in the migration guide under the v6 code they replace.
+  - pymdownx.details
   - attr_list
   - toc:
       permalink: true
@@ -86,7 +89,10 @@ nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - How-to guides:
+      - Migrating from 4.x / 5.x: guides/migrating.md
+      - Cookbook: guides/cookbook.md
       - DataFrame flows: guides/dataframes.md
+      - Running inside an actionflow: guides/actionflow-scripts.md
       - Actionflows & listings: guides/actionflows-and-listings.md
       - Multi-cluster & multi-tenant: guides/multi-cluster.md
       - Error handling & retries: guides/errors-and-retries.md
