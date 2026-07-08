@@ -50,21 +50,23 @@ def test_read_returns_whole_collection_as_frame(cf) -> None:
 def test_read_where_filters_rows(cf) -> None:
     client, mock = cf
     _seed_orders(mock)
-    df = client.data.collection(CID).read(where={"status": "open"})
+    df = client.data.collection(CID).read(pipeline=[{"$match": {"status": "open"}}])
     assert sorted(df["order_id"]) == [1, 3]
 
 
 def test_read_fields_projects_columns_but_keeps_id(cf) -> None:
     client, mock = cf
     _seed_orders(mock)
-    df = client.data.collection(CID).read(fields=["order_id", "amount"])
+    df = client.data.collection(CID).read(
+        pipeline=[{"$project": {"order_id": 1, "amount": 1}}]
+    )
     assert set(df.columns) == {"order_id", "amount", "_id"}
 
 
 def test_read_limit_caps_rows(cf) -> None:
     client, mock = cf
     _seed_orders(mock)
-    df = client.data.collection(CID).read(limit=2)
+    df = client.data.collection(CID).read(pipeline=[{"$limit": 2}])
     assert len(df) == 2
 
 
@@ -72,8 +74,8 @@ def test_read_equals_fetch_to_pandas(cf) -> None:
     client, mock = cf
     _seed_orders(mock)
     col = client.data.collection(CID)
-    from_read = col.read(where={"status": "open"})
-    from_fetch = col.fetch(where={"status": "open"}).to_pandas()
+    from_read = col.read(pipeline=[{"$match": {"status": "open"}}])
+    from_fetch = col.fetch(pipeline=[{"$match": {"status": "open"}}]).to_pandas()
     pd.testing.assert_frame_equal(from_read, from_fetch)
 
 
@@ -108,16 +110,16 @@ def test_empty_collection_reads_empty_frame(cf) -> None:
     assert df.empty
 
 
-def test_fetch_rejects_pipeline_with_sugar(cf) -> None:
+@pytest.mark.parametrize("kwarg", ["where", "fields", "limit"])
+def test_removed_read_sugar_is_rejected(cf, kwarg) -> None:
+    """The where/fields/limit read sugar was removed — passing it must error
+    rather than silently no-op, guarding against accidental reintroduction."""
     client, _mock = cf
-    with pytest.raises(ValueError, match="not both"):
-        client.data.collection(CID).fetch(pipeline=[{"$match": {}}], where={"x": 1})
-
-
-def test_negative_limit_rejected(cf) -> None:
-    client, _mock = cf
-    with pytest.raises(ValueError, match="non-negative"):
-        client.data.collection(CID).read(limit=-1)
+    col = client.data.collection(CID)
+    with pytest.raises(TypeError):
+        col.read(**{kwarg: {"status": "open"} if kwarg != "limit" else 1})
+    with pytest.raises(TypeError):
+        col.fetch(**{kwarg: {"status": "open"} if kwarg != "limit" else 1})
 
 
 def test_aggregate_passes_pipeline_through(cf) -> None:
@@ -267,27 +269,48 @@ def test_to_pandas_without_pandas_raises_install_hint(cf, monkeypatch) -> None:
         result.to_pandas()
 
 
-# -- pipeline compilation -------------------------------------------------
+# -- pipeline encoding ----------------------------------------------------
 
 
-def test_compiled_pipeline_matches_manual_aggregate(cf) -> None:
-    """read(where/fields/limit) must send the same pipeline aggregate() would."""
+def test_pipeline_is_sent_verbatim(cf) -> None:
+    """read(pipeline=...) sends the caller's stages untouched — the client
+    neither interprets nor rewrites them."""
     client, mock = cf
     _seed_orders(mock)
     col = client.data.collection(CID)
 
-    col.read(where={"status": "open"}, fields=["order_id"], limit=1)
-    sugar_pipeline = _last_pipeline(mock)
+    stages = [
+        {"$match": {"status": "open"}},
+        {"$project": {"order_id": 1}},
+        {"$limit": 1},
+    ]
+    col.read(pipeline=stages)
+    assert _last_pipeline(mock) == stages
 
-    col.aggregate(
-        [
-            {"$match": {"status": "open"}},
-            {"$project": {"order_id": 1}},
-            {"$limit": 1},
-        ]
-    )
-    manual_pipeline = _last_pipeline(mock)
-    assert sugar_pipeline == manual_pipeline
+
+def test_read_fetch_aggregate_encode_the_same_pipeline(cf) -> None:
+    """read(pipeline=p), fetch(pipeline=p) and aggregate(p) put the identical
+    pipeline on the wire — they differ only in return type."""
+    client, mock = cf
+    _seed_orders(mock)
+    col = client.data.collection(CID)
+    stages = [{"$match": {"status": "open"}}]
+
+    col.read(pipeline=stages)
+    from_read = _last_pipeline(mock)
+    col.fetch(pipeline=stages).to_pandas()
+    from_fetch = _last_pipeline(mock)
+    col.aggregate(stages)
+    from_aggregate = _last_pipeline(mock)
+    assert from_read == from_fetch == from_aggregate == stages
+
+
+def test_read_without_pipeline_sends_empty(cf) -> None:
+    """A bare read() streams the whole collection — an empty pipeline."""
+    client, mock = cf
+    _seed_orders(mock)
+    client.data.collection(CID).read()
+    assert _last_pipeline(mock) == []
 
 
 def _last_pipeline(mock: LocalMock):

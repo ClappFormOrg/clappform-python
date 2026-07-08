@@ -9,7 +9,7 @@ from clappform import Clappform
 
 # The cluster is discovered from DNS — location and an API key are all you need.
 cf = Clappform(location="acme", api_key="cf_live_...")
-df = cf.data.collection("sales_orders").read(where={"status": "open"})
+df = cf.data.collection("sales_orders").read(pipeline=[{"$match": {"status": "open"}}])
 ```
 
 ## What this client is

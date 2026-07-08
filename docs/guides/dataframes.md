@@ -10,31 +10,42 @@ Get one from `cf.data.collection(ref)`, where `ref` is a slug or a UUID
 
 ## Read into a DataFrame
 
-`read()` streams the collection (or a filtered slice) into pandas. `where`,
-`fields` and `limit` are client-side sugar compiled into a
-`$match` / `$project` / `$limit` pipeline — the API never sees the kwargs.
+`read()` with no arguments streams the whole collection into pandas. To filter,
+project, or reshape, pass an aggregation `pipeline` — the client sends it to the
+server untouched, so use the syntax the collection's backend expects (Mongo
+stages for a Mongo-backed collection, Elastic DSL for an Elastic-backed one).
 
 ```python
 --8<-- "dataframes.py:read"
 ```
 
 `_id` is kept as a column so the frame round-trips through `update()`. An empty
-result yields an empty frame, never an error.
+result yields an empty frame, never an error — but that frame has no columns, so
+branch on `df.empty` before indexing a column. See
+[Handle an empty result](cookbook.md#handle-an-empty-result).
 
-### Aggregation the sugar doesn't cover
+!!! note "No client-side query language"
+    The pipeline is passed through verbatim — the client neither interprets nor
+    rewrites your stages. There is one read idiom (a pipeline), so there is
+    nothing to remember about which operators are "supported": whatever the
+    server understands, you can send.
 
-For stages `where` / `fields` / `limit` don't emit — `$group`, `$sort`, or an
-Elastic-backed collection's DSL — pass a full pipeline with `aggregate()`. The
-list of stages is sent to the server untouched and the result comes back as a
-DataFrame (one row per group here).
+### Grouping and reshaping with `aggregate()`
+
+`aggregate()` is the DataFrame-returning twin of `read(pipeline=...)` — reach
+for it when a call is conceptually an aggregation (`$group`, `$sort`, `$lookup`)
+rather than a filtered read. The stages are sent to the server untouched and the
+result comes back as a DataFrame (one row per group here).
 
 ```python
 --8<-- "dataframes.py:aggregate"
 ```
 
-If you want the records or memory-bounded batches instead of a frame, call
-`fetch(pipeline=[...])` and iterate the [`ReadResult`][clappform.ReadResult]
-rather than `aggregate()`.
+`read(pipeline=...)`, `fetch(pipeline=...)` and `aggregate(...)` put the
+identical pipeline on the wire — they differ only in what they hand back
+(a DataFrame, a [`ReadResult`][clappform.ReadResult], and a DataFrame
+respectively). Use `fetch()` when you want records or memory-bounded batches
+instead of a materialised frame.
 
 ### Aggregation via a saved query
 
