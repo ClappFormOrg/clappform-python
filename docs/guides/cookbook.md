@@ -82,6 +82,32 @@ whichever name reads better at the call site. A plain filter/projection is just
 a pipeline with a `$match`/`$project` stage (see the read recipe above); reach
 for the `aggregate()` name when the call is conceptually a grouping or reshape.
 
+## Stream a large aggregation into DataFrames
+
+`aggregate()` and `read()` materialise the **whole** result in memory before
+handing it back — fine for a slice, wasteful for a result too big to hold. When
+you're reducing or writing out row-by-row, stream instead:
+`fetch(pipeline=...).iter_batches()` yields one gRPC chunk at a time, so you
+convert each chunk to a small DataFrame, fold it into your running result, and
+let it be freed before the next arrives. **Peak memory is one batch, not the
+whole set.**
+
+```python
+--8<-- "cookbook.py:stream-aggregate"
+```
+
+`batch_size` caps the rows per chunk — raise it to trade memory for fewer
+round-trips, lower it when rows are wide. This is the memory-efficient path for
+large aggregations you can process incrementally (summing, writing to a file or
+another collection, feeding a model). If you genuinely need the entire result as
+one frame, `aggregate()` is simpler — the streaming form only helps when you can
+avoid holding it all.
+
+!!! note "A result streams once"
+    The [`ReadResult`][clappform.ReadResult] from `fetch()` is single-pass:
+    iterate it (or `to_pandas()` it) exactly once. Call `fetch()` again for a
+    fresh pass rather than reusing a consumed result.
+
 ## Handle an empty result
 
 A read matching nothing returns an empty DataFrame — never an error, never

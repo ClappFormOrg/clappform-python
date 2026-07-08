@@ -44,6 +44,13 @@ def build_mock() -> LocalMock:
         mock.seed(f"{slug}-id", [])
     # one seeded customer for the single-record read recipe
     mock.seed("customers-id", [{"email": "a@example.com", "plan": "pro", "seats": 3}])
+    # a larger collection for the streaming (memory-bounded) recipe — enough rows
+    # that a small batch_size yields several chunks.
+    mock.seed_collection_slug("events", id="events-id")
+    mock.seed(
+        "events-id",
+        [{"region": "EU" if i % 2 else "US", "amount": float(i)} for i in range(1, 51)],
+    )
 
     # $group isn't computed by the seeded double; stub the server's grouped
     # answer for that pipeline and delegate every other read to the built-in.
@@ -190,6 +197,38 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         )
         # --8<-- [end:aggregate-to-df]
         assert "count" in by_label.columns
+
+        # ---- Stream a large aggregation, batch by batch --------------------
+        # --8<-- [start:stream-aggregate]
+        # aggregate()/read() materialise the whole result at once. For a result
+        # too large to hold, fetch() + iter_batches() streams one gRPC chunk at
+        # a time: convert each chunk to a small DataFrame, fold it into a running
+        # result, and let it be freed before the next chunk arrives. Peak memory
+        # is one batch, not the whole set. `batch_size` caps rows per chunk.
+        result = cf.data.collection("events").fetch(
+            pipeline=[{"$match": {"region": "EU"}}],
+            batch_size=10_000,   # rows per gRPC chunk — tune to your row size
+        )
+
+        running_total = 0.0
+        row_count = 0
+        for batch in result.iter_batches():
+            frame = pd.DataFrame.from_records(batch)   # small: one chunk
+            running_total += frame["amount"].sum()     # reduce, don't accumulate
+            row_count += len(frame)
+            # `frame` and `batch` fall out of scope here, before the next chunk
+        # --8<-- [end:stream-aggregate]
+        assert row_count == 25 and running_total > 0
+
+        # Prove the streaming path actually chunks: a small batch_size yields
+        # more than one batch over the same 25 rows. (Not shown in the guide —
+        # the recipe above uses a realistic large batch_size.)
+        batches = list(
+            cf.data.collection("events")
+            .fetch(pipeline=[{"$match": {"region": "EU"}}], batch_size=10)
+            .iter_batches()
+        )
+        assert len(batches) == 3 and sum(len(b) for b in batches) == 25
 
         # ---- Empty result --------------------------------------------------
         # --8<-- [start:empty-read]
