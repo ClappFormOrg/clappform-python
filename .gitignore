@@ -25,3 +25,6 @@ venv/
 /DESIGN.md
 /examples/
 /planning/
+
+# Local Claude Code config
+.claude/
