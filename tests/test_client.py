@@ -65,8 +65,10 @@ def test_main_cluster_defaults_to_50051() -> None:
     assert resolve_endpoints("")["data"] == "data.clappform.com:50051"
     assert resolve_endpoints("")["client"] == "client.clappform.com:50051"
     # The auth family is served from the "login" host (co-located with data),
-    # not "auth.clappform.com".
+    # and the notifier family from the "notify" host — not the literal
+    # "auth."/"notifier." hosts.
     assert resolve_endpoints("prod")["auth"] == "login.clappform.com:50051"
+    assert resolve_endpoints("")["notifier"] == "notify.clappform.com:50051"
 
 
 def test_endpoint_override_wins_and_unknown_family_rejected() -> None:
