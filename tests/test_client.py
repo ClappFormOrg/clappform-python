@@ -64,7 +64,11 @@ def test_main_cluster_defaults_to_50051() -> None:
     # carry the port explicitly ("prod" is an alias for the main cluster).
     assert resolve_endpoints("")["data"] == "data.clappform.com:50051"
     assert resolve_endpoints("")["client"] == "client.clappform.com:50051"
-    assert resolve_endpoints("prod")["auth"] == "auth.clappform.com:50051"
+    # The auth family is served from the "login" host (co-located with data),
+    # and the notifier family from the "notify" host — not the literal
+    # "auth."/"notifier." hosts.
+    assert resolve_endpoints("prod")["auth"] == "login.clappform.com:50051"
+    assert resolve_endpoints("")["notifier"] == "notify.clappform.com:50051"
 
 
 def test_endpoint_override_wins_and_unknown_family_rejected() -> None:
@@ -72,7 +76,7 @@ def test_endpoint_override_wins_and_unknown_family_rejected() -> None:
     # host:port — e.g. to point the main cluster at 443, or a local dev endpoint.
     resolved = resolve_endpoints("qa", {"data": "10.0.0.5:50051"})
     assert resolved["data"] == "10.0.0.5:50051"
-    assert resolved["auth"] == "auth-qa.clappform.com"
+    assert resolved["auth"] == "login-qa.clappform.com"
     # Overriding a main-cluster family drops the default :50051 for that family.
     assert resolve_endpoints("", {"client": "client.clappform.com"})["client"] == (
         "client.clappform.com"

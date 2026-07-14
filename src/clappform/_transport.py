@@ -24,12 +24,16 @@ from clappform._runtime import CallKind
 BASE_DOMAIN = "clappform.com"
 
 # Host prefix per API family, forming {prefix}{-extension}.clappform.com.
-# The authoriser serves under "auth", matching its family alias.
+# Two families are served from a host that doesn't match their alias: the
+# authoriser family ("auth") lives on the "login" host (co-located with data on
+# the cluster gateway, e.g. login.clappform.com), and the notifier family lives
+# on "notify" (notify.clappform.com). The literal "auth."/"notifier." hosts
+# point at a separate, unreachable box. The rest match their family alias.
 HOST_PREFIXES = {
     "data": "data",
     "client": "client",
-    "auth": "auth",
-    "notifier": "notifier",
+    "auth": "login",
+    "notifier": "notify",
 }
 
 # Package segment -> family alias, mirroring the generated service layer.
