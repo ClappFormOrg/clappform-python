@@ -79,6 +79,36 @@ class ChangeRequestManagementStub(object):
                 request_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ModifyApproverRequest.SerializeToString,
                 response_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
                 _registered_method=True)
+        self.CreateSuggestion = channel.unary_unary(
+                '/clappform.data.v1.change_request.ChangeRequestManagement/CreateSuggestion',
+                request_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.CreateSuggestionRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+                _registered_method=True)
+        self.AcceptSuggestion = channel.unary_unary(
+                '/clappform.data.v1.change_request.ChangeRequestManagement/AcceptSuggestion',
+                request_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.AcceptSuggestionRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+                _registered_method=True)
+        self.RejectSuggestions = channel.unary_unary(
+                '/clappform.data.v1.change_request.ChangeRequestManagement/RejectSuggestions',
+                request_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RejectSuggestionsRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+                _registered_method=True)
+        self.AcceptWithCustomValue = channel.unary_unary(
+                '/clappform.data.v1.change_request.ChangeRequestManagement/AcceptWithCustomValue',
+                request_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.AcceptWithCustomValueRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+                _registered_method=True)
+        self.GetConflicts = channel.unary_unary(
+                '/clappform.data.v1.change_request.ChangeRequestManagement/GetConflicts',
+                request_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.GetConflictsRequests.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ConflictsResponseAll.FromString,
+                _registered_method=True)
+        self.GetConflictsRequest = channel.unary_unary(
+                '/clappform.data.v1.change_request.ChangeRequestManagement/GetConflictsRequest',
+                request_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.GetOneConflictsRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ConflictsResponseOne.FromString,
+                _registered_method=True)
 
 
 class ChangeRequestManagementServicer(object):
@@ -138,6 +168,42 @@ class ChangeRequestManagementServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def CreateSuggestion(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def AcceptSuggestion(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RejectSuggestions(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def AcceptWithCustomValue(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetConflicts(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetConflictsRequest(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ChangeRequestManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -185,6 +251,36 @@ def add_ChangeRequestManagementServicer_to_server(servicer, server):
                     servicer.RemoveApprover,
                     request_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ModifyApproverRequest.FromString,
                     response_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.SerializeToString,
+            ),
+            'CreateSuggestion': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateSuggestion,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.CreateSuggestionRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.SerializeToString,
+            ),
+            'AcceptSuggestion': grpc.unary_unary_rpc_method_handler(
+                    servicer.AcceptSuggestion,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.AcceptSuggestionRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.SerializeToString,
+            ),
+            'RejectSuggestions': grpc.unary_unary_rpc_method_handler(
+                    servicer.RejectSuggestions,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RejectSuggestionsRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.SerializeToString,
+            ),
+            'AcceptWithCustomValue': grpc.unary_unary_rpc_method_handler(
+                    servicer.AcceptWithCustomValue,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.AcceptWithCustomValueRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.SerializeToString,
+            ),
+            'GetConflicts': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetConflicts,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.GetConflictsRequests.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ConflictsResponseAll.SerializeToString,
+            ),
+            'GetConflictsRequest': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetConflictsRequest,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.GetOneConflictsRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ConflictsResponseOne.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -430,6 +526,168 @@ class ChangeRequestManagement(object):
             '/clappform.data.v1.change_request.ChangeRequestManagement/RemoveApprover',
             clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ModifyApproverRequest.SerializeToString,
             clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateSuggestion(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.change_request.ChangeRequestManagement/CreateSuggestion',
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.CreateSuggestionRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AcceptSuggestion(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.change_request.ChangeRequestManagement/AcceptSuggestion',
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.AcceptSuggestionRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RejectSuggestions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.change_request.ChangeRequestManagement/RejectSuggestions',
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RejectSuggestionsRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AcceptWithCustomValue(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.change_request.ChangeRequestManagement/AcceptWithCustomValue',
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.AcceptWithCustomValueRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.RequestChangeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetConflicts(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.change_request.ChangeRequestManagement/GetConflicts',
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.GetConflictsRequests.SerializeToString,
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ConflictsResponseAll.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetConflictsRequest(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.change_request.ChangeRequestManagement/GetConflictsRequest',
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.GetOneConflictsRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_change__request_dot_change__request__pb2.ConflictsResponseOne.FromString,
             options,
             channel_credentials,
             insecure,

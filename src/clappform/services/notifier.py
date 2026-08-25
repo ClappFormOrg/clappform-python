@@ -6,11 +6,538 @@ from collections.abc import Iterable, Iterator, Sequence
 from typing import Any
 
 from clappform import _runtime
+import clappform.gen.clappform.notifier.v1.batch.batch_pb2 as _m_clappform_notifier_v1_batch_batch
+import clappform.gen.clappform.notifier.v1.connections.connections_pb2 as _m_clappform_notifier_v1_connections_connections
+import clappform.gen.clappform.notifier.v1.direct.direct_pb2 as _m_clappform_notifier_v1_direct_direct
+import clappform.gen.clappform.notifier.v1.freqcap.freqcap_pb2 as _m_clappform_notifier_v1_freqcap_freqcap
 import clappform.gen.clappform.notifier.v1.health.health_pb2 as _m_clappform_notifier_v1_health_health
 import clappform.gen.clappform.notifier.v1.inbox.inbox_pb2 as _m_clappform_notifier_v1_inbox_inbox
-import clappform.gen.clappform.notifier.v1.outbound.outbound_pb2 as _m_clappform_notifier_v1_outbound_outbound
+import clappform.gen.clappform.notifier.v1.policies.policies_pb2 as _m_clappform_notifier_v1_policies_policies
+import clappform.gen.clappform.notifier.v1.preferences.preferences_pb2 as _m_clappform_notifier_v1_preferences_preferences
 import clappform.gen.clappform.notifier.v1.whatsapp.whatsapp_pb2 as _m_clappform_notifier_v1_whatsapp_whatsapp
 import clappform.gen.clappform.v1.commons.commons_pb2 as _m_clappform_v1_commons_commons
+
+
+class BatchManagement(_runtime.ServiceBase):
+    """Wrapper for clappform.notifier.v1.batch.BatchManagement."""
+
+    def send_batch(
+        self,
+        request: _m_clappform_notifier_v1_batch_batch.BatchRequest | None = None,
+        *,
+        steps: Sequence[_m_clappform_notifier_v1_batch_batch.NotificationStep] | None = None,
+        default_variables: bytes | None = None,
+        default_actions: Sequence[_m_clappform_notifier_v1_batch_batch.Action] | None = None,
+        stop_conditions: _m_clappform_notifier_v1_batch_batch.StopConditions | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        start_delivery_at: int | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_batch_batch.BatchStatus:
+        """RPC: /clappform.notifier.v1.batch.BatchManagement/SendBatch (unary-unary)"""
+        _provided = {_k: _v for _k, _v in (("steps", steps), ("default_variables", default_variables), ("default_actions", default_actions), ("stop_conditions", stop_conditions), ("priority", priority), ("theme", theme), ("start_delivery_at", start_delivery_at),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_batch_batch.BatchRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.batch.BatchManagement/SendBatch",
+            _request,
+            _m_clappform_notifier_v1_batch_batch.BatchRequest,
+            _m_clappform_notifier_v1_batch_batch.BatchStatus,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def get_batch_status(
+        self,
+        request: _m_clappform_notifier_v1_batch_batch.GetStatus | None = None,
+        *,
+        id: Sequence[str] | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_batch_batch.BatchStatus:
+        """RPC: /clappform.notifier.v1.batch.BatchManagement/GetBatchStatus (unary-unary)"""
+        _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_batch_batch.GetStatus, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.batch.BatchManagement/GetBatchStatus",
+            _request,
+            _m_clappform_notifier_v1_batch_batch.GetStatus,
+            _m_clappform_notifier_v1_batch_batch.BatchStatus,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+
+class ConnectionManagement(_runtime.ServiceBase):
+    """Wrapper for clappform.notifier.v1.connections.ConnectionManagement."""
+
+    def upsert_connection(
+        self,
+        request: _m_clappform_notifier_v1_connections_connections.UpsertConnectionRequest | None = None,
+        *,
+        channel: str | None = None,
+        provider: str | None = None,
+        config: dict[str, str] | None = None,
+        config_preview: dict[str, str] | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_connections_connections.ConnectionResponse:
+        """UpsertConnection creates or replaces a channel connection for the authenticated tenant.
+
+        RPC: /clappform.notifier.v1.connections.ConnectionManagement/UpsertConnection (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("channel", channel), ("provider", provider), ("config", config), ("config_preview", config_preview),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_connections_connections.UpsertConnectionRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.connections.ConnectionManagement/UpsertConnection",
+            _request,
+            _m_clappform_notifier_v1_connections_connections.UpsertConnectionRequest,
+            _m_clappform_notifier_v1_connections_connections.ConnectionResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def get_connection(
+        self,
+        request: _m_clappform_notifier_v1_connections_connections.GetConnectionRequest | None = None,
+        *,
+        channel: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_connections_connections.ConnectionResponse:
+        """GetConnection retrieves a connection config (secrets redacted).
+
+        RPC: /clappform.notifier.v1.connections.ConnectionManagement/GetConnection (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("channel", channel),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_connections_connections.GetConnectionRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.connections.ConnectionManagement/GetConnection",
+            _request,
+            _m_clappform_notifier_v1_connections_connections.GetConnectionRequest,
+            _m_clappform_notifier_v1_connections_connections.ConnectionResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def list_connections(
+        self,
+        request: _m_clappform_notifier_v1_connections_connections.GetConnectionRequest | None = None,
+        *,
+        channel: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_connections_connections.ListConnectionsResponse:
+        """ListConnections returns all configured channels for the authenticated tenant.
+
+        RPC: /clappform.notifier.v1.connections.ConnectionManagement/ListConnections (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("channel", channel),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_connections_connections.GetConnectionRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.connections.ConnectionManagement/ListConnections",
+            _request,
+            _m_clappform_notifier_v1_connections_connections.GetConnectionRequest,
+            _m_clappform_notifier_v1_connections_connections.ListConnectionsResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def delete_connection(
+        self,
+        request: _m_clappform_notifier_v1_connections_connections.DeleteConnectionRequest | None = None,
+        *,
+        channel: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_connections_connections.DeleteConnectionResponse:
+        """DeleteConnection removes a channel connection.
+
+        RPC: /clappform.notifier.v1.connections.ConnectionManagement/DeleteConnection (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("channel", channel),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_connections_connections.DeleteConnectionRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.connections.ConnectionManagement/DeleteConnection",
+            _request,
+            _m_clappform_notifier_v1_connections_connections.DeleteConnectionRequest,
+            _m_clappform_notifier_v1_connections_connections.DeleteConnectionResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def test_connection(
+        self,
+        request: _m_clappform_notifier_v1_connections_connections.TestConnectionRequest | None = None,
+        *,
+        channel: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_connections_connections.TestConnectionResponse:
+        """TestConnection validates credentials by making a real (safe) API call to the provider.
+
+        RPC: /clappform.notifier.v1.connections.ConnectionManagement/TestConnection (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("channel", channel),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_connections_connections.TestConnectionRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.connections.ConnectionManagement/TestConnection",
+            _request,
+            _m_clappform_notifier_v1_connections_connections.TestConnectionRequest,
+            _m_clappform_notifier_v1_connections_connections.TestConnectionResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+
+class DirectManagement(_runtime.ServiceBase):
+    """Wrapper for clappform.notifier.v1.direct.DirectManagement."""
+
+    def send_email(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.DirectEmailRequest | None = None,
+        *,
+        to: str | None = None,
+        subject: str | None = None,
+        body: str | None = None,
+        is_html: bool | None = None,
+        template_id: str | None = None,
+        connection_id: str | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        facts: dict[str, str] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
+        """SendEmail sends a single email directly to one recipient.
+         Uses the tenant's configured SendGrid connection; override with connection_id for multi-connection tenants.
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/SendEmail (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("to", to), ("subject", subject), ("body", body), ("is_html", is_html), ("template_id", template_id), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectEmailRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/SendEmail",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.DirectEmailRequest,
+            _m_clappform_notifier_v1_direct_direct.DirectSendResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def send_whats_app_template(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.DirectWhatsAppTemplateRequest | None = None,
+        *,
+        phone_number: str | None = None,
+        template_name: str | None = None,
+        language_code: str | None = None,
+        connection_id: str | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
+        """SendWhatsAppTemplate sends a WhatsApp template message directly.
+         Uses the tenant's configured WhatsApp connection.
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/SendWhatsAppTemplate (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("phone_number", phone_number), ("template_name", template_name), ("language_code", language_code), ("connection_id", connection_id), ("priority", priority), ("theme", theme),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectWhatsAppTemplateRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/SendWhatsAppTemplate",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.DirectWhatsAppTemplateRequest,
+            _m_clappform_notifier_v1_direct_direct.DirectSendResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def send_whats_app_message(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.DirectWhatsAppMessageRequest | None = None,
+        *,
+        phone_number: str | None = None,
+        body: str | None = None,
+        connection_id: str | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
+        """SendWhatsAppMessage sends a free-form WhatsApp message.
+         Requires an active 24-hour Meta session window (initiated by a prior template send).
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/SendWhatsAppMessage (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("phone_number", phone_number), ("body", body), ("connection_id", connection_id), ("priority", priority), ("theme", theme),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectWhatsAppMessageRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/SendWhatsAppMessage",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.DirectWhatsAppMessageRequest,
+            _m_clappform_notifier_v1_direct_direct.DirectSendResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def send_teams(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.DirectTeamsRequest | None = None,
+        *,
+        subject: str | None = None,
+        body: str | None = None,
+        webhook_url: str | None = None,
+        connection_id: str | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        facts: dict[str, str] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
+        """SendTeams sends a message to a Microsoft Teams channel.
+         Uses the tenant's configured Teams connection; override webhook_url for multi-connection tenants.
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/SendTeams (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("subject", subject), ("body", body), ("webhook_url", webhook_url), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectTeamsRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/SendTeams",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.DirectTeamsRequest,
+            _m_clappform_notifier_v1_direct_direct.DirectSendResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def send_slack(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.DirectSlackRequest | None = None,
+        *,
+        subject: str | None = None,
+        body: str | None = None,
+        webhook_url: str | None = None,
+        connection_id: str | None = None,
+        channel_id: str | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        facts: dict[str, str] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        attachments: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAttachment] | None = None,
+        image_url: str | None = None,
+        image_alt_text: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
+        """SendSlack sends a message to a Slack channel.
+         Uses the tenant's configured Slack connection; override webhook_url for multi-connection tenants.
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/SendSlack (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("subject", subject), ("body", body), ("webhook_url", webhook_url), ("connection_id", connection_id), ("channel_id", channel_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions), ("attachments", attachments), ("image_url", image_url), ("image_alt_text", image_alt_text),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectSlackRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/SendSlack",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.DirectSlackRequest,
+            _m_clappform_notifier_v1_direct_direct.DirectSendResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def send_slack_dm(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.DirectSlackDMRequest | None = None,
+        *,
+        user_id: str | None = None,
+        user_email: str | None = None,
+        subject: str | None = None,
+        body: str | None = None,
+        connection_id: str | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        facts: dict[str, str] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        attachments: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAttachment] | None = None,
+        image_url: str | None = None,
+        image_alt_text: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
+        """SendSlackDM sends a direct message to a specific Slack user.
+         Identifies the target by user_id (Slack U… ID) or user_email (resolved via users.lookupByEmail).
+         Requires a bot token with users:read.email scope when using user_email.
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/SendSlackDM (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("user_id", user_id), ("user_email", user_email), ("subject", subject), ("body", body), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions), ("attachments", attachments), ("image_url", image_url), ("image_alt_text", image_alt_text),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectSlackDMRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/SendSlackDM",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.DirectSlackDMRequest,
+            _m_clappform_notifier_v1_direct_direct.DirectSendResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def send_push(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.DirectPushRequest | None = None,
+        *,
+        user_id: str | None = None,
+        subject: str | None = None,
+        body: str | None = None,
+        connection_id: str | None = None,
+        priority: int | None = None,
+        theme: int | None = None,
+        link_url: str | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
+        """SendPush sends a push notification to a single user's inbox.
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/SendPush (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("user_id", user_id), ("subject", subject), ("body", body), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("link_url", link_url), ("actions", actions),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectPushRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/SendPush",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.DirectPushRequest,
+            _m_clappform_notifier_v1_direct_direct.DirectSendResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def get_message_status(
+        self,
+        request: _m_clappform_notifier_v1_direct_direct.GetMessageStatusRequest | None = None,
+        *,
+        message_id: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_direct_direct.MessageStatusResponse:
+        """GetMessageStatus returns the delivery status for a direct-send message.
+
+        RPC: /clappform.notifier.v1.direct.DirectManagement/GetMessageStatus (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("message_id", message_id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.GetMessageStatusRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.direct.DirectManagement/GetMessageStatus",
+            _request,
+            _m_clappform_notifier_v1_direct_direct.GetMessageStatusRequest,
+            _m_clappform_notifier_v1_direct_direct.MessageStatusResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+
+class FreqCapManagement(_runtime.ServiceBase):
+    """Wrapper for clappform.notifier.v1.freqcap.FreqCapManagement."""
+
+    def upsert_freq_cap(
+        self,
+        request: _m_clappform_notifier_v1_freqcap_freqcap.FreqCapRules | None = None,
+        *,
+        rules: Sequence[_m_clappform_notifier_v1_freqcap_freqcap.ChannelCapRule] | None = None,
+        priority_overrides: dict[str, str] | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_freqcap_freqcap.UpsertFreqCapResponse:
+        """UpsertFreqCap creates or replaces the tenant's frequency cap rules.
+
+        RPC: /clappform.notifier.v1.freqcap.FreqCapManagement/UpsertFreqCap (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("rules", rules), ("priority_overrides", priority_overrides),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_freqcap_freqcap.FreqCapRules, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.freqcap.FreqCapManagement/UpsertFreqCap",
+            _request,
+            _m_clappform_notifier_v1_freqcap_freqcap.FreqCapRules,
+            _m_clappform_notifier_v1_freqcap_freqcap.UpsertFreqCapResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def get_freq_cap(
+        self,
+        request: _m_clappform_notifier_v1_freqcap_freqcap.GetFreqCapRequest | None = None,
+        *,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_freqcap_freqcap.GetFreqCapResponse:
+        """GetFreqCap retrieves the tenant's current frequency cap rules.
+
+        RPC: /clappform.notifier.v1.freqcap.FreqCapManagement/GetFreqCap (unary-unary)
+        """
+        _provided: dict[str, Any] = {}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_freqcap_freqcap.GetFreqCapRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.freqcap.FreqCapManagement/GetFreqCap",
+            _request,
+            _m_clappform_notifier_v1_freqcap_freqcap.GetFreqCapRequest,
+            _m_clappform_notifier_v1_freqcap_freqcap.GetFreqCapResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
 
 
 class GeneralManagement(_runtime.ServiceBase):
@@ -68,131 +595,449 @@ class HealthManagement(_runtime.ServiceBase):
 class InboxManagement(_runtime.ServiceBase):
     """Wrapper for clappform.notifier.v1.inbox.InboxManagement."""
 
-    def stream_messages(
+    def get_notifications(
         self,
-        request: _m_clappform_notifier_v1_inbox_inbox.GetMessagesRequest | None = None,
+        request: _m_clappform_notifier_v1_inbox_inbox.GetNotificationsRequest | None = None,
         *,
         user_id: str | None = None,
-        status: Sequence[int] | None = None,
-        level: Sequence[int] | None = None,
+        offset: int | None = None,
+        limit: int | None = None,
+        status_filter: Sequence[int] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
-    ) -> Iterator[_m_clappform_notifier_v1_inbox_inbox.Message]:
-        """RPC: /clappform.notifier.v1.inbox.InboxManagement/StreamMessages (unary-stream)"""
-        _provided = {_k: _v for _k, _v in (("user_id", user_id), ("status", status), ("level", level),) if _v is not None}
-        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.GetMessagesRequest, request, _provided)
-        return self._caller.invoke(
-            "unary_stream",
-            "/clappform.notifier.v1.inbox.InboxManagement/StreamMessages",
-            _request,
-            _m_clappform_notifier_v1_inbox_inbox.GetMessagesRequest,
-            _m_clappform_notifier_v1_inbox_inbox.Message,
-            timeout=timeout,
-            metadata=metadata,
-            location=location,
-        )
+    ) -> _m_clappform_notifier_v1_inbox_inbox.GetNotificationsResponse:
+        """GetNotifications returns paginated push notifications for the authenticated user.
 
-    def get_messages(
-        self,
-        request: _m_clappform_notifier_v1_inbox_inbox.GetMessagesRequest | None = None,
-        *,
-        user_id: str | None = None,
-        status: Sequence[int] | None = None,
-        level: Sequence[int] | None = None,
-        timeout: float | None = None,
-        metadata: tuple[tuple[str, str], ...] | None = None,
-        location: str | None = None,
-    ) -> _m_clappform_notifier_v1_inbox_inbox.Messages:
-        """RPC: /clappform.notifier.v1.inbox.InboxManagement/GetMessages (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("user_id", user_id), ("status", status), ("level", level),) if _v is not None}
-        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.GetMessagesRequest, request, _provided)
+        RPC: /clappform.notifier.v1.inbox.InboxManagement/GetNotifications (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("user_id", user_id), ("offset", offset), ("limit", limit), ("status_filter", status_filter),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.GetNotificationsRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
-            "/clappform.notifier.v1.inbox.InboxManagement/GetMessages",
+            "/clappform.notifier.v1.inbox.InboxManagement/GetNotifications",
             _request,
-            _m_clappform_notifier_v1_inbox_inbox.GetMessagesRequest,
-            _m_clappform_notifier_v1_inbox_inbox.Messages,
+            _m_clappform_notifier_v1_inbox_inbox.GetNotificationsRequest,
+            _m_clappform_notifier_v1_inbox_inbox.GetNotificationsResponse,
             timeout=timeout,
             metadata=metadata,
             location=location,
         )
 
-    def send_message(
+    def get_unread_count(
         self,
-        request: _m_clappform_notifier_v1_inbox_inbox.MessageRequest | None = None,
+        request: _m_clappform_notifier_v1_inbox_inbox.GetUnreadCountRequest | None = None,
         *,
-        level: int | None = None,
-        status: int | None = None,
-        message: str | None = None,
-        user_ids: Sequence[str] | None = None,
+        user_id: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_inbox_inbox.GetUnreadCountResponse:
+        """GetUnreadCount returns the count of unread push notifications for the authenticated user.
+
+        RPC: /clappform.notifier.v1.inbox.InboxManagement/GetUnreadCount (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("user_id", user_id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.GetUnreadCountRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.inbox.InboxManagement/GetUnreadCount",
+            _request,
+            _m_clappform_notifier_v1_inbox_inbox.GetUnreadCountRequest,
+            _m_clappform_notifier_v1_inbox_inbox.GetUnreadCountResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def mark_as_read(
+        self,
+        request: _m_clappform_notifier_v1_inbox_inbox.MarkAsReadRequest | None = None,
+        *,
+        notification_id: str | None = None,
+        batch_id: str | None = None,
+        step_id: str | None = None,
+        user_id: str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.notifier.v1.inbox.InboxManagement/SendMessage (unary-unary)
-        Fields only settable via a request message (name collision): metadata
+        """MarkAsRead marks a notification as read.
+
+        RPC: /clappform.notifier.v1.inbox.InboxManagement/MarkAsRead (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("level", level), ("status", status), ("message", message), ("user_ids", user_ids),) if _v is not None}
-        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.MessageRequest, request, _provided)
+        _provided = {_k: _v for _k, _v in (("notification_id", notification_id), ("batch_id", batch_id), ("step_id", step_id), ("user_id", user_id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.MarkAsReadRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
-            "/clappform.notifier.v1.inbox.InboxManagement/SendMessage",
+            "/clappform.notifier.v1.inbox.InboxManagement/MarkAsRead",
             _request,
-            _m_clappform_notifier_v1_inbox_inbox.MessageRequest,
+            _m_clappform_notifier_v1_inbox_inbox.MarkAsReadRequest,
             _m_clappform_v1_commons_commons.Message,
             timeout=timeout,
             metadata=metadata,
             location=location,
         )
 
-    def set_status(
+    def mark_as_acknowledged(
         self,
-        request: _m_clappform_notifier_v1_inbox_inbox.SetStatusRequest | None = None,
+        request: _m_clappform_notifier_v1_inbox_inbox.MarkAsAcknowledgedRequest | None = None,
         *,
-        status: int | None = None,
-        ids: Sequence[str] | None = None,
+        notification_id: str | None = None,
+        batch_id: str | None = None,
+        step_id: str | None = None,
+        user_id: str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
-    ) -> _m_clappform_notifier_v1_inbox_inbox.Messages:
-        """RPC: /clappform.notifier.v1.inbox.InboxManagement/SetStatus (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("status", status), ("ids", ids),) if _v is not None}
-        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.SetStatusRequest, request, _provided)
+    ) -> _m_clappform_v1_commons_commons.Message:
+        """MarkAsAcknowledged marks a notification as acknowledged (action button clicked).
+
+        RPC: /clappform.notifier.v1.inbox.InboxManagement/MarkAsAcknowledged (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("notification_id", notification_id), ("batch_id", batch_id), ("step_id", step_id), ("user_id", user_id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.MarkAsAcknowledgedRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
-            "/clappform.notifier.v1.inbox.InboxManagement/SetStatus",
+            "/clappform.notifier.v1.inbox.InboxManagement/MarkAsAcknowledged",
             _request,
-            _m_clappform_notifier_v1_inbox_inbox.SetStatusRequest,
-            _m_clappform_notifier_v1_inbox_inbox.Messages,
+            _m_clappform_notifier_v1_inbox_inbox.MarkAsAcknowledgedRequest,
+            _m_clappform_v1_commons_commons.Message,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def bulk_update_status(
+        self,
+        request: _m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusRequest | None = None,
+        *,
+        items: Sequence[_m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusItem] | None = None,
+        status: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusResponse:
+        """BulkUpdateStatus updates the status of many notifications in a single call.
+         status must be one of: "READ", "ACKNOWLEDGED", "ARCHIVED".
+
+        RPC: /clappform.notifier.v1.inbox.InboxManagement/BulkUpdateStatus (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("items", items), ("status", status),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.inbox.InboxManagement/BulkUpdateStatus",
+            _request,
+            _m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusRequest,
+            _m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def list_suppressions(
+        self,
+        request: _m_clappform_notifier_v1_inbox_inbox.ListSuppressionsRequest | None = None,
+        *,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_inbox_inbox.ListSuppressionsResponse:
+        """ListSuppressions returns all email addresses currently on the suppression list.
+
+        RPC: /clappform.notifier.v1.inbox.InboxManagement/ListSuppressions (unary-unary)
+        """
+        _provided: dict[str, Any] = {}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.ListSuppressionsRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.inbox.InboxManagement/ListSuppressions",
+            _request,
+            _m_clappform_notifier_v1_inbox_inbox.ListSuppressionsRequest,
+            _m_clappform_notifier_v1_inbox_inbox.ListSuppressionsResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def remove_suppression(
+        self,
+        request: _m_clappform_notifier_v1_inbox_inbox.RemoveSuppressionRequest | None = None,
+        *,
+        email: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_v1_commons_commons.Message:
+        """RemoveSuppression removes an email address from the suppression list.
+
+        RPC: /clappform.notifier.v1.inbox.InboxManagement/RemoveSuppression (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("email", email),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.RemoveSuppressionRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.inbox.InboxManagement/RemoveSuppression",
+            _request,
+            _m_clappform_notifier_v1_inbox_inbox.RemoveSuppressionRequest,
+            _m_clappform_v1_commons_commons.Message,
             timeout=timeout,
             metadata=metadata,
             location=location,
         )
 
 
-class OutboundManagement(_runtime.ServiceBase):
-    """Wrapper for clappform.notifier.v1.outbound.OutboundManagement."""
+class PolicyManagement(_runtime.ServiceBase):
+    """Wrapper for clappform.notifier.v1.policies.PolicyManagement."""
 
-    def send_message(
+    def create_policy(
         self,
-        request: _m_clappform_notifier_v1_outbound_outbound.Messages | None = None,
+        request: _m_clappform_notifier_v1_policies_policies.CreatePolicyRequest | None = None,
         *,
-        messages: Sequence[_m_clappform_notifier_v1_outbound_outbound.Message] | None = None,
-        pagination: _m_clappform_v1_commons_commons.Pagination | None = None,
+        name: str | None = None,
+        description: str | None = None,
+        steps: Sequence[_m_clappform_notifier_v1_policies_policies.PolicyStepRequest] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
-    ) -> _m_clappform_notifier_v1_outbound_outbound.MessageResponse:
-        """RPC: /clappform.notifier.v1.outbound.OutboundManagement/SendMessage (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("messages", messages), ("pagination", pagination),) if _v is not None}
-        _request = _runtime.build_request(_m_clappform_notifier_v1_outbound_outbound.Messages, request, _provided)
+    ) -> _m_clappform_notifier_v1_policies_policies.PolicyResponse:
+        """CreatePolicy creates a new escalation policy.
+
+        RPC: /clappform.notifier.v1.policies.PolicyManagement/CreatePolicy (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("name", name), ("description", description), ("steps", steps),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_policies_policies.CreatePolicyRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
-            "/clappform.notifier.v1.outbound.OutboundManagement/SendMessage",
+            "/clappform.notifier.v1.policies.PolicyManagement/CreatePolicy",
             _request,
-            _m_clappform_notifier_v1_outbound_outbound.Messages,
-            _m_clappform_notifier_v1_outbound_outbound.MessageResponse,
+            _m_clappform_notifier_v1_policies_policies.CreatePolicyRequest,
+            _m_clappform_notifier_v1_policies_policies.PolicyResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def get_policy(
+        self,
+        request: _m_clappform_notifier_v1_policies_policies.GetPolicyRequest | None = None,
+        *,
+        id: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_policies_policies.PolicyResponse:
+        """GetPolicy retrieves a policy by ID.
+
+        RPC: /clappform.notifier.v1.policies.PolicyManagement/GetPolicy (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_policies_policies.GetPolicyRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.policies.PolicyManagement/GetPolicy",
+            _request,
+            _m_clappform_notifier_v1_policies_policies.GetPolicyRequest,
+            _m_clappform_notifier_v1_policies_policies.PolicyResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def list_policies(
+        self,
+        request: _m_clappform_notifier_v1_policies_policies.ListPoliciesRequest | None = None,
+        *,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_policies_policies.ListPoliciesResponse:
+        """ListPolicies returns all policies for the tenant.
+
+        RPC: /clappform.notifier.v1.policies.PolicyManagement/ListPolicies (unary-unary)
+        """
+        _provided: dict[str, Any] = {}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_policies_policies.ListPoliciesRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.policies.PolicyManagement/ListPolicies",
+            _request,
+            _m_clappform_notifier_v1_policies_policies.ListPoliciesRequest,
+            _m_clappform_notifier_v1_policies_policies.ListPoliciesResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def update_policy(
+        self,
+        request: _m_clappform_notifier_v1_policies_policies.UpdatePolicyRequest | None = None,
+        *,
+        id: str | None = None,
+        name: str | None = None,
+        description: str | None = None,
+        steps: Sequence[_m_clappform_notifier_v1_policies_policies.PolicyStepRequest] | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_policies_policies.PolicyResponse:
+        """UpdatePolicy replaces a policy definition.
+
+        RPC: /clappform.notifier.v1.policies.PolicyManagement/UpdatePolicy (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("description", description), ("steps", steps),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_policies_policies.UpdatePolicyRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.policies.PolicyManagement/UpdatePolicy",
+            _request,
+            _m_clappform_notifier_v1_policies_policies.UpdatePolicyRequest,
+            _m_clappform_notifier_v1_policies_policies.PolicyResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def delete_policy(
+        self,
+        request: _m_clappform_notifier_v1_policies_policies.DeletePolicyRequest | None = None,
+        *,
+        id: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_policies_policies.DeletePolicyResponse:
+        """DeletePolicy removes a policy.
+
+        RPC: /clappform.notifier.v1.policies.PolicyManagement/DeletePolicy (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_policies_policies.DeletePolicyRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.policies.PolicyManagement/DeletePolicy",
+            _request,
+            _m_clappform_notifier_v1_policies_policies.DeletePolicyRequest,
+            _m_clappform_notifier_v1_policies_policies.DeletePolicyResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def send_from_policy(
+        self,
+        request: _m_clappform_notifier_v1_policies_policies.FromPolicyRequest | None = None,
+        *,
+        policy_id: str | None = None,
+        subject: str | None = None,
+        body: str | None = None,
+        variables: dict[str, str] | None = None,
+        recipients: Sequence[_m_clappform_notifier_v1_policies_policies.FromPolicyRecipient] | None = None,
+        escalation_contacts: dict[str, str] | None = None,
+        priority: str | None = None,
+        semantic_theme: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_policies_policies.FromPolicyResponse:
+        """SendFromPolicy sends a batch notification using a saved policy as the step template.
+
+        RPC: /clappform.notifier.v1.policies.PolicyManagement/SendFromPolicy (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("policy_id", policy_id), ("subject", subject), ("body", body), ("variables", variables), ("recipients", recipients), ("escalation_contacts", escalation_contacts), ("priority", priority), ("semantic_theme", semantic_theme),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_policies_policies.FromPolicyRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.policies.PolicyManagement/SendFromPolicy",
+            _request,
+            _m_clappform_notifier_v1_policies_policies.FromPolicyRequest,
+            _m_clappform_notifier_v1_policies_policies.FromPolicyResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+
+class PreferenceManagement(_runtime.ServiceBase):
+    """Wrapper for clappform.notifier.v1.preferences.PreferenceManagement."""
+
+    def set_preferences(
+        self,
+        request: _m_clappform_notifier_v1_preferences_preferences.UserPreferences | None = None,
+        *,
+        user_id: str | None = None,
+        preferred_channels: Sequence[str] | None = None,
+        channel_availability: dict[str, _m_clappform_notifier_v1_preferences_preferences.ChannelAvailability] | None = None,
+        quiet_hours: _m_clappform_notifier_v1_preferences_preferences.QuietHours | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_preferences_preferences.UserPreferences:
+        """SetPreferences creates or replaces the user's channel preference profile.
+
+        RPC: /clappform.notifier.v1.preferences.PreferenceManagement/SetPreferences (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("user_id", user_id), ("preferred_channels", preferred_channels), ("channel_availability", channel_availability), ("quiet_hours", quiet_hours),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_preferences_preferences.UserPreferences, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.preferences.PreferenceManagement/SetPreferences",
+            _request,
+            _m_clappform_notifier_v1_preferences_preferences.UserPreferences,
+            _m_clappform_notifier_v1_preferences_preferences.UserPreferences,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def get_preferences(
+        self,
+        request: _m_clappform_notifier_v1_preferences_preferences.GetPreferencesRequest | None = None,
+        *,
+        user_id: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_preferences_preferences.UserPreferences:
+        """GetPreferences retrieves the user's channel preference profile.
+
+        RPC: /clappform.notifier.v1.preferences.PreferenceManagement/GetPreferences (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("user_id", user_id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_preferences_preferences.GetPreferencesRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.preferences.PreferenceManagement/GetPreferences",
+            _request,
+            _m_clappform_notifier_v1_preferences_preferences.GetPreferencesRequest,
+            _m_clappform_notifier_v1_preferences_preferences.UserPreferences,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
+    def delete_preferences(
+        self,
+        request: _m_clappform_notifier_v1_preferences_preferences.DeletePreferencesRequest | None = None,
+        *,
+        user_id: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_notifier_v1_preferences_preferences.UserPreferences:
+        """DeletePreferences removes the user's channel preference profile.
+
+        RPC: /clappform.notifier.v1.preferences.PreferenceManagement/DeletePreferences (unary-unary)
+        """
+        _provided = {_k: _v for _k, _v in (("user_id", user_id),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_notifier_v1_preferences_preferences.DeletePreferencesRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.notifier.v1.preferences.PreferenceManagement/DeletePreferences",
+            _request,
+            _m_clappform_notifier_v1_preferences_preferences.DeletePreferencesRequest,
+            _m_clappform_notifier_v1_preferences_preferences.UserPreferences,
             timeout=timeout,
             metadata=metadata,
             location=location,
@@ -201,55 +1046,6 @@ class OutboundManagement(_runtime.ServiceBase):
 
 class WhatsappManagement(_runtime.ServiceBase):
     """Wrapper for clappform.notifier.v1.whatsapp.WhatsappManagement."""
-
-    def send_message(
-        self,
-        request: _m_clappform_notifier_v1_whatsapp_whatsapp.MessageRequest | None = None,
-        *,
-        phone_number: str | None = None,
-        message: str | None = None,
-        timeout: float | None = None,
-        metadata: tuple[tuple[str, str], ...] | None = None,
-        location: str | None = None,
-    ) -> _m_clappform_notifier_v1_whatsapp_whatsapp.MessageResponse:
-        """RPC: /clappform.notifier.v1.whatsapp.WhatsappManagement/SendMessage (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("phone_number", phone_number), ("message", message),) if _v is not None}
-        _request = _runtime.build_request(_m_clappform_notifier_v1_whatsapp_whatsapp.MessageRequest, request, _provided)
-        return self._caller.invoke(
-            "unary_unary",
-            "/clappform.notifier.v1.whatsapp.WhatsappManagement/SendMessage",
-            _request,
-            _m_clappform_notifier_v1_whatsapp_whatsapp.MessageRequest,
-            _m_clappform_notifier_v1_whatsapp_whatsapp.MessageResponse,
-            timeout=timeout,
-            metadata=metadata,
-            location=location,
-        )
-
-    def send_template(
-        self,
-        request: _m_clappform_notifier_v1_whatsapp_whatsapp.TemplateRequest | None = None,
-        *,
-        phone_number: str | None = None,
-        template_name: str | None = None,
-        language_code: str | None = None,
-        timeout: float | None = None,
-        metadata: tuple[tuple[str, str], ...] | None = None,
-        location: str | None = None,
-    ) -> _m_clappform_notifier_v1_whatsapp_whatsapp.HealthStatus:
-        """RPC: /clappform.notifier.v1.whatsapp.WhatsappManagement/SendTemplate (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("phone_number", phone_number), ("template_name", template_name), ("language_code", language_code),) if _v is not None}
-        _request = _runtime.build_request(_m_clappform_notifier_v1_whatsapp_whatsapp.TemplateRequest, request, _provided)
-        return self._caller.invoke(
-            "unary_unary",
-            "/clappform.notifier.v1.whatsapp.WhatsappManagement/SendTemplate",
-            _request,
-            _m_clappform_notifier_v1_whatsapp_whatsapp.TemplateRequest,
-            _m_clappform_notifier_v1_whatsapp_whatsapp.HealthStatus,
-            timeout=timeout,
-            metadata=metadata,
-            location=location,
-        )
 
     def webhook_event(
         self,
@@ -302,8 +1098,13 @@ class NotifierAPI:
     """Generated sub-client for the notifier API."""
 
     def __init__(self, caller: _runtime.Caller) -> None:
+        self.batch = BatchManagement(caller)
+        self.connection = ConnectionManagement(caller)
+        self.direct = DirectManagement(caller)
+        self.freq_cap = FreqCapManagement(caller)
         self.general = GeneralManagement(caller)
         self.health = HealthManagement(caller)
         self.inbox = InboxManagement(caller)
-        self.outbound = OutboundManagement(caller)
+        self.policy = PolicyManagement(caller)
+        self.preference = PreferenceManagement(caller)
         self.whatsapp = WhatsappManagement(caller)

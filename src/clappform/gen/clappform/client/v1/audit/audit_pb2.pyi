@@ -74,7 +74,7 @@ class Logs(_message.Message):
     def __init__(self, items: _Optional[_Iterable[_Union[Log, _Mapping]]] = ..., total: _Optional[int] = ..., pagination: _Optional[_Union[_commons_pb2.Pagination, _Mapping]] = ...) -> None: ...
 
 class AuditListRequest(_message.Message):
-    __slots__ = ("pagination", "start_date", "end_date", "user_id", "request_id", "message", "level", "method", "method_prefix", "data_filters")
+    __slots__ = ("pagination", "start_date", "end_date", "user_id", "request_id", "message", "level", "method", "method_prefix", "data_filters", "url", "url_prefix")
     class DataFiltersEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -92,6 +92,8 @@ class AuditListRequest(_message.Message):
     METHOD_FIELD_NUMBER: _ClassVar[int]
     METHOD_PREFIX_FIELD_NUMBER: _ClassVar[int]
     DATA_FILTERS_FIELD_NUMBER: _ClassVar[int]
+    URL_FIELD_NUMBER: _ClassVar[int]
+    URL_PREFIX_FIELD_NUMBER: _ClassVar[int]
     pagination: _commons_pb2.PaginationRequest
     start_date: int
     end_date: int
@@ -102,7 +104,9 @@ class AuditListRequest(_message.Message):
     method: str
     method_prefix: str
     data_filters: _containers.ScalarMap[str, str]
-    def __init__(self, pagination: _Optional[_Union[_commons_pb2.PaginationRequest, _Mapping]] = ..., start_date: _Optional[int] = ..., end_date: _Optional[int] = ..., user_id: _Optional[str] = ..., request_id: _Optional[str] = ..., message: _Optional[str] = ..., level: _Optional[str] = ..., method: _Optional[str] = ..., method_prefix: _Optional[str] = ..., data_filters: _Optional[_Mapping[str, str]] = ...) -> None: ...
+    url: str
+    url_prefix: str
+    def __init__(self, pagination: _Optional[_Union[_commons_pb2.PaginationRequest, _Mapping]] = ..., start_date: _Optional[int] = ..., end_date: _Optional[int] = ..., user_id: _Optional[str] = ..., request_id: _Optional[str] = ..., message: _Optional[str] = ..., level: _Optional[str] = ..., method: _Optional[str] = ..., method_prefix: _Optional[str] = ..., data_filters: _Optional[_Mapping[str, str]] = ..., url: _Optional[str] = ..., url_prefix: _Optional[str] = ...) -> None: ...
 
 class TimeRangeRequest(_message.Message):
     __slots__ = ("start_date", "end_date")
@@ -169,18 +173,20 @@ class UserActivityStats(_message.Message):
     def __init__(self, active_users: _Optional[_Iterable[_Union[UsageMetric, _Mapping]]] = ..., activity_by_hour: _Optional[_Iterable[_Union[TimeSeriesPoint, _Mapping]]] = ..., user_error_rates: _Optional[_Iterable[_Union[UsageMetric, _Mapping]]] = ..., avg_session_duration_sec: _Optional[float] = ...) -> None: ...
 
 class PerformanceStats(_message.Message):
-    __slots__ = ("endpoint_latencies", "peak_times", "slow_endpoints", "p95_response_time_ms", "p99_response_time_ms")
+    __slots__ = ("endpoint_latencies", "peak_times", "slow_endpoints", "p95_response_time_ms", "p99_response_time_ms", "slow_http_endpoints")
     ENDPOINT_LATENCIES_FIELD_NUMBER: _ClassVar[int]
     PEAK_TIMES_FIELD_NUMBER: _ClassVar[int]
     SLOW_ENDPOINTS_FIELD_NUMBER: _ClassVar[int]
     P95_RESPONSE_TIME_MS_FIELD_NUMBER: _ClassVar[int]
     P99_RESPONSE_TIME_MS_FIELD_NUMBER: _ClassVar[int]
+    SLOW_HTTP_ENDPOINTS_FIELD_NUMBER: _ClassVar[int]
     endpoint_latencies: _containers.RepeatedCompositeFieldContainer[UsageMetric]
     peak_times: _containers.RepeatedCompositeFieldContainer[TimeSeriesPoint]
     slow_endpoints: _containers.RepeatedCompositeFieldContainer[UsageMetric]
     p95_response_time_ms: float
     p99_response_time_ms: float
-    def __init__(self, endpoint_latencies: _Optional[_Iterable[_Union[UsageMetric, _Mapping]]] = ..., peak_times: _Optional[_Iterable[_Union[TimeSeriesPoint, _Mapping]]] = ..., slow_endpoints: _Optional[_Iterable[_Union[UsageMetric, _Mapping]]] = ..., p95_response_time_ms: _Optional[float] = ..., p99_response_time_ms: _Optional[float] = ...) -> None: ...
+    slow_http_endpoints: _containers.RepeatedCompositeFieldContainer[UsageMetric]
+    def __init__(self, endpoint_latencies: _Optional[_Iterable[_Union[UsageMetric, _Mapping]]] = ..., peak_times: _Optional[_Iterable[_Union[TimeSeriesPoint, _Mapping]]] = ..., slow_endpoints: _Optional[_Iterable[_Union[UsageMetric, _Mapping]]] = ..., p95_response_time_ms: _Optional[float] = ..., p99_response_time_ms: _Optional[float] = ..., slow_http_endpoints: _Optional[_Iterable[_Union[UsageMetric, _Mapping]]] = ...) -> None: ...
 
 class SecurityStats(_message.Message):
     __slots__ = ("failed_auth_by_ip", "auth_failures", "unusual_activity", "total_failed_attempts")

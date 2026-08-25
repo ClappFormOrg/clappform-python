@@ -61,11 +61,19 @@ class RecoverRequest(_message.Message):
     def __init__(self, token: _Optional[str] = ..., username: _Optional[str] = ...) -> None: ...
 
 class RecoverResponse(_message.Message):
-    __slots__ = ("valid", "authorization_token", "refresh_token")
+    __slots__ = ("valid", "authorization_token", "refresh_token", "low_codes_remaining")
     VALID_FIELD_NUMBER: _ClassVar[int]
     AUTHORIZATION_TOKEN_FIELD_NUMBER: _ClassVar[int]
     REFRESH_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    LOW_CODES_REMAINING_FIELD_NUMBER: _ClassVar[int]
     valid: bool
     authorization_token: str
     refresh_token: str
-    def __init__(self, valid: bool = ..., authorization_token: _Optional[str] = ..., refresh_token: _Optional[str] = ...) -> None: ...
+    low_codes_remaining: bool
+    def __init__(self, valid: bool = ..., authorization_token: _Optional[str] = ..., refresh_token: _Optional[str] = ..., low_codes_remaining: bool = ...) -> None: ...
+
+class RecoveryCodesResponse(_message.Message):
+    __slots__ = ("recovery_codes",)
+    RECOVERY_CODES_FIELD_NUMBER: _ClassVar[int]
+    recovery_codes: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, recovery_codes: _Optional[_Iterable[str]] = ...) -> None: ...

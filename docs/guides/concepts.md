@@ -73,12 +73,14 @@ coexist in one process without interfering. See
 Calls are grouped by the proto family they belong to:
 
 - **`cf.data`** — the data plane (collections, aggregation, insert/update/delete,
-  indexes). The DataFrame handles (`cf.data.collection` / `cf.data.query`) live
-  here too.
+  indexes, schema, exports, embeddings, rules, …). The DataFrame handles
+  (`cf.data.collection` / `cf.data.query`) live here too.
 - **`cf.client`** — the platform API (apps, collections metadata, actionflows,
   cronjobs, transfer, …).
 - **`cf.auth`** — the authoriser (API keys, users, roles, …).
-- **`cf.notifier`** — outbound/inbox/whatsapp messaging.
+- **`cf.notifier`** — messaging: one-off sends (`cf.notifier.direct`), batches,
+  the inbox, delivery policies, per-user preferences, frequency caps and
+  channel connections.
 
 The family segment disambiguates names that repeat across services (`get`,
 `create`, `delete` exist on many). See the
