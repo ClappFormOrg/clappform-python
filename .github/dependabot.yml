@@ -16,8 +16,9 @@ updates:
         patterns:
           - "*"
 
-  # Workflow actions (currently a mix of checkout/setup-python @v4/@v5/@v6 and
-  # the PyPI publish action) — consolidate them onto current major versions.
+  # Workflow actions (checkout, setup-python, the artifact actions, and the
+  # PyPI publish action). Keeps them on majors that run on the current runner
+  # Node, so the runner stops warning about Node 20 actions.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

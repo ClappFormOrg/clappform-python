@@ -114,6 +114,30 @@ ignore_missing_imports = true
 module = ["pyarrow.*", "polars.*"]
 ignore_missing_imports = true
 
+# Pyright is not part of `make check` — mypy stays the gate. This section exists
+# so that a pyright-langserver spawned by an editor or agent reports the same
+# scope mypy does, rather than flagging the generated trees the gate ignores.
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
+include = ["src/clappform", "tools", "tests"]
+
+# Not source: bytecode, the servicegen golden fixtures, and the MkDocs build
+# output (a copy of the whole tree — analysing it double-reports everything).
+# Mirrors the "site" and "servicegen_golden" entries in extend-exclude above.
+exclude = ["**/__pycache__", "site", "tests/servicegen_golden"]
+
+# Generated code. `ignore` rather than `exclude` so these modules still resolve
+# for the hand-written code that imports them, while their own diagnostics stay
+# silent — the same split as ignore_errors in the mypy overrides above.
+ignore = ["src/clappform/gen", "src/clappform/services"]
+
+# pyarrow ships no py.typed marker and polars may be absent entirely; both sit
+# behind the [arrow]/[polars] extras. Matches the ignore_missing_imports
+# overrides for pandas, pyarrow and polars above.
+reportMissingTypeStubs = "none"
+reportMissingModuleSource = "none"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
