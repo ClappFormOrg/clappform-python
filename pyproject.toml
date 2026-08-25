@@ -93,13 +93,30 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+# S is flake8-bandit: the checks that matter for a client library holding
+# credentials, such as a hardcoded secret, a disabled TLS verification, eval on
+# a server response, or an unpickled payload. C901 caps cyclomatic complexity
+# per function.
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "S", "C901"]
+
+[tool.ruff.lint.mccabe]
+# Ruff's own default, stated here so the gate is visible next to the rule.
+max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
 # Doc snippet sources deliberately re-import inside each function so that every
 # fenced block the guides include reads as standalone, copy-pasteable code.
 # That trips F811 (redefinition), which is expected here rather than a defect.
-"docs/snippets/*.py" = ["F811"]
+# S101: a snippet asserts to show the reader what a call returns.
+"docs/snippets/*.py" = ["F811", "S101"]
+# pytest rewrites `assert` to produce its diffs, so S101 has nothing to say
+# about a test file.
+"tests/**/*.py" = ["S101"]
+# tools/ and the golden test invoke protoc from the dev environment's own
+# grpcio-tools with argv this repo builds. S603 and S607 are about untrusted
+# input reaching a shell, and there is none here.
+"tools/*.py" = ["S603", "S607"]
+"tests/test_servicegen_golden.py" = ["S603"]
 
 [tool.mypy]
 python_version = "3.10"
