@@ -1,4 +1,4 @@
-"""Collection and saved-query handles — the DataFrame-flavoured surface.
+"""Collection and saved-query handles: the DataFrame-flavoured surface.
 
 This is the ergonomic layer people actually reach for:
 
@@ -7,7 +7,7 @@ This is the ergonomic layer people actually reach for:
     df = col.read(pipeline=[{"$match": {"status": "open"}}])   # filtered slice
     col.append(df); col.update(df); col.upsert(df, on="order_id")
 
-A handle holds only ``(client, reference)`` — no connection, no state — and
+A handle holds only ``(client, reference)``: no connection, no state, and
 every flow runs over the streaming data RPCs through the client's transport.
 Reads go through :class:`ReadResult`, the seam future output surfaces
 (``to_polars``/``to_arrow``) plug into: ``read()`` is literally
@@ -75,7 +75,7 @@ def _require_polars() -> Any:
 
 # The server does not yet emit Arrow IPC on the streaming data plane, so the
 # columnar surfaces below cannot produce a result even with pyarrow/polars
-# installed. They exist now — failing loudly rather than as AttributeError — so
+# installed. They exist now, failing loudly rather than as AttributeError, so
 # the names are reserved and callers discover the capability; they light up
 # (as a purely additive change) once a cluster negotiates the Arrow format.
 _ARROW_NOT_READY = (
@@ -122,7 +122,7 @@ class ReadResult:
         if self._consumed:
             raise ClappformError(
                 "this ReadResult has already been consumed; a result set streams "
-                "once — call read()/fetch() again for a fresh one"
+                "once; call read()/fetch() again for a fresh one"
             )
         self._consumed = True
 
@@ -165,7 +165,7 @@ class ReadResult:
         """Materialise the result set as a ``polars.DataFrame`` (reserved).
 
         Built on :meth:`to_arrow` (zero-copy ``pl.from_arrow``), so once
-        implemented it needs pyarrow as well as polars — install
+        implemented it needs pyarrow as well as polars, so install
         ``clappform[polars,arrow]`` (or ``clappform[all]``). This stub only
         checks for polars, as it raises before any Arrow conversion runs.
 
@@ -178,7 +178,7 @@ class ReadResult:
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> Any:
         """Arrow PyCapsule stream interface (reserved).
 
-        Lets Arrow-native consumers (Polars, DuckDB, ...) pull results directly
+        Arrow-native consumers (Polars, DuckDB, ...) pull results directly
         with no clappform glue. Requires ``pip install clappform[arrow]``.
 
         Reserved for the v6 Arrow read path; raises until server Arrow support
@@ -235,7 +235,7 @@ class _AggregateReader:
         ``NOT_FOUND`` as :class:`NotFoundError` at that point. So the first
         chunk is pulled here to probe. If it fails ``NOT_FOUND``, ``on_stale``
         drops the cached id, and a second stream is opened against the freshly
-        resolved id — this is the one re-resolution the slug contract promises.
+        resolved id. This is the one re-resolution the slug contract promises.
 
         The retry deliberately covers only a ``NOT_FOUND`` raised *before* any
         row reaches the caller (the probe). Once the first chunk has been
@@ -356,7 +356,7 @@ class CollectionHandle(_AggregateReader):
 
         The DataFrame-returning form of ``fetch(pipeline=...)``. The pipeline is
         passed through untouched, so use the syntax the collection's backend
-        expects — Mongo stages (``$match``, ``$project``, ``$group``, ``$sort``,
+        expects: Mongo stages (``$match``, ``$project``, ``$group``, ``$sort``,
         ...) for a Mongo-backed collection, Elastic DSL for an Elastic-backed one.
         """
         return self.fetch(pipeline=pipeline, batch_size=batch_size, timeout=timeout).to_pandas()
@@ -369,7 +369,7 @@ class CollectionHandle(_AggregateReader):
         A cached slug->UUID mapping can go stale (the collection was recreated
         or its slug remapped); the first read then fails ``NOT_FOUND``. When
         the id came from a slug, drop the cache entry and resolve again before
-        surfacing the error. A UUID passed directly is not retried — there is
+        surfacing the error. A UUID passed directly is not retried, because there is
         nothing to re-resolve.
         """
 
@@ -402,7 +402,7 @@ class CollectionHandle(_AggregateReader):
 
         Uploads stream in chunks of ``chunk_rows`` (a failed chunk is
         retryable at the flow level, not a whole-frame resend). ``progress`` is
-        invoked with the cumulative row count after each chunk — handy for a
+        invoked with the cumulative row count after each chunk, handy for a
         notebook progress bar.
         """
         insert_pb2 = _import("clappform.gen.clappform.data.v1.insert.insert_pb2")
@@ -434,7 +434,7 @@ class CollectionHandle(_AggregateReader):
         """Update existing documents, matched by the ``on`` column (default ``_id``).
 
         Every row must carry the ``on`` key. Because ``read()`` keeps ``_id`` as
-        a column, the common case — read, mutate other columns, ``update(df)`` —
+        a column, the common case (read, mutate other columns, ``update(df)``)
         needs no argument at all.
         """
         update_pb2 = _import("clappform.gen.clappform.data.v1.update.update_pb2")
@@ -459,7 +459,7 @@ class CollectionHandle(_AggregateReader):
         """Insert-or-update every row keyed on the business column ``on``.
 
         Uses ``SyncManyByField``: rows whose ``on`` value already exists are
-        updated, the rest inserted. ``on`` is required — an upsert has no
+        updated, the rest inserted. ``on`` is required, because an upsert has no
         default key the way :meth:`update` does.
         """
         sync_pb2 = _import("clappform.gen.clappform.data.v1.sync.sync_pb2")
@@ -487,7 +487,7 @@ class CollectionHandle(_AggregateReader):
         """Set ``set_values`` on every document matching the ``where`` filter.
 
         A single server-side ``$set`` over the matched documents
-        (``UpdateManyByQuery``) — no data is round-tripped through the client.
+        (``UpdateManyByQuery``), so no data is round-tripped through the client.
         """
         self._client.data.update.update_many_by_query(
             collection=self.collection_id,
@@ -549,7 +549,7 @@ class QueryHandle(_AggregateReader):
 
     Obtained from ``cf.data.query(ref)`` where ``ref`` is the query's name or
     UUID. A saved query already carries its own collection and pipeline, so the
-    handle sends only the ``query`` field on ``AggregateStream`` — no
+    handle sends only the ``query`` field on ``AggregateStream``: no
     collection, no pipeline, and no write surface.
     """
 

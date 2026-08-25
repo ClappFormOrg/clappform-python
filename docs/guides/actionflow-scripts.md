@@ -1,13 +1,13 @@
 # Running inside an actionflow
 
-Many scripts using this client don't run standalone — they run as tasks inside
+Many scripts using this client don't run standalone; they run as tasks inside
 an actionflow, on a worker that hands the task its tenant, a key, and its input
 parameters. The client works the same way there as anywhere else; this guide
 covers the two things specific to that context.
 
 ## Constructing the client in a worker
 
-The library reads nothing from the environment — `location`, the cluster, and
+The library reads nothing from the environment: `location`, the cluster, and
 the credential are always constructor arguments. So a task takes the values the
 worker exposes and passes them in explicitly:
 
@@ -28,7 +28,7 @@ worker runs somewhere discovery can't reach.
 
 ## Passing start parameters
 
-When a task starts another actionflow, it often needs to hand it parameters —
+When a task starts another actionflow, it often needs to hand it parameters:
 a cursor, a date range, a batch id. Those ride on `custom_keys`, which today
 takes JSON bytes, so build them from a plain dict and encode once:
 
@@ -41,7 +41,7 @@ return the id it kicked off.
 
 ## Everything else is the ordinary loop
 
-Nothing about running in a worker changes how you read and write data — it's
+Nothing about running in a worker changes how you read and write data. It's
 the same DataFrame surface as the [Quickstart](../quickstart.md) and
 [Cookbook](cookbook.md):
 

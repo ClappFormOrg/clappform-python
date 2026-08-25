@@ -20,12 +20,12 @@ cf = Clappform(location="acme", cluster="prod", api_key="...")  # no DNS lookup
 ### `AuthenticationError`, or an error mentioning a missing `location` header
 
 The API key was rejected, or the tenant header wasn't sent. `location` is
-required on every call and is a constructor argument — the library never reads
+required on every call and is a constructor argument; the library never reads
 it from the environment.
 
 **Fix:** confirm the key is valid for the cluster you landed on, and that
 `location` is your tenant subdomain. `repr(cf)` prints both the cluster and
-location the client is bound to — check it first:
+location the client is bound to, so check it first:
 
 ```python
 print(cf)  # Clappform(cluster='prod', location='acme', auth=ApiKey, version=..., protos=...)
@@ -57,7 +57,7 @@ that tenant.
 
 ### "This `ReadResult` has already been consumed"
 
-A result set streams **once** — iterate it or `to_pandas()` it exactly once.
+A result set streams **once**: iterate it or `to_pandas()` it exactly once.
 Reusing the same `fetch()` result raises rather than silently returning empty.
 
 ```python
@@ -67,7 +67,7 @@ Reusing the same `fetch()` result raises rather than silently returning empty.
 ### An empty read blows up with `KeyError` on a column
 
 A read that matches nothing returns an empty DataFrame with **no columns**, so
-`df["col"]` raises. Branch on `df.empty` before indexing — see
+`df["col"]` raises. Branch on `df.empty` before indexing. See
 [Handle an empty result](cookbook.md#handle-an-empty-result).
 
 ### A big read times out (`TransientError` / `DEADLINE_EXCEEDED`)
@@ -84,15 +84,15 @@ The call exceeded the client's default deadline. Raise it for that one call with
 
 JSON has no representation for infinity, so the codec refuses it rather than
 corrupt the payload. Clean the column (`df.replace([np.inf, -np.inf], np.nan)`)
-before `append`/`update`. `NaN`/`NaT` are fine — they become JSON `null`.
+before `append`/`update`. `NaN`/`NaT` are fine; they become JSON `null`.
 
 ## Aggregation
 
 ### My `$group` pipeline returns raw rows unchanged (in a test)
 
 `LocalMock` runs the `$match`/`$project`/`$limit` stages but does **not** compute
-`$group`, `$sort`, `$lookup`, or other stages — it's a transport double, not an
-aggregation engine. Stub the grouped answer with `.on()` for that pipeline:
+`$group`, `$sort`, `$lookup`, or other stages, because it's a transport double,
+not an aggregation engine. Stub the grouped answer with `.on()` for that pipeline:
 
 ```python
 --8<-- "troubleshooting.py:group-in-mock"
@@ -104,7 +104,7 @@ Against a real cluster the server computes the full pipeline; this only affects
 ## FAQ
 
 **How do I read a filtered slice?** Pass an aggregation pipeline:
-`col.read(pipeline=[{"$match": {...}}])`. There is no `where=` argument — the
+`col.read(pipeline=[{"$match": {...}}])`. There is no `where=` argument; the
 client sends the pipeline verbatim rather than owning a query language.
 See [Read & query data](dataframes.md).
 

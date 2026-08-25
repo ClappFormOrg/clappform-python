@@ -9,7 +9,7 @@ hosts::
 
 So one forward lookup of ``{location}.clappform.com`` yields the cluster
 extension: no reverse lookups, no registry, no extra dependencies. This
-module only derives the extension — which endpoints to build from it, and
+module only derives the extension; which endpoints to build from it, and
 per-instance caching, belong to the client constructor. The ``location``
 metadata header sent on every call is unaffected.
 
@@ -53,7 +53,7 @@ def discover_cluster(location: str, *, resolver: Resolver | None = None) -> str:
     ``"prod-lts"``-style values for every other cluster.
 
     Raises :class:`ConfigurationError` when the lookup fails or the
-    canonical name does not match the BigIP convention — pass ``cluster=``
+    canonical name does not match the BigIP convention. Pass ``cluster=``
     explicitly in that case.
     """
     if not location or not re.fullmatch(r"[a-z0-9-]+", location, re.IGNORECASE):

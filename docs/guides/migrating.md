@@ -1,6 +1,6 @@
 # Migrating from 4.x / 5.x
 
-Version 6 is a ground-up rewrite. If your scripts import `clappform.Data`,
+Version 6 is a full rewrite. If your scripts import `clappform.Data`,
 `clappform.Client`, or anything from `clappform.proto.*`, they are on the old
 package. This guide shows the v6 way for every common call, with the old form
 kept underneath purely as a memory jog.
@@ -13,13 +13,13 @@ separate `Data` / `Client` objects are all gone. You work with a single
 
 !!! note "How to read this page"
     The **v6** code in each section is what you write now, and it is pulled from
-    a snippet that runs against `LocalMock` in CI — so it is guaranteed to work.
+    a snippet that runs against `LocalMock` in CI, so it is known to work.
     The **old 4.x / 5.x** form is tucked into a collapsed "reference" block below
     each one; open it only if you need to recognise what you're replacing.
 
 ## Connecting
 
-There were two client classes — `Data` and `Client` — each taking a token, a
+There were two client classes, `Data` and `Client`, each taking a token, a
 location, and often an explicit `target` host:port. v6 has one client, and the
 cluster is discovered from DNS.
 
@@ -30,10 +30,10 @@ cluster is discovered from DNS.
 Data-plane calls that were on `Data` now live on `cf.data`; the ones on
 `Client` live on `cf.client`. If you talk to an older cluster that still serves
 gRPC on `:50051`, pass it through `endpoints=` (see
-[Multi-cluster](multi-cluster.md)) — discovery targets the current clusters on
+[Multi-cluster](multi-cluster.md)). Discovery targets the current clusters on
 443.
 
-??? note "Old (4.x / 5.x) — reference"
+??? note "Old (4.x / 5.x) reference"
 
     ```python
     import clappform
@@ -51,7 +51,7 @@ gRPC on `:50051`, pass it through `endpoints=` (see
 --8<-- "migrating.py:read"
 ```
 
-??? note "Old — reference"
+??? note "Old reference"
 
     ```python
     from clappform.proto.clappform.data.v1 import aggregate_pb2
@@ -67,7 +67,7 @@ gRPC on `:50051`, pass it through `endpoints=` (see
     ```
 
 If you had a full pipeline (`$group`, `$sort`, …) rather than a simple filter,
-pass it to `aggregate()` — still no `json.dumps`, no `encode()`, no manual
+pass it to `aggregate()`, still with no `json.dumps`, no `encode()`, no manual
 concat:
 
 ```python
@@ -77,13 +77,13 @@ concat:
 ## Inserting rows
 
 `append()` chunks and streams the upload for you and returns the number of rows
-written — no `insert_many_dataframe` helper, no draining the response iterator.
+written. No `insert_many_dataframe` helper, no draining the response iterator.
 
 ```python
 --8<-- "migrating.py:insert"
 ```
 
-??? note "Old — reference"
+??? note "Old reference"
 
     ```python
     from clappform.utils import insert_many_dataframe
@@ -94,14 +94,14 @@ written — no `insert_many_dataframe` helper, no draining the response iterator
 
 ## Updating rows
 
-`read()` keeps `_id` on the frame, so you mutate and hand it straight back —
+`read()` keeps `_id` on the frame, so you mutate and hand it straight back with
 no batching, no per-batch JSON serialisation, no `UpdateRequestByOid`.
 
 ```python
 --8<-- "migrating.py:update"
 ```
 
-??? note "Old — reference"
+??? note "Old reference"
 
     ```python
     for start in range(0, len(df), batch_size):
@@ -116,13 +116,13 @@ no batching, no per-batch JSON serialisation, no `UpdateRequestByOid`.
 ## Deleting rows
 
 `delete()` takes exactly one of `oids=` (specific `_id`s) or `where=` (a
-filter). An empty `where` is refused — use `clear()` for a deliberate full wipe.
+filter). An empty `where` is refused; use `clear()` for a deliberate full wipe.
 
 ```python
 --8<-- "migrating.py:delete"
 ```
 
-??? note "Old — reference"
+??? note "Old reference"
 
     ```python
     from clappform.proto.clappform.data.v1 import delete_pb2
@@ -133,18 +133,18 @@ filter). An empty `where` is refused — use `clear()` for a deliberate full wip
 
 ## Starting an actionflow
 
-`start()` takes an id on the same client — no raw `StartActionflow` proto, no
+`start()` takes an id on the same client, with no raw `StartActionflow` proto, no
 integer `actionflowid`, no magic `user=` number.
 
 ```python
 --8<-- "migrating.py:actionflow"
 ```
 
-To pass start parameters, use `custom_keys=` — today that field takes JSON
+To pass start parameters, use `custom_keys=`. Today that field takes JSON
 bytes, so build it with `json.dumps({...}).encode("utf-8")`. See
 [Running inside an actionflow](actionflow-scripts.md#passing-start-parameters).
 
-??? note "Old — reference"
+??? note "Old reference"
 
     ```python
     from clappform.proto.clappform.client.v1 import actionflow_pb2
@@ -168,7 +168,7 @@ bytes, so build it with `json.dumps({...}).encode("utf-8")`. See
 | `update_replace_many(UpdateRequestByOid(...))` | `cf.data.collection(ref).update(df)` |
 | `delete_many_by_oids(DeleteRequestOids(...))` | `cf.data.collection(ref).delete(oids=[...])` |
 | `c.actionflow_start(StartActionflow(...))` | `cf.client.actionflow.start(id=...)` |
-| `from clappform.proto...import *_pb2` | not needed — but `clappform.gen...` is there if you want the raw stubs |
+| `from clappform.proto...import *_pb2` | not needed, though `clappform.gen...` is there if you want the raw stubs |
 | manual `json.dumps(pipeline).encode()` | pass Python dicts/lists; the client encodes |
 | `try/except grpc.RpcError` | `except ClappformError` (see [Errors](errors-and-retries.md)) |
 

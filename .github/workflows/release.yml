@@ -14,7 +14,7 @@ name: Release
 #     version on the public `clappform` project; choose `pypi` to dispatch a
 #     production publish instead.
 #
-# Auth is PyPI Trusted Publishing (OIDC) — no long-lived tokens live in the
+# Auth is PyPI Trusted Publishing (OIDC), so no long-lived tokens live in the
 # repo. One-time setup: add a trusted publisher on BOTH indexes you use
 # (pypi.org and/or test.pypi.org) for this repository + workflow (`release.yml`)
 # + the matching environment name (`pypi` / `testpypi`), and create GitHub
@@ -55,7 +55,7 @@ jobs:
         run: python -m build
 
       # On a Release trigger, fail loudly if the tag and the packaged version
-      # disagree — a mismatched tag is the classic way a wrong version ships.
+      # disagree; a mismatched tag is the classic way a wrong version ships.
       # Tag may be `v6.0.0a1` or `6.0.0a1`; compare on the normalized value.
       - name: Check tag matches package version
         if: github.event_name == 'release'
@@ -101,7 +101,7 @@ jobs:
       - name: Publish to production PyPI (Trusted Publishing / OIDC)
         if: github.event_name == 'release' || inputs.target == 'pypi'
         uses: pypa/gh-action-pypi-publish@release/v1
-        # No `password:` — OIDC trusted publishing authenticates via the
+        # No `password:`, because OIDC trusted publishing authenticates via the
         # id-token above. Defaults to the production index (pypi.org).
 
       - name: Publish to TestPyPI (Trusted Publishing / OIDC)

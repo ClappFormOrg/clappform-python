@@ -20,7 +20,7 @@ need the `pandas` extra; `polars` and `arrow` are also declared, and
 
 ## Quickstart
 
-A client is one binding — a cluster, a tenant (`location`), and a credential.
+A client is one binding: a cluster, a tenant (`location`), and a credential.
 Nothing is read from the environment; you pass everything in.
 
 ```python
@@ -35,7 +35,7 @@ with cf:
     # Read a filtered slice straight into a pandas DataFrame.
     df = orders.read(where={"status": "open"}, fields=["order_id", "amount"])
 
-    # Mutate it and write the changed rows back — matched on _id by default.
+    # Mutate it and write the changed rows back, matched on _id by default.
     df["amount"] *= 1.08
     orders.update(df)
 ```
@@ -61,7 +61,7 @@ or tenants coexist in one process.
 | List collections / apps / queries | `cf.client.collection.iter_get_all()` (and `app`, `query`, `cronjob`) |
 | Move a whole app between instances | `src.client.transfer.export_app(...)` → `dst.client.transfer.import_app(...)` |
 
-Errors are typed — every failure derives from `ClappformError` and carries the
+Errors are typed: every failure derives from `ClappformError` and carries the
 call context (method, cluster, location), so you never import `grpc` to handle
 one.
 
@@ -86,7 +86,7 @@ with Clappform(location="acme", cluster="prod", api_key="test", transport=mock) 
 ## Documentation
 
 Full guides and the generated API reference live at
-**[clappform.readthedocs.io](https://clappform.readthedocs.io/)** — quickstart,
+**[clappform.readthedocs.io](https://clappform.readthedocs.io/)**: quickstart,
 DataFrame flows, actionflows & listings, multi-cluster / multi-tenant, error
 handling & retries, and testing with `LocalMock`. Every code example in the
 guides is a runnable snippet exercised against `LocalMock` in CI, so the docs

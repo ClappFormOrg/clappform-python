@@ -36,7 +36,7 @@ def build_mock() -> LocalMock:
     )
 
     # The guide's aggregate() example uses a $group, which the seeded double
-    # doesn't compute — stub the server's grouped answer and delegate every
+    # doesn't compute, so stub the server's grouped answer and delegate every
     # other read to the built-in handler.
     def _aggregate(request):
         stages = json.loads(request.pipeline) if request.pipeline else []
@@ -61,7 +61,7 @@ def run(transport: LocalMock) -> None:
     from clappform import Clappform
 
     cf = Clappform(location="preprod", api_key="cf_live_...")
-    # data-plane calls live on cf.data, client-API calls on cf.client —
+    # data-plane calls live on cf.data, client-API calls on cf.client:
     # one binding, no separate Data / Client objects.
     # --8<-- [end:connect]
 
@@ -83,7 +83,7 @@ def run(transport: LocalMock) -> None:
         assert len(df) == 2
 
         # --8<-- [start:aggregate]
-        # A full pipeline (the old default) still works — pass it to aggregate().
+        # A full pipeline (the old default) still works; pass it to aggregate().
         # No json.dumps, no encode(), no manual concat of the streamed chunks.
         revenue = cf.data.collection("sales_orders").aggregate(
             [{"$group": {"_id": "$status", "total": {"$sum": "$amount"}}}]
@@ -111,7 +111,7 @@ def run(transport: LocalMock) -> None:
         # --8<-- [start:delete]
         orders = cf.data.collection("sales_orders")
 
-        # by explicit _id(s) — the direct replacement for delete_many_by_oids
+        # by explicit _id(s), the direct replacement for delete_many_by_oids
         orders.delete(oids=["order-id-1", "order-id-2"])
 
         # ...or by filter, evaluated server-side (nothing round-trips)

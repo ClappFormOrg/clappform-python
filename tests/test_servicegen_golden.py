@@ -58,7 +58,7 @@ def test_generated_sources_match_golden(descriptor_set: bytes) -> None:
     )
     for name, source in sources.items():
         expected = (GOLDEN / name).read_text(encoding="utf-8")
-        assert source == expected, f"{name} drifted from golden — see UPDATE_GOLDEN"
+        assert source == expected, f"{name} drifted from golden; see UPDATE_GOLDEN"
 
 
 def test_reserved_field_is_not_flattened(descriptor_set: bytes) -> None:

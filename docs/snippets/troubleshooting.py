@@ -33,7 +33,7 @@ def run(transport: LocalMock) -> None:
         col = cf.data.collection("orders")
 
         # --8<-- [start:consumed-result]
-        # SYMPTOM: "this ReadResult has already been consumed" — a result set
+        # SYMPTOM: "this ReadResult has already been consumed". A result set
         # streams once. FIX: don't reuse a fetch(); take what you need in one
         # pass, or call fetch()/read() again for a fresh stream.
         from clappform import ClappformError

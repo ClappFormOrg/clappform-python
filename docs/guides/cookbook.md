@@ -1,7 +1,7 @@
 # Cookbook
 
 Copy-paste recipes for the tasks people write most. Every block here runs
-against `LocalMock` in CI, so the code is known-good — lift it straight into
+against `LocalMock` in CI, so the code is known-good. Lift it straight into
 your script and swap the collection names and filters for yours.
 
 For the full argument list behind any call, see [DataFrame flows](dataframes.md)
@@ -11,7 +11,7 @@ For the full argument list behind any call, see [DataFrame flows](dataframes.md)
 ## Collection CRUD
 
 The four operations you'll use most, on a `cf.data.collection(ref)` handle.
-`ref` is a slug or a UUID — a slug is resolved once and cached per tenant.
+`ref` is a slug or a UUID; a slug is resolved once and cached per tenant.
 
 ### Create (insert new rows)
 
@@ -44,12 +44,12 @@ The four operations you'll use most, on a `cf.data.collection(ref)` handle.
 ```
 
 !!! warning "Full wipes are explicit"
-    `delete(where={})` is refused — an empty filter matching every document is
-    almost always a bug. To empty a collection on purpose, call `clear()`.
+    `delete(where={})` is refused, because an empty filter matching every
+    document is almost always a bug. To empty a collection on purpose, call `clear()`.
 
 ## Read a single record
 
-Filter, cap at one row, and take it as a dict — with an `.empty` guard so a
+Filter, cap at one row, and take it as a dict, with an `.empty` guard so a
 miss returns `None` instead of raising.
 
 ```python
@@ -64,7 +64,7 @@ Read the bytes into a DataFrame with pandas, then `append()`.
 --8<-- "cookbook.py:ingest-file"
 ```
 
-pandas picks the reader from the format — `read_csv`, `read_excel` (needs
+pandas picks the reader from the format: `read_csv`, `read_excel` (needs
 `openpyxl`), `read_parquet`, `read_json`. The client chunks and streams the
 upload; `append()` returns the number of rows written. For a full refresh of
 existing rows, use `upsert(df, on="...")` instead so a re-run updates in place.
@@ -77,7 +77,7 @@ Group, sort, or reshape server-side and get a frame back.
 --8<-- "cookbook.py:aggregate-to-df"
 ```
 
-`aggregate(p)` is exactly `read(pipeline=p)` returning a DataFrame — use
+`aggregate(p)` is exactly `read(pipeline=p)` returning a DataFrame, so use
 whichever name reads better at the call site. A plain filter/projection is just
 a pipeline with a `$match`/`$project` stage (see the read recipe above); reach
 for the `aggregate()` name when the call is conceptually a grouping or reshape.
@@ -85,8 +85,8 @@ for the `aggregate()` name when the call is conceptually a grouping or reshape.
 ## Stream a large aggregation into DataFrames
 
 `aggregate()` and `read()` materialise the **whole** result in memory before
-handing it back — fine for a slice, wasteful for a result too big to hold. When
-you're reducing or writing out row-by-row, stream instead:
+handing it back, which is fine for a slice and wasteful for a result too big to
+hold. When you're reducing or writing out row-by-row, stream instead:
 `fetch(pipeline=...).iter_batches()` yields one gRPC chunk at a time, so you
 convert each chunk to a small DataFrame, fold it into your running result, and
 let it be freed before the next arrives. **Peak memory is one batch, not the
@@ -96,11 +96,11 @@ whole set.**
 --8<-- "cookbook.py:stream-aggregate"
 ```
 
-`batch_size` caps the rows per chunk — raise it to trade memory for fewer
+`batch_size` caps the rows per chunk: raise it to trade memory for fewer
 round-trips, lower it when rows are wide. This is the memory-efficient path for
 large aggregations you can process incrementally (summing, writing to a file or
 another collection, feeding a model). If you genuinely need the entire result as
-one frame, `aggregate()` is simpler — the streaming form only helps when you can
+one frame, `aggregate()` is simpler; the streaming form only helps when you can
 avoid holding it all.
 
 !!! note "A result streams once"
@@ -110,7 +110,7 @@ avoid holding it all.
 
 ## Handle an empty result
 
-A read matching nothing returns an empty DataFrame — never an error, never
+A read matching nothing returns an empty DataFrame, never an error and never
 `None`. It has no columns, so branch on `.empty` before indexing one.
 
 ```python
@@ -136,8 +136,8 @@ Trigger a flow by id; the response carries the run's `uuid`.
 --8<-- "cookbook.py:actionflow-start"
 ```
 
-To hand the flow start parameters, pass `custom_keys=` — JSON bytes today, so
-encode a dict:
+To hand the flow start parameters, pass `custom_keys=`, which takes JSON bytes
+today, so encode a dict:
 
 ```python
 --8<-- "cookbook.py:actionflow-params"

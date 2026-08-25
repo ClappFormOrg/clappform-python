@@ -3,7 +3,7 @@
 [`LocalMock`][clappform.testing.LocalMock] is an in-process transport double. It
 implements the same transport seam the real client uses, so it plugs straight
 into `Clappform(transport=LocalMock())` and every service method works against
-it — no network, no infrastructure, no keys that matter.
+it, with no network, no infrastructure, and no keys that matter.
 
 Every example in these guides runs against `LocalMock` in CI, so a doc snippet
 that breaks fails the build.
@@ -23,13 +23,13 @@ round-trips:
 --8<-- "testing.py:roundtrip"
 ```
 
-Writes mutate the store, so a follow-up read sees them — which is what lets you
+Writes mutate the store, so a follow-up read sees them, which is what lets you
 test a read → mutate → write-back pipeline end to end.
 
 ## Assert on the calls made
 
-Every call is recorded on `mock.calls` for assertions — handy for checking the
-right RPC was invoked with the right tenant.
+The mock records every call on `mock.calls` for assertions, which is how you
+check that the right RPC ran with the right tenant.
 
 ```python
 --8<-- "testing.py:assert-calls"

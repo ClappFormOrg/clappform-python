@@ -1,8 +1,8 @@
 # Performance & large datasets
 
-The DataFrame flows are tuned for the common case out of the box. This page is
+The DataFrame flows are tuned for the common case by default. This page is
 for when the data is large enough that *how* you read and write starts to
-matter — big reads, bulk loads, and memory pressure.
+matter: big reads, bulk loads, and memory pressure.
 
 ## Reads: `batch_size` and streaming
 
@@ -18,7 +18,7 @@ peak. Tune it to your row width, not a magic number.
 ```
 
 **Stream instead of materialise.** If you're reducing or writing out
-row-by-row, don't build one giant DataFrame — iterate batches and let each fall
+row-by-row, don't build one giant DataFrame. Iterate batches and let each fall
 out of scope, so peak memory is one chunk:
 
 ```python
@@ -27,7 +27,7 @@ out of scope, so peak memory is one chunk:
 
 This is the same technique as the
 [Stream a large aggregation](cookbook.md#stream-a-large-aggregation-into-dataframes)
-recipe — use it whenever the result doesn't need to exist as one frame.
+recipe: use it whenever the result doesn't need to exist as one frame.
 
 ## Writes: `chunk_rows` and progress
 
@@ -36,7 +36,7 @@ recipe — use it whenever the result doesn't need to exist as one frame.
 resending the whole frame. Raise it to trade memory for fewer round-trips; lower
 it for very wide rows.
 
-Pass a `progress` callback to surface a running count — handy for a notebook bar
+Pass a `progress` callback to surface a running count, handy for a notebook bar
 or a log line on a long load. It's called with the cumulative row count after
 each chunk:
 
@@ -60,9 +60,9 @@ shape is one-off or computed at runtime.
 
 ## Rules of thumb
 
-- Default `batch_size` / `chunk_rows` are fine until profiling says otherwise —
+- Default `batch_size` / `chunk_rows` are fine until profiling says otherwise;
   don't tune preemptively.
 - Memory-bound? Stream (`iter_batches`) rather than raising `batch_size`.
 - Throughput-bound on a bulk load? Raise `chunk_rows` so there are fewer chunks.
 - A read that can't finish inside the deadline needs streaming, not just a
-  bigger `timeout=` — see [Errors & retries](errors-and-retries.md#per-call-deadlines).
+  bigger `timeout=`. See [Errors & retries](errors-and-retries.md#per-call-deadlines).

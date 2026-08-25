@@ -8,7 +8,7 @@ changed). This test dials a real staging cluster to catch exactly that.
 It is **skipped unless** ``CLAPPFORM_CONTRACT_SMOKE`` is set, because it needs
 network access and real credentials, so it never runs in the normal unit-test
 suite (local or PR CI). The intended home is the proto-sync workflow, which
-runs after regenerating stubs from a new ``commons`` tag — the one moment
+runs after regenerating stubs from a new ``commons`` tag, the one moment
 client/server drift can appear. Point it at staging with:
 
     CLAPPFORM_CONTRACT_SMOKE=1
@@ -16,8 +16,8 @@ client/server drift can appear. Point it at staging with:
     CLAPPFORM_SMOKE_API_KEY=<staging api key>
     CLAPPFORM_SMOKE_CLUSTER=<cluster extension>   # optional; DNS-discovered if unset
 
-The assertions stay deliberately shallow — a real round-trip and clean
-teardown — so the test flags drift without depending on any tenant's data.
+The assertions stay deliberately shallow (a real round-trip and clean
+teardown) so the test flags drift without depending on any tenant's data.
 """
 
 from __future__ import annotations
@@ -85,7 +85,7 @@ def test_staging_auth_key_listing_round_trips(staging_client) -> None:
 
 
 def test_staging_notifier_health_round_trips(staging_client) -> None:
-    """Health-check the notifier family against staging — a tenant-data-free
+    """Health-check the notifier family against staging: a tenant-data-free
     round-trip that flags drift on a third API family (and its host)."""
     try:
         status = staging_client.notifier.health.health()

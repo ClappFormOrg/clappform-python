@@ -1,4 +1,4 @@
-"""Collection/query handles and ReadResult — the DataFrame surface.
+"""Collection/query handles and ReadResult: the DataFrame surface.
 
 Drives the flows through the real ``Clappform`` client against ``LocalMock``,
 exactly as customers and the guide snippets in ``docs/snippets/`` do: seed a
@@ -112,7 +112,7 @@ def test_empty_collection_reads_empty_frame(cf) -> None:
 
 @pytest.mark.parametrize("kwarg", ["where", "fields", "limit"])
 def test_removed_read_sugar_is_rejected(cf, kwarg) -> None:
-    """The where/fields/limit read sugar was removed — passing it must error
+    """The where/fields/limit read sugar was removed, so passing it must error
     rather than silently no-op, guarding against accidental reintroduction."""
     client, _mock = cf
     col = client.data.collection(CID)
@@ -125,7 +125,7 @@ def test_removed_read_sugar_is_rejected(cf, kwarg) -> None:
 def test_aggregate_passes_pipeline_through(cf) -> None:
     client, mock = cf
     _seed_orders(mock)
-    # A $match stage the sugar could also emit — proves the custom path streams.
+    # A $match stage the sugar could also emit, proving the custom path streams.
     df = client.data.collection(CID).aggregate([{"$match": {"status": "closed"}}])
     assert list(df["order_id"]) == [2]
 
@@ -273,7 +273,7 @@ def test_to_pandas_without_pandas_raises_install_hint(cf, monkeypatch) -> None:
 
 
 def test_pipeline_is_sent_verbatim(cf) -> None:
-    """read(pipeline=...) sends the caller's stages untouched — the client
+    """read(pipeline=...) sends the caller's stages untouched: the client
     neither interprets nor rewrites them."""
     client, mock = cf
     _seed_orders(mock)
@@ -290,7 +290,7 @@ def test_pipeline_is_sent_verbatim(cf) -> None:
 
 def test_read_fetch_aggregate_encode_the_same_pipeline(cf) -> None:
     """read(pipeline=p), fetch(pipeline=p) and aggregate(p) put the identical
-    pipeline on the wire — they differ only in return type."""
+    pipeline on the wire and differ only in return type."""
     client, mock = cf
     _seed_orders(mock)
     col = client.data.collection(CID)
@@ -306,7 +306,7 @@ def test_read_fetch_aggregate_encode_the_same_pipeline(cf) -> None:
 
 
 def test_read_without_pipeline_sends_empty(cf) -> None:
-    """A bare read() streams the whole collection — an empty pipeline."""
+    """A bare read() streams the whole collection with an empty pipeline."""
     client, mock = cf
     _seed_orders(mock)
     client.data.collection(CID).read()

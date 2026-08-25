@@ -3,7 +3,7 @@
 # Docs live in this repo and build with MkDocs (RTD supports MkDocs natively),
 # so the existing clappform.readthedocs.io domain and its search index carry
 # over. The reference is generated from the wrapper layer's docstrings, which
-# means the package has to be importable at build time — hence the editable
+# means the package has to be importable at build time, hence the editable
 # install with the docs and pandas extras below.
 version: 2
 

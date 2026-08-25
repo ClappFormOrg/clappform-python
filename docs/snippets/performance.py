@@ -39,7 +39,7 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:write-progress]
         # append/update/upsert stream the upload in chunks of chunk_rows. Pass a
-        # progress callback to surface a running count — a notebook progress bar,
+        # progress callback to surface a running count: a notebook progress bar,
         # a log line, whatever. It's called with the cumulative rows after each
         # chunk.
         big = pd.DataFrame([{"n": i} for i in range(10_000)])

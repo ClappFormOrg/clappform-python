@@ -41,7 +41,7 @@ def run(prod_transport: LocalMock, qa_transport: LocalMock) -> None:
 
         # --8<-- [start:with-location]
         # Same cluster, another tenant: with_location() clones cheaply and
-        # shares the underlying connections — only the tenant metadata differs.
+        # shares the underlying connections; only the tenant metadata differs.
         beta = prod.with_location("beta")
         beta_orders = beta.data.collection("orders").read()
         # --8<-- [end:with-location]
@@ -61,8 +61,8 @@ def run(prod_transport: LocalMock, qa_transport: LocalMock) -> None:
         assert totals == {"acme": 1, "beta": 1, "gamma": 1}
 
         # --8<-- [start:transfer-app]
-        # Move a whole app — its collections, and optionally its queries,
-        # actionflows and questionnaires — from one instance to another.
+        # Move a whole app, with its collections and optionally its queries,
+        # actionflows and questionnaires, from one instance to another.
         # export_app() reads the bundle from the source; import_app() writes it
         # into the target. The AppExport's four byte blobs are exactly the
         # fields import_app() consumes, so the hand-off needs no reshaping.
@@ -97,7 +97,7 @@ def _register_transfer_stubs(
     """Stub ExportApp on the source and ImportApp on the target.
 
     Transfer RPCs are not data-plane calls, so LocalMock has no built-in
-    handler — the same ``.on()`` stubbing you'd use in your own tests. The
+    handler, so this uses the same ``.on()`` stubbing you'd use in your own tests. The
     import stub is a handler that captures the received blobs so the snippet
     can assert the bundle crossed instances intact.
     """

@@ -83,7 +83,7 @@ extend-exclude = [
     "src/clappform/gen",
     "src/clappform/services",
     "tests/servicegen_golden",
-    # MkDocs build output — a copy of the source tree, not source to lint.
+    # MkDocs build output: a copy of the source tree, not source to lint.
     "site",
 ]
 
@@ -93,7 +93,7 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 [tool.ruff.lint.per-file-ignores]
 # Doc snippet sources deliberately re-import inside each function so that every
 # fenced block the guides include reads as standalone, copy-pasteable code.
-# That trips F811 (redefinition) — expected here, not a defect.
+# That trips F811 (redefinition), which is expected here rather than a defect.
 "docs/snippets/*.py" = ["F811"]
 
 [tool.mypy]
@@ -122,7 +122,7 @@ ignore_missing_imports = true
 module = ["pyarrow.*", "polars.*"]
 ignore_missing_imports = true
 
-# Pyright is not part of `make check` — mypy stays the gate. This section exists
+# Pyright is not part of `make check`; mypy stays the gate. This section exists
 # so that a pyright-langserver spawned by an editor or agent reports the same
 # scope mypy does, rather than flagging the generated trees the gate ignores.
 [tool.pyright]
@@ -131,13 +131,13 @@ typeCheckingMode = "standard"
 include = ["src/clappform", "tools", "tests"]
 
 # Not source: bytecode, the servicegen golden fixtures, and the MkDocs build
-# output (a copy of the whole tree — analysing it double-reports everything).
+# output (a copy of the whole tree, so analysing it double-reports everything).
 # Mirrors the "site" and "servicegen_golden" entries in extend-exclude above.
 exclude = ["**/__pycache__", "site", "tests/servicegen_golden"]
 
 # Generated code. `ignore` rather than `exclude` so these modules still resolve
 # for the hand-written code that imports them, while their own diagnostics stay
-# silent — the same split as ignore_errors in the mypy overrides above.
+# silent, the same split as ignore_errors in the mypy overrides above.
 ignore = ["src/clappform/gen", "src/clappform/services"]
 
 # pyarrow ships no py.typed marker and polars may be absent entirely; both sit

@@ -15,7 +15,7 @@ one at qa and use them side by side:
 ```
 
 Omit `cluster=` and the client discovers it from the DNS CNAME of
-`{location}.clappform.com`. An explicit `cluster=` always wins — pass it in
+`{location}.clappform.com`. An explicit `cluster=` always wins, so pass it in
 air-gapped or split-DNS environments where discovery can't run.
 
 ## Copying across clusters
@@ -29,8 +29,8 @@ a write on the other:
 
 ## Moving a whole app between instances
 
-The copy above moves *rows*. To move an entire **app** — its collections and,
-optionally, its queries, actionflows and questionnaires — use the transfer
+The copy above moves *rows*. To move an entire **app**, with its collections and,
+optionally, its queries, actionflows and questionnaires, use the transfer
 RPCs. `export_app()` reads the bundle from the source instance and returns it as
 four byte blobs; `import_app()` writes those same blobs into the target. It's
 inherently a two-instance operation: read from one client, write to the other.
@@ -41,7 +41,7 @@ inherently a two-instance operation: read from one client, write to the other.
 
 The `include_*` flags on `export_app()` choose what travels with the app, and
 the `AppExport` it returns exposes exactly the `app` / `queries` / `actionflows`
-/ `questionnaires` fields `import_app()` consumes — so the hand-off is a direct
+/ `questionnaires` fields `import_app()` consumes, so the hand-off is a direct
 pass-through with no reshaping. Pass `overwrite=True` on the import only when you
 intend to replace an app that already exists on the target; the default refuses
 to clobber it. `export_actionflow()` / `import_actionflow()` move a single
@@ -51,7 +51,7 @@ actionflow the same way when you don't need the whole app.
 
 `with_location()` gives a cheap clone bound to a different tenant. When the
 cluster is known (explicit, or a custom transport) the clone shares the parent's
-connections and configuration — only the tenant metadata differs, and no DNS is
+connections and configuration: only the tenant metadata differs, and no DNS is
 performed.
 
 ```python
@@ -68,7 +68,7 @@ performed.
 ### Fanning out across many tenants
 
 Because `with_location()` is cheap and shares connections, running the same job
-across a list of tenants is just a loop — clone per tenant, do the work, move
+across a list of tenants is just a loop: clone per tenant, do the work, move
 on. Only the tenant metadata changes between iterations.
 
 ```python
@@ -77,12 +77,12 @@ on. Only the tenant metadata changes between iterations.
 
 Each clone reuses the parent's channels (same cluster), so this doesn't open a
 connection per tenant. If the tenants span *different* clusters, construct a
-`Clappform` per cluster instead — see [two clusters, one process](#two-clusters-one-process).
+`Clappform` per cluster instead. See [two clusters, one process](#two-clusters-one-process).
 
 ## Staggered rollouts
 
 Clusters update at different times, so a newer client may call an RPC an older
-cluster doesn't serve yet — that surfaces as
+cluster doesn't serve yet. That surfaces as
 [`NotSupportedError`][clappform.NotSupportedError] (gRPC `UNIMPLEMENTED`), not a
 crash. Handle it where you rely on a just-added RPC; see
 [Error handling & retries](errors-and-retries.md).

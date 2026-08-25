@@ -1,6 +1,6 @@
 """Cluster discovery from the location's CNAME target.
 
-All tests inject a stub resolver — no live DNS is ever performed in CI.
+All tests inject a stub resolver, so no live DNS is ever performed in CI.
 """
 
 import socket

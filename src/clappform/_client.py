@@ -1,7 +1,7 @@
 """The Clappform client: one instance = one (cluster, location, credentials)
 binding.
 
-Nothing is global — two instances pointed at two clusters coexist in one
+Nothing is global: two instances pointed at two clusters coexist in one
 process, and :meth:`Clappform.with_location` gives a cheap same-cluster
 clone for another tenant, sharing connections and configuration.
 """
@@ -54,7 +54,7 @@ class Clappform:
 
     ``cluster`` is the host extension (``"qa"``, ``"qa-lts"``, ``"prod"`` or
     ``""`` for the main cluster). When omitted, it is discovered from the
-    DNS CNAME of ``{location}.clappform.com`` — pass it explicitly in
+    DNS CNAME of ``{location}.clappform.com``. Pass it explicitly in
     air-gapped or split-DNS environments.
 
     All configuration is explicit constructor input: the library reads no
@@ -77,8 +77,8 @@ class Clappform:
     # shows on more than one family. The two-level ``cf.<family>.<service>``
     # path stays the canonical form regardless of what is hoisted.
     #
-    # Intentionally empty for now. The obvious DataFrame candidates —
-    # ``collection`` / ``query`` — are NOT globally unambiguous: both are real
+    # Intentionally empty for now. The obvious DataFrame candidates,
+    # ``collection`` / ``query``, are NOT globally unambiguous: both are real
     # service names on cf.client, so hoisting them onto ``cf`` would shadow a
     # different family's surface. They stay at their canonical home,
     # ``cf.data.collection(...)`` / ``cf.data.query(...)``. New entries are
@@ -187,7 +187,7 @@ class Clappform:
         """A clone bound to another tenant, sharing connections when possible.
 
         With an explicitly configured cluster (or a custom transport) the
-        clone inherits it and shares the transport — only the tenant
+        clone inherits it and shares the transport; only the tenant
         metadata differs, and no DNS is performed. When this instance's
         cluster was *discovered*, a different location is re-discovered:
         if it lands on the same cluster the transport is still shared,
@@ -243,7 +243,7 @@ class Clappform:
 
         Only reached when normal lookup misses (the bound families and curated
         shortcuts resolve first). If ``name`` is a real service or method name
-        living on a family, say so — ``cf.insert`` -> "``insert`` lives on
+        living on a family, say so: ``cf.insert`` -> "``insert`` lives on
         cf.data". Otherwise fall back to the standard ``AttributeError``.
         """
         # Dunder / private probes (copy, pickle, etc.) must miss cleanly.

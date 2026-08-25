@@ -7,7 +7,7 @@
 #
 # Generated trees (clappform/gen, clappform/services, the servicegen golden
 # fixture, and the mkdocs `site/` output) are excluded everywhere, matching
-# ruff's extend-exclude — they are machine-written and must not be reformatted.
+# ruff's extend-exclude: they are machine-written and must not be reformatted.
 exclude: |
   (?x)^(
     src/clappform/gen/|
@@ -30,7 +30,7 @@ repos:
   # ruff lint, matching the CI lint job (`ruff check .`, config in [tool.ruff]
   # of pyproject.toml). Deliberately no ruff-format hook: this repo is not
   # maintained with the ruff formatter (it uses hand-managed line breaks that
-  # the formatter would rewrite), and CI does not format-check either — so the
+  # the formatter would rewrite), and CI does not format-check either, so the
   # hook mirrors exactly what CI enforces, nothing more.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.7

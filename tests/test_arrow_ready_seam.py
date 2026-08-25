@@ -21,7 +21,7 @@ from clappform.dataframes import ReadResult
 def test_codec_dispatches_per_chunk_format_not_globally() -> None:
     # A stream whose chunks carry different formats must be dispatched per
     # chunk: the JSON chunk decodes, and the ARROW_IPC chunk hits the reserved
-    # branch and raises — proving the format travels with each chunk rather than
+    # branch and raises, proving the format travels with each chunk rather than
     # being assumed once for the whole stream.
     stream = [
         (ChunkFormat.JSON, b'[{"a":1}]'),

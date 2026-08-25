@@ -35,7 +35,7 @@ def run(transport: LocalMock) -> None:
 
     # --8<-- [start:connect-in-worker]
     # A task running in the worker is handed its tenant and a key. Nothing is
-    # read from the environment by the library — you pass them in, so pull them
+    # read from the environment by the library; you pass them in, so pull them
     # from wherever the worker exposes them and construct the client explicitly.
     cf = Clappform(location=TENANT, api_key=API_KEY)
     # --8<-- [end:connect-in-worker]
@@ -45,7 +45,7 @@ def run(transport: LocalMock) -> None:
     with cf:
         # --8<-- [start:start-params]
         # Start parameters ride on `custom_keys`, which today takes JSON bytes.
-        # Build them from a plain dict — encode once, pass through.
+        # Build them from a plain dict, encode once, and pass through.
         custom_keys = json.dumps({"next_page": "", "since": "2026-01-01"}).encode("utf-8")
         started = cf.client.actionflow.start(
             id="recalculate-dashboards",
@@ -56,7 +56,7 @@ def run(transport: LocalMock) -> None:
         assert run_id == "run-xyz"
 
         # --8<-- [start:read-write]
-        # From there it's the ordinary DataFrame loop — nothing about running in
+        # From there it's the ordinary DataFrame loop; nothing about running in
         # a worker changes how you read and write collections.
         orders = cf.data.collection("sales_orders")
         df = orders.read(pipeline=[{"$match": {"status": "open"}}])

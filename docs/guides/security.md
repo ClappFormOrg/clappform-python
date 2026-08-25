@@ -1,13 +1,13 @@
 # Security & credentials
 
-API keys are the only credential this line ships, and everything is explicit —
+API keys are the only credential this line ships, and everything is explicit:
 the library reads no config files and no environment variables. That puts you in
 control of where secrets come from; this page covers using that well.
 
 ## Keep keys out of source
 
 The client never reads the environment for you, so *you* decide the source. Pull
-the key from a secret store / environment at the call site and pass it in —
+the key from a secret store or environment at the call site and pass it in;
 never hard-code it, never commit it:
 
 ```python
@@ -28,7 +28,7 @@ see [Running inside an actionflow](actionflow-scripts.md).
 
 ## Scope keys to what they need
 
-The credential rides on every call from a client — the client *is* a
+The credential rides on every call from a client, because the client *is* a
 `(cluster, location, credential)` binding. Prefer a key scoped to one tenant and
 the minimum permissions for the job over a broad key reused everywhere: the blast
 radius of a leak is exactly what the key can do.
@@ -36,12 +36,12 @@ radius of a leak is exactly what the key can do.
 ## Rotating a key
 
 Manage keys through the authoriser API (`cf.auth.api_keys`). Generate a
-replacement, cut over to it, then delete the old one — so a leaked or ageing key
+replacement, cut over to it, then delete the old one, so a leaked or ageing key
 stops working. `generate_key()` returns the new `APIKey`; `read_all()` lists what
 exists.
 
 ```python
-# Illustrative — talks to a live authoriser.
+# Illustrative: talks to a live authoriser.
 new_key = cf.auth.api_keys.generate_key(
     name="nightly-etl",
     expiration_date=EPOCH_SECONDS,      # set an expiry; don't mint eternal keys
@@ -56,7 +56,7 @@ disrupting the rest.
 ## Transport security
 
 Connections are TLS by default. The `insecure=True` escape hatch exists only for
-local development against a plaintext endpoint — never use it against a real
+local development against a plaintext endpoint. Never use it against a real
 cluster. Endpoint overrides (`endpoints=`) are for reaching non-standard hosts
 (e.g. a legacy `:50051` cluster), not for disabling transport security.
 
