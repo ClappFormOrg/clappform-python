@@ -78,6 +78,11 @@ docs = [
     "mkdocs-material>=9.5,<10",
     "mkdocstrings[python]>=0.25,<1",
     "pymdown-extensions>=10.0",
+    # mkdocstrings formats the signatures that separate_signature and
+    # show_signature_annotations render, and it needs Ruff or Black present to
+    # do it. Read the Docs installs [docs,pandas] and nothing else, so without
+    # ruff here the published reference shows unformatted signatures.
+    "ruff>=0.5",
 ]
 
 [project.urls]
