@@ -48,8 +48,10 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
+      # twine 7.0 is the floor: hatchling stamps Metadata 2.5 on the build and
+      # older twine rejects a metadata version it does not know.
       - name: Install build tooling
-        run: python -m pip install build twine
+        run: python -m pip install "build>=1.2" "twine>=7.0"
 
       - name: Build sdist and wheel
         run: python -m build
