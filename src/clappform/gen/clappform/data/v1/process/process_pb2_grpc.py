@@ -26,7 +26,9 @@ if _version_not_supported:
 
 
 class ProcessManagementStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """ProcessManagement provides OGC API - Processes endpoints for discovering,
+    describing, and executing processes backed by Clappform questionnaires.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -72,46 +74,55 @@ class ProcessManagementStub(object):
 
 
 class ProcessManagementServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """ProcessManagement provides OGC API - Processes endpoints for discovering,
+    describing, and executing processes backed by Clappform questionnaires.
+    """
 
     def GetConformance(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """GetConformance returns the list of OGC specification URIs this API conforms to.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ListProcesses(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """ListProcesses returns a paginated list of all available processes.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def DescribeProcess(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """DescribeProcess returns the full metadata, input schema, and output schema for a single process.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ExecuteProcess(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """ExecuteProcess runs a process synchronously and returns the result outputs.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetJobStatus(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """GetJobStatus returns the current status of an asynchronous job.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def DismissJob(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """DismissJob cancels a running or pending job and removes its artifacts.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetJobResults(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """GetJobResults retrieves the output values of a successfully completed job.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -163,7 +174,9 @@ def add_ProcessManagementServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class ProcessManagement(object):
-    """Missing associated documentation comment in .proto file."""
+    """ProcessManagement provides OGC API - Processes endpoints for discovering,
+    describing, and executing processes backed by Clappform questionnaires.
+    """
 
     @staticmethod
     def GetConformance(request,

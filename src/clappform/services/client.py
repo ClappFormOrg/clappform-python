@@ -578,12 +578,14 @@ class AuditManagement(_runtime.ServiceBase):
         method: str | None = None,
         method_prefix: str | None = None,
         data_filters: dict[str, str] | None = None,
+        url: str | None = None,
+        url_prefix: str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_audit_audit.Logs:
         """RPC: /clappform.client.v1.audit.AuditManagement/GetAll (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("pagination", pagination), ("start_date", start_date), ("end_date", end_date), ("user_id", user_id), ("request_id", request_id), ("message", message), ("level", level), ("method", method), ("method_prefix", method_prefix), ("data_filters", data_filters),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("pagination", pagination), ("start_date", start_date), ("end_date", end_date), ("user_id", user_id), ("request_id", request_id), ("message", message), ("level", level), ("method", method), ("method_prefix", method_prefix), ("data_filters", data_filters), ("url", url), ("url_prefix", url_prefix),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_audit_audit.AuditListRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
