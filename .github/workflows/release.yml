@@ -58,15 +58,17 @@ jobs:
 
       # On a Release trigger, fail loudly if the tag and the packaged version
       # disagree; a mismatched tag is the classic way a wrong version ships.
-      # Tag may be `v6.0.0a1` or `6.0.0a1`; compare on the normalized value.
+      # The version comes from the wheel that was just built, not from a config
+      # file, so this checks what actually ships. Tag may be `v6.0.0a1` or
+      # `6.0.0a1`; the wheel filename already carries the normalized value.
       - name: Check tag matches package version
         if: github.event_name == 'release'
         run: |
-          PKG_VERSION="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+          PKG_VERSION="$(python -c 'import glob, os; print(os.path.basename(glob.glob("dist/*.whl")[0]).split("-")[1])')"
           TAG="${GITHUB_REF_NAME#v}"
           echo "package version: $PKG_VERSION   release tag: $TAG"
           if [ "$PKG_VERSION" != "$TAG" ]; then
-            echo "::error::Release tag ($TAG) does not match pyproject version ($PKG_VERSION). Bump the version or fix the tag."
+            echo "::error::Release tag ($TAG) does not match the built package version ($PKG_VERSION). Bump __version__ in src/clappform/__init__.py or fix the tag."
             exit 1
           fi
 

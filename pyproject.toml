@@ -6,7 +6,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "clappform"
-version = "6.0.0a0"
+# Sourced from __version__ in src/clappform/__init__.py, so a release bumps
+# one literal instead of two that can silently disagree. See [tool.hatch.version].
+dynamic = ["version"]
 description = "Python client for the Clappform gRPC APIs"
 readme = "README.md"
 license = "Apache-2.0"
@@ -77,6 +79,9 @@ docs = [
 [project.urls]
 Documentation = "https://clappform.readthedocs.io"
 Source = "https://github.com/ClappFormOrg/clappform-python"
+
+[tool.hatch.version]
+path = "src/clappform/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/clappform"]

@@ -56,13 +56,18 @@ version:
 
 1. Land everything for the release on `Major/6`, then promote to the default
    branch per the branch flow.
-2. Bump `version` in `pyproject.toml` (pre-releases use PEP 440 suffixes, e.g.
-   `6.0.0a1`, `6.0.0rc1`). Commit.
+2. Bump `__version__` in `src/clappform/__init__.py` (pre-releases use PEP 440
+   suffixes, e.g. `6.0.0a1`, `6.0.0rc1`). That literal is the only place the
+   version lives: `pyproject.toml` declares `dynamic = ["version"]` and
+   hatchling reads it from there. Re-run `pip install -e ".[dev,pandas]"`
+   afterwards, because an editable install records the version at install time
+   and `test_version_matches_packaged_version` compares against it. Commit.
 3. Tag and publish a **GitHub Release** whose tag matches the version
    (`v6.0.0a1` or `6.0.0a1`). Put the release notes, including the proto diff
    of the sync, in the release body.
 4. The `Release` workflow runs: it builds the sdist + wheel, fails if the tag
-   and packaged version disagree, and validates metadata with `twine check`.
+   and the built wheel's version disagree, and validates metadata with
+   `twine check`.
 5. The `publish` job then pauses on the `pypi` environment. A required reviewer
    approves, and only then does the upload run.
 
@@ -74,6 +79,23 @@ clappform`; users opt in with `pip install --pre clappform` or a pinned
 
 ```bash
 make release-check   # build sdist+wheel and run `twine check` (no upload)
+```
+
+`make release-check` needs `twine>=7.0` from the `dev` extra: hatchling stamps
+Metadata 2.5, and twine 6.x rejects it with `'2.5' is not a valid metadata
+version`. Run `pip install -U -e ".[dev]"` if you hit that.
+
+Check the version is still free on whichever index you are targeting. Neither
+PyPI nor TestPyPI accepts a re-upload of a version that already exists, and the
+two indexes hold different sets:
+
+```bash
+python - <<'EOF'
+import json, urllib.request
+for host in ("pypi.org", "test.pypi.org"):
+    with urllib.request.urlopen(f"https://{host}/pypi/clappform/json") as r:
+        print(host, sorted(json.load(r)["releases"]))
+EOF
 ```
 
 Inspect `dist/`, or install the wheel into a throwaway venv and import it, to

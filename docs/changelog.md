@@ -6,10 +6,11 @@ function of both its own version and the protos it wraps. `clappform.__proto_ver
 reports the pinned proto tag at runtime, and `repr(client)` includes it.
 
 !!! note "Per-release entries"
-    Release entries, including each release's proto diff, are published from
-    the release workflow that also pushes to PyPI, so this page fills in as
-    versions ship. The versions below track the 6.x line; the 4.x HTTP-era docs
-    remain archived under their own version tag.
+    Each release's notes, including its proto diff, go in the GitHub Release
+    body; step 3 of [RELEASING.md](https://github.com/ClappFormOrg/clappform-python/blob/main/RELEASING.md)
+    covers that. Add the same entry to this page in the release commit. The
+    versions below track the 6.x line; the 4.x HTTP-era docs remain archived
+    under their own version tag.
 
 ## 6.0.0 (alpha)
 

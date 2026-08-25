@@ -1,7 +1,7 @@
 """Package-level sanity: metadata, versioning, and import surface."""
 
 import re
-from importlib.metadata import metadata
+from importlib.metadata import metadata, version
 
 import clappform
 
@@ -9,6 +9,17 @@ import clappform
 def test_version_is_pep440() -> None:
     assert re.fullmatch(r"\d+\.\d+\.\d+([ab]|rc)?\d*", clappform.__version__)
     assert clappform.__version__.startswith("6.")
+
+
+def test_version_matches_packaged_version() -> None:
+    """`__version__` is what hatchling packaged, so the two can never drift.
+
+    hatchling reads the literal in ``clappform/__init__.py`` for the
+    distribution version, and this asserts the built metadata agrees. A release
+    that bumps one and not the other fails here instead of shipping a wheel
+    whose ``repr(client)`` reports the previous version.
+    """
+    assert clappform.__version__ == version("clappform")
 
 
 def test_proto_version_matches_pin() -> None:

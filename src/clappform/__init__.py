@@ -18,7 +18,9 @@ from clappform._proto_version import __proto_version__
 from clappform._transport import DEFAULT_RETRIES, RetryPolicy
 from clappform.dataframes import CollectionHandle, QueryHandle, ReadResult
 
-__version__ = "6.0.0a0"
+# The one place the release version lives; hatchling reads this literal for the
+# packaged version (see [tool.hatch.version] in pyproject.toml).
+__version__ = "6.0.0a1"
 
 __all__ = [
     "DEFAULT_RETRIES",
