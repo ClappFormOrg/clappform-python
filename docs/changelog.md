@@ -13,6 +13,15 @@ reports the pinned proto tag at runtime, and `repr(client)` includes it.
 
 ## 6.0.0 (alpha)
 
+### Dependencies
+
+The `protobuf` requirement moves from `>=4.25,<6` to `>=5.28.1,<8`. The floor is
+a correction: `clappform/gen` carries gencode 5.28.1, and protobuf 4.x has no
+`google.protobuf.runtime_version` while 5.27 and below fail protobuf's own
+gencode-newer-than-runtime check, so `6.0.0a0` never imported on either. The
+ceiling moves because every `grpcio-tools` release carrying a CPython 3.14 wheel
+requires protobuf 6.31 or newer.
+
 ### Proto pin: `commons` v1.6.2 → v1.7.2
 
 The generated surface is regenerated from `commons` v1.7.2. Anyone already on
