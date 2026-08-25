@@ -30,6 +30,28 @@ jobs:
       - run: python -m pip install -e .[dev,pandas]
       - run: python -m mypy src/clappform tools
 
+  apicheck:
+    # Advisory. A major-version branch removes API on purpose, so this reports
+    # what the diff does to the public surface and never blocks the merge; the
+    # findings land as annotations on the changed files.
+    if: github.event_name == 'pull_request'
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # griffe reads the base ref from a temporary worktree, so the ref has to
+      # exist locally. A PR checkout only brings the merge commit.
+      - run: git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install -e .[dev]
+      - run: python tools/apicheck.py --against "origin/${{ github.base_ref }}" --format github
+
   test:
     strategy:
       fail-fast: false

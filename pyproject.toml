@@ -59,6 +59,10 @@ dev = [
     # rejects a metadata version it does not know, and 7.0 is the first
     # release that knows 2.5, so `twine check` fails below it.
     "twine>=7.0",
+    # Maintenance gates: pip-audit resolves the installed tree against the PyPI
+    # and OSV advisory databases, griffe backs tools/apicheck.py.
+    "pip-audit>=2.7",
+    "griffe>=2.2,<3",
 ]
 # Docs toolchain: MkDocs + Material, with mkdocstrings rendering the API
 # reference straight from the wrapper layer's docstrings, and the snippets
