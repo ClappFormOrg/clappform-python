@@ -32,8 +32,11 @@ df = cf.data.collection("sales_orders").read(pipeline=[{"$match": {"status": "op
 ## Install
 
 ```bash
-pip install "clappform[pandas]"
+pip install --pre "clappform[pandas]"
 ```
+
+Version 6 is in pre-release, so `--pre` is required. Drop it and pip resolves to
+4.x, an unrelated HTTP-era package with none of this API.
 
 The core install pulls only `grpcio` and `protobuf`; pandas ships in the
 `[pandas]` extra so the DataFrame surface is available.

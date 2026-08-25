@@ -10,8 +10,11 @@ old call to its v6 equivalent.
 ## Install
 
 ```bash
-pip install "clappform[pandas]"
+pip install --pre "clappform[pandas]"
 ```
+
+Version 6 is in pre-release, so `--pre` is required. Drop it and pip resolves to
+4.x, an unrelated HTTP-era package with none of this API.
 
 The core dependencies are just `grpcio` and `protobuf`. pandas comes in the
 `[pandas]` extra, which you want for the DataFrame flows below.

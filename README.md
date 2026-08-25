@@ -11,8 +11,11 @@ configuration, and typed errors.
 ## Install
 
 ```bash
-pip install clappform[pandas]
+pip install --pre "clappform[pandas]"
 ```
+
+Version 6 is in pre-release, so `--pre` is required. Without it pip resolves to
+the unrelated 4.x package noted above. Quote the extra so zsh does not glob it.
 
 Core dependencies are `grpcio` and `protobuf` only. The DataFrame flows below
 need the `pandas` extra; `polars` and `arrow` are also declared, and
@@ -95,7 +98,7 @@ can't drift from the client.
 ## Development
 
 ```bash
-pip install -e .[dev,pandas]
+pip install -e ".[dev,pandas]"
 make generate   # regenerate clappform/gen and clappform/services from protos
 make check      # ruff + mypy + pytest
 make docs-test  # run the doc snippets, then build the site with --strict
