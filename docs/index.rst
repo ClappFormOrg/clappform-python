@@ -5,6 +5,15 @@
 
 Welcome to Clappform's API Wrapper
 ==================================
+
+.. note::
+
+   These are the docs for the 4.x client, which talks to the HTTP API. Version 6
+   is a rewrite on gRPC with a different API, and its docs live at
+   `clappform.readthedocs.io/en/v6.0.0a1 <https://clappform.readthedocs.io/en/v6.0.0a1/>`_.
+   Install it with ``pip install --pre "clappform[pandas]"``. Nothing on this
+   page applies to 6.x.
+
 **Clappform** allows one to easily connect and interact with a Clappform B.V. API. There is no need to manually program HTTP requests to authenticate and consume the API. Many resources of the API are able to be created, read, updated and deleted. To start using **Clappform** with logging::
 
     >>> import logging
