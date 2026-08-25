@@ -65,15 +65,15 @@ dev = [
 # Docs toolchain: MkDocs + Material, with mkdocstrings rendering the API
 # reference straight from the wrapper layer's docstrings, and the snippets
 # extension pulling runnable code out of docs/snippets/ so guide code can't
-# drift from what actually executes. mike drives the per-release version selector on
-# Read the Docs. Pinned to majors so a doc build is reproducible across
-# releases without dragging in a breaking theme change unnoticed.
+# drift from what actually executes. Read the Docs builds one copy per activated
+# version and serves the version flyout itself, so nothing here drives that.
+# Pinned to majors so a doc build is reproducible across releases without
+# dragging in a breaking theme change unnoticed.
 docs = [
     "mkdocs>=1.6,<2",
     "mkdocs-material>=9.5,<10",
     "mkdocstrings[python]>=0.25,<1",
     "pymdown-extensions>=10.0",
-    "mike>=2.1,<3",
 ]
 
 [project.urls]

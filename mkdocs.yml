@@ -36,12 +36,13 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
 
-# Per-release version selector: staggered cluster rollouts mean users must
-# read the docs for the version they are actually on. `mike` publishes one
-# versioned copy per release and RTD serves the selector from provider: mike.
-extra:
-  version:
-    provider: mike
+# No `extra.version` block on purpose. Staggered cluster rollouts do mean users
+# must read the docs for the version they are on, but Read the Docs builds one
+# copy per activated version and serves its own version flyout for switching.
+# Setting `provider: mike` here would make the theme fetch a versions.json that
+# the plain `mkdocs build` in .readthedocs.yaml never writes, leaving an empty
+# selector next to a working one. Switch to mike only by also moving the docs
+# publish to `mike deploy`.
 
 plugins:
   - search
