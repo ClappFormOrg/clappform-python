@@ -2,8 +2,8 @@
 
 Where ``test_transport_grpc.py`` proves the transport primitives (metadata,
 deadlines, error translation, streaming), this module drives the higher-level
-flows — pagination, DataFrame round-trips, slug resolution and its cache, and
-retry-on-UNAVAILABLE — against real generated servicers over a loopback
+flows (pagination, DataFrame round-trips, slug resolution and its cache, and
+retry-on-UNAVAILABLE) against real generated servicers over a loopback
 channel. Every assertion therefore exercises the whole client stack:
 interceptors, codec, retry service config, and error translation together, not
 a mocked transport.

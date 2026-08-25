@@ -34,7 +34,7 @@ def run(transport: LocalMock) -> None:
         orders = cf.data.collection("sales_orders")
 
         # read() with no arguments streams the whole collection. To filter,
-        # project or cap, pass an aggregation pipeline — it is sent to the
+        # project or cap, pass an aggregation pipeline; it is sent to the
         # server untouched, so use the syntax the collection's backend expects
         # (Mongo stages here).
         df = orders.read(
@@ -50,7 +50,7 @@ def run(transport: LocalMock) -> None:
         # --8<-- [start:aggregate]
         # aggregate() is the DataFrame-returning twin of read(pipeline=...).
         # Reach for it for grouping/reshaping stages ($group, $sort, ...). The
-        # pipeline is sent to the server untouched — one row per group here.
+        # pipeline is sent to the server untouched, one row per group here.
         revenue_by_region = orders.aggregate(
             [
                 {"$match": {"status": "open"}},
@@ -67,7 +67,7 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:aggregate-query]
         # A saved server-side query already carries its own collection and
-        # pipeline, so you just read it — no pipeline to write client-side.
+        # pipeline, so you just read it, with no pipeline to write client-side.
         revenue = cf.data.query("monthly-revenue-per-region")
         revenue_df = revenue.read()
         # --8<-- [end:aggregate-query]
@@ -86,7 +86,7 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:insert]
         # append() inserts every row as a brand-new document. Build the frame
-        # however you like — here from a list of dicts.
+        # however you like, here from a list of dicts.
         import pandas as pd
 
         new_orders = pd.DataFrame(
@@ -109,7 +109,7 @@ def run(transport: LocalMock) -> None:
         # --8<-- [end:update]
 
         # --8<-- [start:upsert]
-        # upsert() inserts-or-updates on a business key — no _id needed. `on`
+        # upsert() inserts-or-updates on a business key, with no _id needed. `on`
         # has no default: you must name the key column. Rows whose key exists
         # are updated in place; the rest are inserted.
         incoming = pd.DataFrame(
@@ -120,14 +120,14 @@ def run(transport: LocalMock) -> None:
         )
         orders.upsert(incoming, on="order_id")
         # --8<-- [end:upsert]
-        # A-1 updated in place, A-99 inserted — no duplicate A-1.
+        # A-1 updated in place, A-99 inserted, no duplicate A-1.
         by_key = {row["order_id"]: row for row in transport.records("sales_orders-id")}
         assert by_key["A-1"]["amount"] == 200.0
         assert by_key["A-99"]["region"] == "APAC"
 
         # --8<-- [start:server-side]
         # Mutate or delete without pulling rows through the client. Both run
-        # entirely on the server — nothing is round-tripped.
+        # entirely on the server, so nothing is round-tripped.
         orders.replace_where({"status": "open"}, {"reviewed": True})
         orders.delete(where={"status": "closed"})
 

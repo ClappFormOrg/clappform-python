@@ -1,13 +1,13 @@
 # Clappform Python Client
 
 The Python client for the Clappform gRPC APIs. One package, one `Clappform`
-client, first-class pandas DataFrame flows, and native multi-cluster /
+client, pandas DataFrame flows, and multi-cluster /
 multi-tenant support.
 
 ```python
 from clappform import Clappform
 
-# The cluster is discovered from DNS — location and an API key are all you need.
+# The cluster is discovered from DNS: location and an API key are all you need.
 cf = Clappform(location="acme", api_key="cf_live_...")
 df = cf.data.collection("sales_orders").read(pipeline=[{"$match": {"status": "open"}}])
 ```
@@ -17,13 +17,13 @@ df = cf.data.collection("sales_orders").read(pipeline=[{"$match": {"status": "op
 - **DataFrame-first.** Reads stream straight into pandas; writes take a
   DataFrame back. See [DataFrame flows](guides/dataframes.md).
 - **Nothing global.** Every client is one `(cluster, location, credentials)`
-  binding — two clusters coexist in one process. The library reads no config
+  binding, so two clusters coexist in one process. The library reads no config
   files and no environment variables; everything is a constructor argument.
 - **Generated from the protos.** The API reference is generated from the
   wrapper layer's docstrings, which come from the proto comments, so a new RPC
   appears in these docs in the same release that adds it to the client.
 - **Typed errors.** Every failure derives from `ClappformError` and carries the
-  call context (method, cluster, location) — you never import `grpc` to handle
+  call context (method, cluster, location), so you never import `grpc` to handle
   one. See [Error handling & retries](guides/errors-and-retries.md).
 - **Testable without infrastructure.** `LocalMock` is an in-process transport
   double; the examples in these guides run against it in CI. See

@@ -1,5 +1,5 @@
 site_name: Clappform Python Client
-site_description: Python client for the Clappform gRPC APIs — DataFrame-first, multi-cluster, multi-tenant.
+site_description: DataFrame-first Python client for the Clappform gRPC APIs, multi-cluster and multi-tenant.
 site_url: https://clappform.readthedocs.io/
 repo_url: https://github.com/ClappFormOrg/clappform-python
 repo_name: ClappFormOrg/clappform-python
@@ -20,7 +20,7 @@ theme:
     - search.suggest
     - toc.follow
   palette:
-    # Light/dark toggle — the switch stamps the scheme, both are styled.
+    # Light/dark toggle; the switch stamps the scheme and both are styled.
     - media: "(prefers-color-scheme: light)"
       scheme: default
       primary: indigo
@@ -65,7 +65,7 @@ plugins:
 
 markdown_extensions:
   - admonition
-  # Collapsible admonitions (`??? note`) — used to fold the old-API reference
+  # Collapsible admonitions (`??? note`), used to fold the old-API reference
   # blocks in the migration guide under the v6 code they replace.
   - pymdownx.details
   - attr_list
@@ -79,16 +79,16 @@ markdown_extensions:
       alternate_style: true
   # Pulls runnable code out of docs/snippets/ into the guides. Those modules
   # run against LocalMock in the docs-test job, so a snippet that stops working
-  # (or a bad include path) fails the build — the same guarantee tests give the
+  # (or a bad include path) fails the build, the same guarantee tests give the
   # code.
   - pymdownx.snippets:
       base_path: [docs/snippets]
       check_paths: true
 
 # Grouped by intent, not by document type: readers who already know the
-# concepts jump to the section that matches what they're trying to do —
+# concepts jump to the section that matches what they're trying to do:
 # get started, perform a task, understand a term, unblock an error, or look
-# something up — rather than scanning a flat guide list.
+# something up, rather than scanning a flat guide list.
 nav:
   - Home: index.md
   - Get started:

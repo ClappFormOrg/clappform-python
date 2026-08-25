@@ -1,8 +1,8 @@
 # Error handling & retries
 
 Every failure the client raises derives from
-[`ClappformError`][clappform.ClappformError] and carries the call context —
-method, cluster, location — so you never import `grpc` to handle one, and the
+[`ClappformError`][clappform.ClappformError] and carries the call context
+(method, cluster, location), so you never import `grpc` to handle one, and the
 message always says which tenant on which cluster failed.
 
 ## The typed hierarchy
@@ -11,7 +11,7 @@ gRPC status codes are mapped onto specific exception types:
 
 | Exception | gRPC status | Meaning |
 |---|---|---|
-| [`ConfigurationError`][clappform.ConfigurationError] | (pre-flight / missing header) | Bad endpoints, credentials, or a missing tenant header — often raised before any RPC |
+| [`ConfigurationError`][clappform.ConfigurationError] | (pre-flight / missing header) | Bad endpoints, credentials, or a missing tenant header, often raised before any RPC |
 | [`AuthenticationError`][clappform.AuthenticationError] | `UNAUTHENTICATED` | The credential was rejected |
 | [`PermissionDeniedError`][clappform.PermissionDeniedError] | `PERMISSION_DENIED` | Authenticated, but not allowed |
 | [`NotFoundError`][clappform.NotFoundError] | `NOT_FOUND` | The referenced entity does not exist |
@@ -42,13 +42,13 @@ exponential backoff. Override it per client with a
 !!! warning "Retries and streaming writes"
     Chunked uploads (`append`, `update`, `upsert`) stream in chunks, so a failed
     chunk is retryable at the flow level. When a `TransientError` escapes after
-    retries are exhausted, retry the whole flow rather than a single chunk — the
+    retries are exhausted, retry the whole flow rather than a single chunk. The
     write is designed to be safe to re-run.
 
 ### Retrying a whole flow
 
 The built-in retries cover a single RPC's transient failures. When one still
-escapes as a `TransientError`, re-run the whole operation — the read/write flows
+escapes as a `TransientError`, re-run the whole operation. The read/write flows
 are idempotent enough to repeat safely (`update`/`upsert` key on an id or
 business column, so a repeat converges rather than duplicating). A small
 back-off loop is usually all you need:
@@ -60,7 +60,7 @@ back-off loop is usually all you need:
 ## Per-call deadlines
 
 Every call inherits the client's default deadline. When one operation is
-legitimately slow — a large read or aggregation — raise the deadline for that
+legitimately slow (a large read or aggregation), raise the deadline for that
 call alone with `timeout=` (seconds), rather than loosening the client-wide
 default:
 
@@ -69,7 +69,7 @@ default:
 ```
 
 For results too large to finish within any reasonable deadline, stream them in
-batches instead — see
+batches instead. See
 [Stream a large aggregation](cookbook.md#stream-a-large-aggregation-into-dataframes).
 
 See the [Errors reference](../reference/errors.md) for the full hierarchy, and

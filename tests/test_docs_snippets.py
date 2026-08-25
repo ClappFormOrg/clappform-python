@@ -4,7 +4,7 @@ The guides pull their fenced code out of ``docs/snippets/*.py`` via the mkdocs
 snippets extension, and each of those modules exposes a ``run()`` (or
 ``build_mock()`` + ``run()``) entry point that exercises the snippet against
 ``LocalMock``. This test drives every one of them, so a doc example that stops
-working fails the suite here as well as the docs build — the "docs can't rot"
+working fails the suite here as well as the docs build: the "docs can't rot"
 guarantee, enforced in CI.
 """
 

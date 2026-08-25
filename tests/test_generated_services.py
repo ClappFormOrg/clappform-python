@@ -1,7 +1,7 @@
 """Behaviour of the committed generated service layer, driven by a fake caller.
 
-These tests exercise the real shipped modules under clappform.services —
-kwargs flattening, streaming adapters, pagination — against an in-memory
+These tests exercise the real shipped modules under clappform.services:
+kwargs flattening, streaming adapters, and pagination, against an in-memory
 Caller, so they cover exactly what users import.
 """
 

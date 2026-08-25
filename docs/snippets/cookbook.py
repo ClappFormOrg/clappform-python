@@ -7,7 +7,7 @@ and runs against ``LocalMock`` in the docs-test job, so the recipes stay
 correct.
 
 Data-plane calls (read/append/update/delete/aggregate) run against the seeded
-store. Everything else — actionflow start, index management, transfer — is not a
+store. Everything else (actionflow start, index management, transfer) is not a
 data-plane RPC, so it is backed by an explicit ``.on()`` stub keyed on the full
 gRPC method path, exactly as you'd stub it in your own tests.
 """
@@ -44,7 +44,7 @@ def build_mock() -> LocalMock:
         mock.seed(f"{slug}-id", [])
     # one seeded customer for the single-record read recipe
     mock.seed("customers-id", [{"email": "a@example.com", "plan": "pro", "seats": 3}])
-    # a larger collection for the streaming (memory-bounded) recipe — enough rows
+    # a larger collection for the streaming (memory-bounded) recipe, with enough rows
     # that a small batch_size yields several chunks.
     mock.seed_collection_slug("events", id="events-id")
     mock.seed(
@@ -119,7 +119,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
     with cf:
         # ---- Collection CRUD ------------------------------------------------
         # --8<-- [start:crud-create]
-        # CREATE — append new documents from a DataFrame. Returns rows written.
+        # CREATE: append new documents from a DataFrame. Returns rows written.
         rows = pd.DataFrame(
             [
                 {"address": "Prinsengracht 3", "city": "Amsterdam", "energy_label": "B"},
@@ -130,7 +130,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         # --8<-- [end:crud-create]
 
         # --8<-- [start:crud-read]
-        # READ — a filtered slice straight into pandas. `where` filters,
+        # READ: a filtered slice straight into pandas. `where` filters,
         # `fields` projects, `limit` caps; all optional.
         df = cf.data.collection("housing_stock").read(
             pipeline=[
@@ -143,7 +143,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         assert len(df) >= 2
 
         # --8<-- [start:crud-update]
-        # UPDATE — mutate the frame (which still carries _id) and hand it back.
+        # UPDATE: mutate the frame (which still carries _id) and hand it back.
         # Matched on _id by default, so no key argument is needed.
         df = cf.data.collection("housing_stock").read(
             pipeline=[{"$match": {"city": "Amsterdam"}}]
@@ -153,17 +153,17 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         # --8<-- [end:crud-update]
 
         # --8<-- [start:crud-upsert]
-        # UPSERT — insert-or-update keyed on a business column. Re-running never
+        # UPSERT: insert-or-update keyed on a business column. Re-running never
         # duplicates: rows whose key exists are updated, the rest inserted.
         cf.data.collection("housing_stock").upsert(rows, on="address")
         # --8<-- [end:crud-upsert]
 
         # --8<-- [start:crud-delete]
-        # DELETE — by explicit _id(s) or by a server-side filter.
+        # DELETE: by explicit _id(s) or by a server-side filter.
         housing = cf.data.collection("housing_stock")
         housing.delete(where={"energy_label": "G"})     # by filter
         housing.delete(oids=["some-id-1", "some-id-2"])  # by id
-        # To wipe the whole collection, call clear() — never delete(where={}).
+        # To wipe the whole collection, call clear(), never delete(where={}).
         # --8<-- [end:crud-delete]
 
         # ---- Single-record read --------------------------------------------
@@ -191,7 +191,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
 
         # ---- Aggregate to a DataFrame --------------------------------------
         # --8<-- [start:aggregate-to-df]
-        # Group server-side and get a DataFrame back — one result row per group.
+        # Group server-side and get a DataFrame back, one result row per group.
         by_label = cf.data.collection("housing_stock").aggregate(
             [{"$group": {"_id": "$energy_label", "count": {"$sum": 1}}}]
         )
@@ -207,7 +207,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         # is one batch, not the whole set. `batch_size` caps rows per chunk.
         result = cf.data.collection("events").fetch(
             pipeline=[{"$match": {"region": "EU"}}],
-            batch_size=10_000,   # rows per gRPC chunk — tune to your row size
+            batch_size=10_000,   # rows per gRPC chunk; tune to your row size
         )
 
         running_total = 0.0
@@ -221,7 +221,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         assert row_count == 25 and running_total > 0
 
         # Prove the streaming path actually chunks: a small batch_size yields
-        # more than one batch over the same 25 rows. (Not shown in the guide —
+        # more than one batch over the same 25 rows. (Not shown in the guide;
         # the recipe above uses a realistic large batch_size.)
         batches = list(
             cf.data.collection("events")
@@ -233,7 +233,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         # ---- Empty result --------------------------------------------------
         # --8<-- [start:empty-read]
         # A read matching nothing returns an empty frame (no columns), never an
-        # error — so branch on .empty before indexing a column.
+        # error, so branch on .empty before indexing a column.
         df = cf.data.collection("empty_coll").read(
             pipeline=[{"$match": {"status": "open"}}]
         )
@@ -266,7 +266,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
         assert run_id == "run-xyz"
 
         # --8<-- [start:actionflow-params]
-        # With start parameters — custom_keys takes JSON bytes today, so encode
+        # With start parameters: custom_keys takes JSON bytes today, so encode
         # a plain dict.
         cf.client.actionflow.start(
             id="recalculate-dashboards",
@@ -289,7 +289,7 @@ def run(transport: LocalMock, other_cluster: LocalMock) -> None:
     # --8<-- [start:transfer]
     # Move a whole app from one instance to another: export from the source,
     # import into the destination. Each part is bytes, so it passes straight
-    # through — no unpacking.
+    # through, with no unpacking.
     src = Clappform(location="acme", cluster="prod", api_key="cf_live_...", transport=transport)
     dst = Clappform(location="acme", cluster="qa", api_key="cf_test_...", transport=other_cluster)
 

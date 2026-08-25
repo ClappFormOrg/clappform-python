@@ -51,7 +51,7 @@ def test_uuid_ref_is_used_without_lookup(cf) -> None:
     mock.seed(CID, [{"n": 1}])
     df = client.data.collection(CID).read()
     assert len(df) == 1
-    # No collection listing was consulted — the UUID went straight through.
+    # No collection listing was consulted; the UUID went straight through.
     assert not any(c.method == COLLECTION_GET_ALL for c in mock.calls)
 
 
@@ -117,7 +117,7 @@ def test_stale_cached_uuid_reresolves_once(cf) -> None:
 
 
 def test_not_found_after_first_chunk_is_not_retried(cf) -> None:
-    """A NOT_FOUND once rows have streamed surfaces raw — no silent replay.
+    """A NOT_FOUND once rows have streamed surfaces raw, with no silent replay.
 
     Re-resolving mid-stream would re-deliver already-yielded rows, so the retry
     is intentionally limited to a NOT_FOUND on the probing first chunk.
@@ -259,7 +259,7 @@ def test_stale_cached_query_uuid_reresolves_once(cf) -> None:
 
 
 def test_query_not_found_after_first_chunk_is_not_retried(cf) -> None:
-    """A NOT_FOUND once rows have streamed surfaces raw — no silent replay.
+    """A NOT_FOUND once rows have streamed surfaces raw, with no silent replay.
 
     The QueryHandle counterpart to the collection mid-stream test: re-resolving
     after rows were yielded would re-deliver them, so the retry is limited to a

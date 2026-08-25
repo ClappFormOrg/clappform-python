@@ -44,7 +44,7 @@ class AggregateServicer(aggregate_pb2_grpc.AggregateManagementServicer):
         if request.collection == "vanishes":
             # Yield one chunk, then fail mid-stream. Exercises the transport's
             # translating iterator, which must map the error raised *during*
-            # iteration onto the typed hierarchy — not just errors at call time.
+            # iteration onto the typed hierarchy, not just errors at call time.
             yield aggregate_pb2.AggregateResponse(data=b"[1]", total=3)
             context.abort(grpc.StatusCode.NOT_FOUND, "collection vanished mid-scan")
         for chunk in (b"[1]", b"[2]", b"[3]"):

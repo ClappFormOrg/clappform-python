@@ -1,8 +1,8 @@
 """Slug/name -> UUID resolution for collections and saved queries.
 
 The data plane identifies collections and saved queries by UUID, but both
-entities also carry a human identifier — a ``slug`` for collections, a
-``name`` for saved queries — and that is what people remember. So the
+entities also carry a human identifier (a ``slug`` for collections, a
+``name`` for saved queries) and that is what people remember. So the
 DataFrame entry points accept either: a string that already parses as a UUID
 is used as-is with zero overhead, and anything else is treated as a human
 identifier and resolved through the Client API on first use.

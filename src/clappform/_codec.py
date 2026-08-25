@@ -1,7 +1,7 @@
 """Data-plane JSON codec: records <-> bytes, with type normalisation.
 
 This is the encoding used by every DataFrame flow. It is deliberately
-pandas-independent — it speaks *records* (lists of plain dicts) in and out, so
+pandas-independent: it speaks *records* (lists of plain dicts) in and out, so
 pandas is only ever applied at the very edge (``DataFrame(records)`` /
 ``df.to_dict("records")``) and alternative surfaces (polars, Arrow) can be
 added without reworking the flows here.
@@ -68,14 +68,14 @@ def _normalise_value(value: Any) -> Any:
         # to themselves. isnan rejects non-floats, so guard on float first.
         if math.isnan(value):
             return None
-        # Infinities have no JSON representation — json.dumps would emit the
+        # Infinities have no JSON representation; json.dumps would emit the
         # non-standard ``Infinity`` token, which the server cannot parse. Fail
         # loudly so an infinity (almost always a computation bug) is surfaced
         # here rather than silently corrupting the payload on the wire.
         if math.isinf(value):
             raise ValueError(
                 "cannot encode infinite float value; JSON has no representation "
-                "for inf/-inf — clean the data before writing"
+                "for inf/-inf; clean the data before writing"
             )
         return value
     if isinstance(value, (datetime, date)):
@@ -87,7 +87,7 @@ def _normalise_value(value: Any) -> Any:
     # Missing-value singletons (pandas NaT/NA, numpy NaT) that slipped past the
     # float branch compare unequal to themselves. pandas NA is doubly awkward:
     # ``NA != NA`` returns NA, not a bool, and coercing that to bool raises
-    # "boolean value of NA is ambiguous" — so route any non-bool / raising
+    # "boolean value of NA is ambiguous", so route any non-bool / raising
     # comparison to None too, since only these missing sentinels behave that way.
     if _is_missing_sentinel(value):
         return None
@@ -112,7 +112,7 @@ def _parse_extended_json(value: Any) -> Any:
 
     ``{"$oid": "..."}`` becomes the hex string; ``{"$date": ...}`` becomes an
     ISO-8601 string (the value is already ISO-8601 or epoch-ms per the v2
-    spec — epoch-ms is converted, strings pass through). Anything that is not a
+    spec: epoch-ms is converted, strings pass through). Anything that is not a
     recognised wrapper is returned structurally unchanged.
     """
     if isinstance(value, list):

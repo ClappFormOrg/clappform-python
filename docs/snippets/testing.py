@@ -9,7 +9,7 @@ def run() -> None:
     from clappform.testing import LocalMock
 
     # Seed the data plane, then point a client at the mock. No network, no keys
-    # that matter — the same JSON codec the real client uses drives the store.
+    # that matter; the same JSON codec the real client uses drives the store.
     # `collection("customers")` resolves the slug first, so register the mapping
     # and seed the store under the resolved id.
     mock = LocalMock()
@@ -46,7 +46,7 @@ def run() -> None:
 
     # --8<-- [start:stub]
     # For RPCs without a built-in data handler, register a canned response with
-    # .on() keyed by the full gRPC method path — use the RPC's real response
+    # .on() keyed by the full gRPC method path; use the RPC's real response
     # message so the stub matches what the server returns. An explicit stub
     # always wins over a built-in handler.
     from clappform.gen.clappform.client.v1.actionflow import actionflow_pb2

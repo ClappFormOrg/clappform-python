@@ -17,7 +17,7 @@ check: lint typecheck test
 build:
 	python -m build
 
-# Build the distributions and validate their metadata — the same checks the
+# Build the distributions and validate their metadata, the same checks the
 # Release workflow runs before the gated PyPI publish. Does not upload.
 release-check: build
 	python -m twine check dist/*

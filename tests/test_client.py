@@ -54,7 +54,7 @@ def test_default_location_injected_and_per_call_override_wins() -> None:
 
 def test_endpoint_resolution_variants() -> None:
     # Newer clusters serve gRPC on 443, so the address is the bare host and
-    # gRPC defaults the secure channel to 443 — no explicit port is appended.
+    # gRPC defaults the secure channel to 443, so no explicit port is appended.
     assert resolve_endpoints("qa")["data"] == "data-qa.clappform.com"
     assert resolve_endpoints("QA-LTS")["client"] == "client-qa-lts.clappform.com"
 
@@ -65,7 +65,7 @@ def test_main_cluster_defaults_to_50051() -> None:
     assert resolve_endpoints("")["data"] == "data.clappform.com:50051"
     assert resolve_endpoints("")["client"] == "client.clappform.com:50051"
     # The auth family is served from the "login" host (co-located with data),
-    # and the notifier family from the "notify" host — not the literal
+    # and the notifier family from the "notify" host, not the literal
     # "auth."/"notifier." hosts.
     assert resolve_endpoints("prod")["auth"] == "login.clappform.com:50051"
     assert resolve_endpoints("")["notifier"] == "notify.clappform.com:50051"
@@ -73,7 +73,7 @@ def test_main_cluster_defaults_to_50051() -> None:
 
 def test_endpoint_override_wins_and_unknown_family_rejected() -> None:
     # An override is used verbatim (no port appended) and may carry its own
-    # host:port — e.g. to point the main cluster at 443, or a local dev endpoint.
+    # host:port, e.g. to point the main cluster at 443, or a local dev endpoint.
     resolved = resolve_endpoints("qa", {"data": "10.0.0.5:50051"})
     assert resolved["data"] == "10.0.0.5:50051"
     assert resolved["auth"] == "login-qa.clappform.com"
@@ -212,7 +212,7 @@ def test_channel_for_returns_live_channel_on_owned_transport() -> None:
 
 def test_with_location_clone_close_does_not_break_parent() -> None:
     # A shared-transport clone is not the transport owner; closing it must be a
-    # no-op that leaves the parent (and its channels) usable — the multi-tenant
+    # no-op that leaves the parent (and its channels) usable, which the multi-tenant
     # safety invariant.
     cf, transport = make_client(cluster="qa")
     clone = cf.with_location("umbrella")

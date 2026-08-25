@@ -1,8 +1,8 @@
 """In-process gRPC servers used to exercise the full client stack.
 
 These servicers implement the generated gRPC service base classes with just
-enough canned logic to drive real client flows — pagination, DataFrame
-round-trips, slug resolution, streaming, and retries — over a genuine
+enough canned logic to drive real client flows (pagination, DataFrame
+round-trips, slug resolution, streaming, and retries) over a genuine
 127.0.0.1 channel. Because the client talks to them through its production
 transport, every test that uses them covers interceptors (metadata), the
 codec, retry configuration, and error translation, not just the wrapper layer.
@@ -59,7 +59,7 @@ class CollectionListServicer(collection_pb2_grpc.CollectionManagementServicer):
     """Serves the paginated listing the slug resolver walks.
 
     ``GetAll`` pages a fixed number of collections per request so the client's
-    ``iter_get_all`` auto-pagination is genuinely exercised — more than one
+    ``iter_get_all`` auto-pagination is genuinely exercised, with more than one
     page, terminating when ``page >= pages``. The listing is location-scoped:
     a tenant only sees the collections registered for it, which is what lets
     the per-location resolver cache be tested end-to-end.
@@ -152,7 +152,7 @@ class InsertServicer(insert_pb2_grpc.InsertManagementServicer):
 
     ``InsertMany`` consumes the request iterator (each carrying a JSON chunk),
     appends the decoded records to the matching collection, and returns one
-    ``InsertResponse`` per request with the rows processed and assigned oids —
+    ``InsertResponse`` per request with the rows processed and assigned oids,
     enough for the DataFrame ``append`` round-trip and for asserting the
     ``location`` header arrives on a client-streaming call.
     """
@@ -190,7 +190,7 @@ class UpdateServicer(update_pb2_grpc.UpdateManagementServicer):
 
     ``UpdateMany`` consumes the request stream, and for each JSON chunk applies
     the non-``_id`` fields onto the row in the target collection whose ``_id``
-    matches — enough to drive the read -> mutate -> update round-trip over the
+    matches, which is enough to drive the read -> mutate -> update round-trip over the
     wire and confirm the ``location`` header rides a client-streaming call.
     """
 
@@ -280,7 +280,7 @@ class ApiKeyServicer(apikey_pb2_grpc.APIKeyManagementServicer):
 
 
 class HealthServicer(health_pb2_grpc.HealthManagementServicer):
-    """Fake notifier health check — the notifier family's E2E smoke."""
+    """Fake notifier health check: the notifier family's E2E smoke."""
 
     def Health(self, request, context):  # noqa: N802
         return health_pb2.HealthStatus(service="notifier", status=health_pb2.OK)

@@ -51,7 +51,7 @@ class ClappformError(Exception):
 
 
 class ConfigurationError(ClappformError):
-    """Bad endpoints, credentials, or cluster settings — raised before any
+    """Bad endpoints, credentials, or cluster settings, raised before any
     RPC is attempted, or when the server reports missing call configuration."""
 
 
@@ -121,7 +121,7 @@ def translate_rpc_error(
 
     if _LOCATION_HEADER_DETAIL in details:
         return ConfigurationError(
-            f"{details} — the server received no usable tenant header; "
+            f"{details}; the server received no usable tenant header; "
             f"check the location= argument",
             status=status_name,
             method=method,
@@ -135,7 +135,7 @@ def translate_rpc_error(
     message = details or f"RPC failed with status {status_name}"
     if exc_cls is NotSupportedError:
         message = (
-            f"{message} — this cluster may not serve this RPC yet; "
+            f"{message}; this cluster may not serve this RPC yet; "
             f"cluster rollouts are staggered"
         )
     return exc_cls(

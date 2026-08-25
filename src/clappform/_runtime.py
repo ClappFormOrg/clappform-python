@@ -55,7 +55,7 @@ def build_request(request_cls: type, request: Any, kwargs: dict[str, Any]) -> An
     """Resolve the message-or-kwargs calling convention of generated methods.
 
     Callers pass either a prebuilt request message or flattened field
-    keyword arguments — never both. ``kwargs`` holds only the fields the
+    keyword arguments, never both. ``kwargs`` holds only the fields the
     caller actually provided (``None`` values are dropped by the generated
     method before calling this).
     """

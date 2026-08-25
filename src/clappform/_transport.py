@@ -4,7 +4,7 @@ The generated service layer talks to a :class:`~clappform._runtime.Caller`;
 :class:`GrpcTransport` is the production implementation. It owns one lazily
 created channel per endpoint, composes per-call metadata (credentials +
 tenant location + caller extras), applies the default deadline, and
-translates every ``grpc.RpcError`` into the typed hierarchy — including
+translates every ``grpc.RpcError`` into the typed hierarchy, including
 errors raised mid-iteration on streaming responses.
 """
 
@@ -90,11 +90,11 @@ def resolve_endpoints(
 
     ``cluster`` is the host extension: ``""`` (or ``"prod"``) for the main
     cluster, ``"qa"``-style values otherwise. The newer clusters serve gRPC
-    over TLS on 443, so their address is the bare host with no port — gRPC
+    over TLS on 443, so their address is the bare host with no port, because gRPC
     defaults a secure channel to 443. The main cluster still listens on
     ``:50051``, so its defaults carry that port explicitly. Explicit
     ``overrides`` win per family and are used verbatim (no port is appended),
-    so an override may carry its own ``host:port`` — e.g. to point the main
+    so an override may carry its own ``host:port``, e.g. to point the main
     cluster at 443 once it migrates, or at a local dev endpoint.
     """
     extension = cluster.strip().lstrip("-").lower()

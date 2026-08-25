@@ -1,4 +1,4 @@
-"""``LocalMock`` — an in-process transport double for the Clappform client.
+"""``LocalMock``: an in-process transport double for the Clappform client.
 
 ``LocalMock`` implements the :class:`~clappform._runtime.Caller` protocol, so
 it plugs straight into ``Clappform(transport=LocalMock())`` and every generated
@@ -6,10 +6,10 @@ service method works against it with no network and no infrastructure.
 
 It offers two layers:
 
-* **Explicit stubs** — :meth:`LocalMock.on` registers a canned response, a
+* **Explicit stubs.** :meth:`LocalMock.on` registers a canned response, a
   handler callable, or (for streaming RPCs) an iterable of responses, keyed by
   the full gRPC method path. This works for *any* RPC in the client.
-* **A seedable data-plane store** — :meth:`LocalMock.seed` loads records into a
+* **A seedable data-plane store.** :meth:`LocalMock.seed` loads records into a
   named collection, and built-in handlers for the core data RPCs read and
   mutate that store through the same JSON codec the real client uses:
 
@@ -21,8 +21,8 @@ It offers two layers:
   - ``UpdateManyByQuery`` (``replace_where``) and ``DeleteManyByQuery``,
   - ``DeleteManyByOids`` and ``Clear``.
 
-  That is what lets the full DataFrame surface — read, filter, mutate, update,
-  upsert, replace-where, delete — round-trip end-to-end in tests and in the
+  That is what lets the full DataFrame surface (read, filter, mutate, update,
+  upsert, replace-where, delete) round-trip end-to-end in tests and in the
   guide snippets under ``docs/snippets/``. :meth:`seed_collection_slug` and
   :meth:`seed_query` register the Client API listings so slug/name resolution
   also runs without a server. An explicit stub for a method always wins over
@@ -79,7 +79,7 @@ class LocalMock:
         """Register a canned ``response`` for a full gRPC ``method`` path.
 
         ``response`` may be a response message, a callable ``handler(request)``
-        returning one, or — for a streaming-output RPC — an iterable of
+        returning one, or (for a streaming-output RPC) an iterable of
         response messages (or a callable returning such an iterable). Returns
         ``self`` so registrations chain. Registering the same method twice
         replaces the earlier stub.
@@ -265,7 +265,7 @@ def _aggregate_target(mock: LocalMock, request: Any) -> str:
 def _apply_pipeline(rows: list[_codec.Record], pipeline: bytes) -> list[_codec.Record]:
     """Apply the ``$match``/``$project``/``$limit`` stages the sugar emits.
 
-    Only the stages ``read(where=, fields=, limit=)`` compiles are honoured —
+    Only the stages ``read(where=, fields=, limit=)`` compiles are honoured,
     enough to test the client sugar without reimplementing an aggregation
     engine. ``$match`` supports equality on top-level fields; other operators
     and stages are passed over so a caller-supplied pipeline still streams the
@@ -357,7 +357,7 @@ def _build_response(response_cls: type, **fields: Any) -> Any:
     """Construct a response, keeping only fields the message actually declares.
 
     Data RPCs vary in their response shape (some return a data-bearing message,
-    some a plain ``Message{message}``); this lets one handler serve either
+    some a plain ``Message{message}``); this way one handler serves either
     without hardcoding a schema the proto may not have.
     """
     declared = {f.name for f in response_cls.DESCRIPTOR.fields}  # type: ignore[attr-defined]

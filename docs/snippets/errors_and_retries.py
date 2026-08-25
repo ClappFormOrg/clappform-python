@@ -6,7 +6,7 @@ from clappform.testing import LocalMock
 
 
 def build_mock() -> LocalMock:
-    # One real collection is registered, so slug resolution runs — but "ghost"
+    # One real collection is registered, so slug resolution runs, but "ghost"
     # is not in the listing, so resolving it raises NotFoundError, the real path
     # the snippet catches below.
     mock = LocalMock()
@@ -37,7 +37,7 @@ def run(transport: LocalMock) -> None:
         try:
             orders.read()
         except NotFoundError as exc:
-            # Every error carries call context — method, cluster, location — so
+            # Every error carries call context (method, cluster, location), so
             # "which tenant on which cluster failed" is in the message.
             handle_missing(exc)
         except TransientError:
@@ -51,7 +51,7 @@ def run(transport: LocalMock) -> None:
         # --8<-- [start:retry-flow]
         # A TransientError means retries were exhausted at the RPC level. Because
         # the chunked write flows are safe to re-run, retry the whole operation
-        # rather than a single chunk — a tiny loop is usually enough.
+        # rather than a single chunk; a tiny loop is usually enough.
         import time
 
         for attempt in range(3):

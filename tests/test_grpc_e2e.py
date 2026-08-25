@@ -148,7 +148,7 @@ def test_concurrent_reads_through_one_client_share_the_channel(cluster) -> None:
 
 def test_two_clusters_one_process_have_no_cross_talk() -> None:
     # Two independent fake clusters on two ports; two clients in one process.
-    # A write into one must not appear in the other — proving endpoint routing
+    # A write into one must not appear in the other, proving endpoint routing
     # and per-client transports keep clusters fully isolated.
     prod = start_fake_cluster()
     qa = start_fake_cluster()

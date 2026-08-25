@@ -2,7 +2,7 @@
 
 These operations live on ``cf.client`` (not the DataFrame handle): starting an
 actionflow, and listing collections, apps, saved queries and cronjobs. None of
-them are data-plane RPCs, so ``LocalMock`` has no built-in handler — each is
+them are data-plane RPCs, so ``LocalMock`` has no built-in handler; each is
 backed by an explicit ``.on()`` stub keyed on the full gRPC method path, which
 is exactly how you'd stub them in your own tests. Runs against ``LocalMock`` in
 CI so the guide's code matches the client.
@@ -106,8 +106,8 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:list-collections]
         # Read every collection in the tenant. Each Collection carries its slug
-        # and id — the same id cf.data.collection(slug) resolves to under the
-        # hood, so this is how you discover what's there to read.
+        # and id, the same id cf.data.collection(slug) resolves to
+        # internally, so this is how you discover what's there to read.
         collections = list(cf.client.collection.iter_get_all())
         slugs = [c.slug for c in collections]
         # --8<-- [end:list-collections]
@@ -115,7 +115,7 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:list-others]
         # The same get_all / iter_get_all pair lists apps, saved queries and
-        # cronjobs — anything on cf.client with a listing follows this shape.
+        # cronjobs; anything on cf.client with a listing follows this shape.
         apps = list(cf.client.app.iter_get_all())
         queries = list(cf.client.query.iter_get_all())
         cronjobs = list(cf.client.cronjob.iter_get_all())

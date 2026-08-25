@@ -143,7 +143,7 @@ def test_nested_pandas_na_becomes_null() -> None:
 
 
 def test_pandas_nullable_dtype_frame_round_trips_missing_as_null() -> None:
-    # End-to-end: the realistic path that triggered the bug — a nullable-dtype
+    # End-to-end: the realistic path that triggered the bug, a nullable-dtype
     # frame with a genuinely missing cell, normalised straight from records.
     import pandas as pd
 

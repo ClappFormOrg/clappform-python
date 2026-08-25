@@ -2,7 +2,7 @@
 
 Every fenced block in docs/quickstart.md is pulled from this file by the
 snippets extension, and this file runs end-to-end against ``LocalMock`` in the
-docs-test job — so the quickstart cannot document code that no longer works.
+docs-test job, so the quickstart cannot document code that no longer works.
 The ``transport=LocalMock()`` argument is the only thing a reader drops to talk
 to a real cluster; the seeding below stands in for data that already lives in
 their tenant.
@@ -52,7 +52,7 @@ def run(transport: LocalMock) -> None:
     )
 
     # In air-gapped or split-DNS environments where discovery can't run, pin
-    # the cluster explicitly — that skips DNS entirely.
+    # the cluster explicitly, which skips DNS entirely.
     cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...")
     # --8<-- [end:connect]
 
@@ -63,7 +63,7 @@ def run(transport: LocalMock) -> None:
     os.environ.setdefault("CLAPPFORM_API_KEY", "cf_live_...")
 
     # --8<-- [start:connect-env]
-    # Read the key from wherever your script keeps secrets — the library never
+    # Read the key from wherever your script keeps secrets; the library never
     # touches the environment itself, so this stays your choice.
     import os
 
@@ -80,7 +80,7 @@ def run(transport: LocalMock) -> None:
         # --8<-- [start:roundtrip]
         orders = cf.data.collection("sales_orders")
 
-        # read a filtered slice straight into a pandas DataFrame — pass an
+        # read a filtered slice straight into a pandas DataFrame by passing an
         # aggregation pipeline; $match filters, $project picks columns
         df = orders.read(
             pipeline=[

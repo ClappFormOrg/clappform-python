@@ -1,7 +1,7 @@
 """Name -> API-family index for friendly wrong-family / typo errors.
 
-The public surface is intentionally two levels deep — ``cf.data.insert(...)``,
-``cf.auth.api_key(...)`` — because names are only unique at the gRPC-path level,
+The public surface is intentionally two levels deep (``cf.data.insert(...)``,
+``cf.auth.api_key(...)``) because names are only unique at the gRPC-path level,
 not at the flat Python-attribute level (``create`` / ``get`` / ``delete`` recur
 across ~22 services, and ``general`` / ``process`` / ``version`` name services in
 more than one family, on different hosts). Flattening the surface onto ``cf``
