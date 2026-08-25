@@ -35,24 +35,34 @@ class ChatManagementStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetRooms = channel.unary_unary(
-                '/clappform.data.v1.chat.ChatManagement/GetRooms',
-                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetRoomsRequest.SerializeToString,
-                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Rooms.FromString,
+        self.CreateChat = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/CreateChat',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.CreateChatRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
                 _registered_method=True)
-        self.UpdateRoom = channel.unary_unary(
-                '/clappform.data.v1.chat.ChatManagement/UpdateRoom',
-                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.UpdateRoomRequest.SerializeToString,
-                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Room.FromString,
+        self.GetChats = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/GetChats',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetChatsRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chats.FromString,
                 _registered_method=True)
-        self.DeleteRoom = channel.unary_unary(
-                '/clappform.data.v1.chat.ChatManagement/DeleteRoom',
-                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.DeleteRoomRequest.SerializeToString,
+        self.GetChat = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/GetChat',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetChatRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
+                _registered_method=True)
+        self.UpdateChat = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/UpdateChat',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.UpdateChatRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
+                _registered_method=True)
+        self.DeleteChat = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/DeleteChat',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.DeleteChatRequest.SerializeToString,
                 response_deserializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Empty.FromString,
                 _registered_method=True)
-        self.StreamMessage = channel.unary_stream(
-                '/clappform.data.v1.chat.ChatManagement/StreamMessage',
-                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.StreamMessageRequest.SerializeToString,
+        self.SendMessage = channel.unary_stream(
+                '/clappform.data.v1.chat.ChatManagement/SendMessage',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.SendMessageRequest.SerializeToString,
                 response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.StreamMessageResponse.FromString,
                 _registered_method=True)
         self.GetMessages = channel.unary_unary(
@@ -60,40 +70,57 @@ class ChatManagementStub(object):
                 request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetMessagesRequest.SerializeToString,
                 response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Messages.FromString,
                 _registered_method=True)
-        self.UploadFiles = channel.unary_unary(
-                '/clappform.data.v1.chat.ChatManagement/UploadFiles',
-                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileUploadRequest.SerializeToString,
-                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileUploadResponse.FromString,
+        self.SetKeepInMemory = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/SetKeepInMemory',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.SetKeepInMemoryRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
                 _registered_method=True)
-        self.DeleteFile = channel.unary_unary(
-                '/clappform.data.v1.chat.ChatManagement/DeleteFile',
-                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileDeleteRequest.SerializeToString,
+        self.RefreshSchemaCache = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/RefreshSchemaCache',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.RefreshSchemaCacheRequest.SerializeToString,
                 response_deserializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Empty.FromString,
+                _registered_method=True)
+        self.BuildQuery = channel.unary_unary(
+                '/clappform.data.v1.chat.ChatManagement/BuildQuery',
+                request_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.BuildQueryRequest.SerializeToString,
+                response_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.BuildQueryResponse.FromString,
                 _registered_method=True)
 
 
 class ChatManagementServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetRooms(self, request, context):
+    def CreateChat(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def UpdateRoom(self, request, context):
+    def GetChats(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DeleteRoom(self, request, context):
+    def GetChat(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamMessage(self, request, context):
+    def UpdateChat(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteChat(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendMessage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -105,13 +132,19 @@ class ChatManagementServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def UploadFiles(self, request, context):
+    def SetKeepInMemory(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DeleteFile(self, request, context):
+    def RefreshSchemaCache(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def BuildQuery(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -120,24 +153,34 @@ class ChatManagementServicer(object):
 
 def add_ChatManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetRooms': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetRooms,
-                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetRoomsRequest.FromString,
-                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Rooms.SerializeToString,
+            'CreateChat': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateChat,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.CreateChatRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.SerializeToString,
             ),
-            'UpdateRoom': grpc.unary_unary_rpc_method_handler(
-                    servicer.UpdateRoom,
-                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.UpdateRoomRequest.FromString,
-                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Room.SerializeToString,
+            'GetChats': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetChats,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetChatsRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chats.SerializeToString,
             ),
-            'DeleteRoom': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteRoom,
-                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.DeleteRoomRequest.FromString,
+            'GetChat': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetChat,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetChatRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.SerializeToString,
+            ),
+            'UpdateChat': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateChat,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.UpdateChatRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.SerializeToString,
+            ),
+            'DeleteChat': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteChat,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.DeleteChatRequest.FromString,
                     response_serializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Empty.SerializeToString,
             ),
-            'StreamMessage': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamMessage,
-                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.StreamMessageRequest.FromString,
+            'SendMessage': grpc.unary_stream_rpc_method_handler(
+                    servicer.SendMessage,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.SendMessageRequest.FromString,
                     response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.StreamMessageResponse.SerializeToString,
             ),
             'GetMessages': grpc.unary_unary_rpc_method_handler(
@@ -145,15 +188,20 @@ def add_ChatManagementServicer_to_server(servicer, server):
                     request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetMessagesRequest.FromString,
                     response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Messages.SerializeToString,
             ),
-            'UploadFiles': grpc.unary_unary_rpc_method_handler(
-                    servicer.UploadFiles,
-                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileUploadRequest.FromString,
-                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileUploadResponse.SerializeToString,
+            'SetKeepInMemory': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetKeepInMemory,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.SetKeepInMemoryRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.SerializeToString,
             ),
-            'DeleteFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteFile,
-                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileDeleteRequest.FromString,
+            'RefreshSchemaCache': grpc.unary_unary_rpc_method_handler(
+                    servicer.RefreshSchemaCache,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.RefreshSchemaCacheRequest.FromString,
                     response_serializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Empty.SerializeToString,
+            ),
+            'BuildQuery': grpc.unary_unary_rpc_method_handler(
+                    servicer.BuildQuery,
+                    request_deserializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.BuildQueryRequest.FromString,
+                    response_serializer=clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.BuildQueryResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -167,7 +215,7 @@ class ChatManagement(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetRooms(request,
+    def CreateChat(request,
             target,
             options=(),
             channel_credentials=None,
@@ -180,9 +228,9 @@ class ChatManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.data.v1.chat.ChatManagement/GetRooms',
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetRoomsRequest.SerializeToString,
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Rooms.FromString,
+            '/clappform.data.v1.chat.ChatManagement/CreateChat',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.CreateChatRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
             options,
             channel_credentials,
             insecure,
@@ -194,7 +242,7 @@ class ChatManagement(object):
             _registered_method=True)
 
     @staticmethod
-    def UpdateRoom(request,
+    def GetChats(request,
             target,
             options=(),
             channel_credentials=None,
@@ -207,9 +255,9 @@ class ChatManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.data.v1.chat.ChatManagement/UpdateRoom',
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.UpdateRoomRequest.SerializeToString,
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Room.FromString,
+            '/clappform.data.v1.chat.ChatManagement/GetChats',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetChatsRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chats.FromString,
             options,
             channel_credentials,
             insecure,
@@ -221,7 +269,7 @@ class ChatManagement(object):
             _registered_method=True)
 
     @staticmethod
-    def DeleteRoom(request,
+    def GetChat(request,
             target,
             options=(),
             channel_credentials=None,
@@ -234,8 +282,62 @@ class ChatManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.data.v1.chat.ChatManagement/DeleteRoom',
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.DeleteRoomRequest.SerializeToString,
+            '/clappform.data.v1.chat.ChatManagement/GetChat',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.GetChatRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateChat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.chat.ChatManagement/UpdateChat',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.UpdateChatRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteChat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.chat.ChatManagement/DeleteChat',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.DeleteChatRequest.SerializeToString,
             clappform_dot_v1_dot_commons_dot_commons__pb2.Empty.FromString,
             options,
             channel_credentials,
@@ -248,7 +350,7 @@ class ChatManagement(object):
             _registered_method=True)
 
     @staticmethod
-    def StreamMessage(request,
+    def SendMessage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -261,8 +363,8 @@ class ChatManagement(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/clappform.data.v1.chat.ChatManagement/StreamMessage',
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.StreamMessageRequest.SerializeToString,
+            '/clappform.data.v1.chat.ChatManagement/SendMessage',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.SendMessageRequest.SerializeToString,
             clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.StreamMessageResponse.FromString,
             options,
             channel_credentials,
@@ -302,7 +404,7 @@ class ChatManagement(object):
             _registered_method=True)
 
     @staticmethod
-    def UploadFiles(request,
+    def SetKeepInMemory(request,
             target,
             options=(),
             channel_credentials=None,
@@ -315,9 +417,9 @@ class ChatManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.data.v1.chat.ChatManagement/UploadFiles',
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileUploadRequest.SerializeToString,
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileUploadResponse.FromString,
+            '/clappform.data.v1.chat.ChatManagement/SetKeepInMemory',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.SetKeepInMemoryRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.Chat.FromString,
             options,
             channel_credentials,
             insecure,
@@ -329,7 +431,7 @@ class ChatManagement(object):
             _registered_method=True)
 
     @staticmethod
-    def DeleteFile(request,
+    def RefreshSchemaCache(request,
             target,
             options=(),
             channel_credentials=None,
@@ -342,9 +444,36 @@ class ChatManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.data.v1.chat.ChatManagement/DeleteFile',
-            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.FileDeleteRequest.SerializeToString,
+            '/clappform.data.v1.chat.ChatManagement/RefreshSchemaCache',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.RefreshSchemaCacheRequest.SerializeToString,
             clappform_dot_v1_dot_commons_dot_commons__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def BuildQuery(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.data.v1.chat.ChatManagement/BuildQuery',
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.BuildQueryRequest.SerializeToString,
+            clappform_dot_data_dot_v1_dot_chat_dot_chat__pb2.BuildQueryResponse.FromString,
             options,
             channel_credentials,
             insecure,

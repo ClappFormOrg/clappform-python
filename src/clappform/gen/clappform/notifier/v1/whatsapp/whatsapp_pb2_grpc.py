@@ -35,16 +35,6 @@ class WhatsappManagementStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendMessage = channel.unary_unary(
-                '/clappform.notifier.v1.whatsapp.WhatsappManagement/SendMessage',
-                request_serializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.MessageRequest.SerializeToString,
-                response_deserializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.MessageResponse.FromString,
-                _registered_method=True)
-        self.SendTemplate = channel.unary_unary(
-                '/clappform.notifier.v1.whatsapp.WhatsappManagement/SendTemplate',
-                request_serializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.TemplateRequest.SerializeToString,
-                response_deserializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.HealthStatus.FromString,
-                _registered_method=True)
         self.WebhookEvent = channel.unary_unary(
                 '/clappform.notifier.v1.whatsapp.WhatsappManagement/WebhookEvent',
                 request_serializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.WebhookEventRequest.SerializeToString,
@@ -59,18 +49,6 @@ class WhatsappManagementStub(object):
 
 class WhatsappManagementServicer(object):
     """Missing associated documentation comment in .proto file."""
-
-    def SendMessage(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def SendTemplate(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def WebhookEvent(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -87,16 +65,6 @@ class WhatsappManagementServicer(object):
 
 def add_WhatsappManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendMessage': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendMessage,
-                    request_deserializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.MessageRequest.FromString,
-                    response_serializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.MessageResponse.SerializeToString,
-            ),
-            'SendTemplate': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendTemplate,
-                    request_deserializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.TemplateRequest.FromString,
-                    response_serializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.HealthStatus.SerializeToString,
-            ),
             'WebhookEvent': grpc.unary_unary_rpc_method_handler(
                     servicer.WebhookEvent,
                     request_deserializer=clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.WebhookEventRequest.FromString,
@@ -117,60 +85,6 @@ def add_WhatsappManagementServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class WhatsappManagement(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def SendMessage(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/clappform.notifier.v1.whatsapp.WhatsappManagement/SendMessage',
-            clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.MessageRequest.SerializeToString,
-            clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.MessageResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def SendTemplate(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/clappform.notifier.v1.whatsapp.WhatsappManagement/SendTemplate',
-            clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.TemplateRequest.SerializeToString,
-            clappform_dot_notifier_dot_v1_dot_whatsapp_dot_whatsapp__pb2.HealthStatus.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
 
     @staticmethod
     def WebhookEvent(request,

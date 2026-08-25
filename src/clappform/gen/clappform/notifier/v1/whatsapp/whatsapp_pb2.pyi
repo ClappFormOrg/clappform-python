@@ -8,40 +8,6 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
-class HealthStatus(_message.Message):
-    __slots__ = ("service", "timestamp")
-    SERVICE_FIELD_NUMBER: _ClassVar[int]
-    TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
-    service: str
-    timestamp: str
-    def __init__(self, service: _Optional[str] = ..., timestamp: _Optional[str] = ...) -> None: ...
-
-class MessageRequest(_message.Message):
-    __slots__ = ("phone_number", "message")
-    PHONE_NUMBER_FIELD_NUMBER: _ClassVar[int]
-    MESSAGE_FIELD_NUMBER: _ClassVar[int]
-    phone_number: str
-    message: str
-    def __init__(self, phone_number: _Optional[str] = ..., message: _Optional[str] = ...) -> None: ...
-
-class MessageResponse(_message.Message):
-    __slots__ = ("status", "message")
-    STATUS_FIELD_NUMBER: _ClassVar[int]
-    MESSAGE_FIELD_NUMBER: _ClassVar[int]
-    status: int
-    message: str
-    def __init__(self, status: _Optional[int] = ..., message: _Optional[str] = ...) -> None: ...
-
-class TemplateRequest(_message.Message):
-    __slots__ = ("phone_number", "template_name", "language_code")
-    PHONE_NUMBER_FIELD_NUMBER: _ClassVar[int]
-    TEMPLATE_NAME_FIELD_NUMBER: _ClassVar[int]
-    LANGUAGE_CODE_FIELD_NUMBER: _ClassVar[int]
-    phone_number: str
-    template_name: str
-    language_code: str
-    def __init__(self, phone_number: _Optional[str] = ..., template_name: _Optional[str] = ..., language_code: _Optional[str] = ...) -> None: ...
-
 class WebhookVerifyResponse(_message.Message):
     __slots__ = ("challenge",)
     CHALLENGE_FIELD_NUMBER: _ClassVar[int]

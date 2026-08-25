@@ -35,51 +35,92 @@ class InboxManagementStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.StreamMessages = channel.unary_stream(
-                '/clappform.notifier.v1.inbox.InboxManagement/StreamMessages',
-                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetMessagesRequest.SerializeToString,
-                response_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Message.FromString,
+        self.GetNotifications = channel.unary_unary(
+                '/clappform.notifier.v1.inbox.InboxManagement/GetNotifications',
+                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetNotificationsRequest.SerializeToString,
+                response_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetNotificationsResponse.FromString,
                 _registered_method=True)
-        self.GetMessages = channel.unary_unary(
-                '/clappform.notifier.v1.inbox.InboxManagement/GetMessages',
-                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetMessagesRequest.SerializeToString,
-                response_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Messages.FromString,
+        self.GetUnreadCount = channel.unary_unary(
+                '/clappform.notifier.v1.inbox.InboxManagement/GetUnreadCount',
+                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetUnreadCountRequest.SerializeToString,
+                response_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetUnreadCountResponse.FromString,
                 _registered_method=True)
-        self.SendMessage = channel.unary_unary(
-                '/clappform.notifier.v1.inbox.InboxManagement/SendMessage',
-                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MessageRequest.SerializeToString,
+        self.MarkAsRead = channel.unary_unary(
+                '/clappform.notifier.v1.inbox.InboxManagement/MarkAsRead',
+                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MarkAsReadRequest.SerializeToString,
                 response_deserializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Message.FromString,
                 _registered_method=True)
-        self.SetStatus = channel.unary_unary(
-                '/clappform.notifier.v1.inbox.InboxManagement/SetStatus',
-                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.SetStatusRequest.SerializeToString,
-                response_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Messages.FromString,
+        self.MarkAsAcknowledged = channel.unary_unary(
+                '/clappform.notifier.v1.inbox.InboxManagement/MarkAsAcknowledged',
+                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MarkAsAcknowledgedRequest.SerializeToString,
+                response_deserializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Message.FromString,
+                _registered_method=True)
+        self.BulkUpdateStatus = channel.unary_unary(
+                '/clappform.notifier.v1.inbox.InboxManagement/BulkUpdateStatus',
+                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.BulkUpdateStatusRequest.SerializeToString,
+                response_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.BulkUpdateStatusResponse.FromString,
+                _registered_method=True)
+        self.ListSuppressions = channel.unary_unary(
+                '/clappform.notifier.v1.inbox.InboxManagement/ListSuppressions',
+                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.ListSuppressionsRequest.SerializeToString,
+                response_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.ListSuppressionsResponse.FromString,
+                _registered_method=True)
+        self.RemoveSuppression = channel.unary_unary(
+                '/clappform.notifier.v1.inbox.InboxManagement/RemoveSuppression',
+                request_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.RemoveSuppressionRequest.SerializeToString,
+                response_deserializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Message.FromString,
                 _registered_method=True)
 
 
 class InboxManagementServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def StreamMessages(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def GetNotifications(self, request, context):
+        """GetNotifications returns paginated push notifications for the authenticated user.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetMessages(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def GetUnreadCount(self, request, context):
+        """GetUnreadCount returns the count of unread push notifications for the authenticated user.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendMessage(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def MarkAsRead(self, request, context):
+        """MarkAsRead marks a notification as read.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SetStatus(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def MarkAsAcknowledged(self, request, context):
+        """MarkAsAcknowledged marks a notification as acknowledged (action button clicked).
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def BulkUpdateStatus(self, request, context):
+        """BulkUpdateStatus updates the status of many notifications in a single call.
+        status must be one of: "READ", "ACKNOWLEDGED", "ARCHIVED".
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListSuppressions(self, request, context):
+        """ListSuppressions returns all email addresses currently on the suppression list.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RemoveSuppression(self, request, context):
+        """RemoveSuppression removes an email address from the suppression list.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -87,25 +128,40 @@ class InboxManagementServicer(object):
 
 def add_InboxManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'StreamMessages': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamMessages,
-                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetMessagesRequest.FromString,
-                    response_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Message.SerializeToString,
+            'GetNotifications': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetNotifications,
+                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetNotificationsRequest.FromString,
+                    response_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetNotificationsResponse.SerializeToString,
             ),
-            'GetMessages': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetMessages,
-                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetMessagesRequest.FromString,
-                    response_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Messages.SerializeToString,
+            'GetUnreadCount': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUnreadCount,
+                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetUnreadCountRequest.FromString,
+                    response_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetUnreadCountResponse.SerializeToString,
             ),
-            'SendMessage': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendMessage,
-                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MessageRequest.FromString,
+            'MarkAsRead': grpc.unary_unary_rpc_method_handler(
+                    servicer.MarkAsRead,
+                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MarkAsReadRequest.FromString,
                     response_serializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Message.SerializeToString,
             ),
-            'SetStatus': grpc.unary_unary_rpc_method_handler(
-                    servicer.SetStatus,
-                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.SetStatusRequest.FromString,
-                    response_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Messages.SerializeToString,
+            'MarkAsAcknowledged': grpc.unary_unary_rpc_method_handler(
+                    servicer.MarkAsAcknowledged,
+                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MarkAsAcknowledgedRequest.FromString,
+                    response_serializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Message.SerializeToString,
+            ),
+            'BulkUpdateStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.BulkUpdateStatus,
+                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.BulkUpdateStatusRequest.FromString,
+                    response_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.BulkUpdateStatusResponse.SerializeToString,
+            ),
+            'ListSuppressions': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListSuppressions,
+                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.ListSuppressionsRequest.FromString,
+                    response_serializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.ListSuppressionsResponse.SerializeToString,
+            ),
+            'RemoveSuppression': grpc.unary_unary_rpc_method_handler(
+                    servicer.RemoveSuppression,
+                    request_deserializer=clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.RemoveSuppressionRequest.FromString,
+                    response_serializer=clappform_dot_v1_dot_commons_dot_commons__pb2.Message.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -119,34 +175,7 @@ class InboxManagement(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def StreamMessages(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            '/clappform.notifier.v1.inbox.InboxManagement/StreamMessages',
-            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetMessagesRequest.SerializeToString,
-            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Message.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetMessages(request,
+    def GetNotifications(request,
             target,
             options=(),
             channel_credentials=None,
@@ -159,9 +188,9 @@ class InboxManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.notifier.v1.inbox.InboxManagement/GetMessages',
-            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetMessagesRequest.SerializeToString,
-            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Messages.FromString,
+            '/clappform.notifier.v1.inbox.InboxManagement/GetNotifications',
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetNotificationsRequest.SerializeToString,
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetNotificationsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -173,7 +202,7 @@ class InboxManagement(object):
             _registered_method=True)
 
     @staticmethod
-    def SendMessage(request,
+    def GetUnreadCount(request,
             target,
             options=(),
             channel_credentials=None,
@@ -186,8 +215,35 @@ class InboxManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.notifier.v1.inbox.InboxManagement/SendMessage',
-            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MessageRequest.SerializeToString,
+            '/clappform.notifier.v1.inbox.InboxManagement/GetUnreadCount',
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetUnreadCountRequest.SerializeToString,
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.GetUnreadCountResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def MarkAsRead(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.notifier.v1.inbox.InboxManagement/MarkAsRead',
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MarkAsReadRequest.SerializeToString,
             clappform_dot_v1_dot_commons_dot_commons__pb2.Message.FromString,
             options,
             channel_credentials,
@@ -200,7 +256,7 @@ class InboxManagement(object):
             _registered_method=True)
 
     @staticmethod
-    def SetStatus(request,
+    def MarkAsAcknowledged(request,
             target,
             options=(),
             channel_credentials=None,
@@ -213,9 +269,90 @@ class InboxManagement(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/clappform.notifier.v1.inbox.InboxManagement/SetStatus',
-            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.SetStatusRequest.SerializeToString,
-            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.Messages.FromString,
+            '/clappform.notifier.v1.inbox.InboxManagement/MarkAsAcknowledged',
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.MarkAsAcknowledgedRequest.SerializeToString,
+            clappform_dot_v1_dot_commons_dot_commons__pb2.Message.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def BulkUpdateStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.notifier.v1.inbox.InboxManagement/BulkUpdateStatus',
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.BulkUpdateStatusRequest.SerializeToString,
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.BulkUpdateStatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListSuppressions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.notifier.v1.inbox.InboxManagement/ListSuppressions',
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.ListSuppressionsRequest.SerializeToString,
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.ListSuppressionsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RemoveSuppression(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.notifier.v1.inbox.InboxManagement/RemoveSuppression',
+            clappform_dot_notifier_dot_v1_dot_inbox_dot_inbox__pb2.RemoveSuppressionRequest.SerializeToString,
+            clappform_dot_v1_dot_commons_dot_commons__pb2.Message.FromString,
             options,
             channel_credentials,
             insecure,

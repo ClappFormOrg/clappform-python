@@ -26,7 +26,12 @@ classifiers = [
 ]
 dependencies = [
     "grpcio>=1.60,<2",
-    "protobuf>=4.25,<6",
+    # The floor is the gencode version stamped into clappform/gen (5.28.1): an
+    # older runtime either lacks google.protobuf.runtime_version entirely (4.x)
+    # or fails its own gencode-newer-than-runtime check (5.27 and below). The
+    # gencode loads on 6.x and 7.x, and capping below 7 would force pip to
+    # backtrack past every grpcio-tools release that ships cp314 wheels.
+    "protobuf>=5.28.1,<8",
 ]
 
 [project.optional-dependencies]
@@ -39,7 +44,10 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
     "mypy>=1.10",
-    "grpcio-tools>=1.60,<2",
+    # 1.75.1 is the oldest release with cp314 wheels. Below it, a Python 3.14
+    # runner builds the sdist from source, and that build passes both
+    # /std:c++17 and /std:c11 to cl.exe, which MSVC 14.51 rejects (D8016).
+    "grpcio-tools>=1.75.1,<2",
     "types-protobuf",
     "types-grpcio",
     # Release tooling: build the sdist/wheel and validate metadata locally, the

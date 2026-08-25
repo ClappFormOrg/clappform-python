@@ -528,6 +528,29 @@ class OtpManagement(_runtime.ServiceBase):
             location=location,
         )
 
+    def regenerate_recovery_codes(
+        self,
+        request: _m_clappform_authoriser_v1_otp_otp.TokenRequest | None = None,
+        *,
+        token: str | None = None,
+        timeout: float | None = None,
+        metadata: tuple[tuple[str, str], ...] | None = None,
+        location: str | None = None,
+    ) -> _m_clappform_authoriser_v1_otp_otp.RecoveryCodesResponse:
+        """RPC: /clappform.authoriser.v1.otp.OtpManagement/RegenerateRecoveryCodes (unary-unary)"""
+        _provided = {_k: _v for _k, _v in (("token", token),) if _v is not None}
+        _request = _runtime.build_request(_m_clappform_authoriser_v1_otp_otp.TokenRequest, request, _provided)
+        return self._caller.invoke(
+            "unary_unary",
+            "/clappform.authoriser.v1.otp.OtpManagement/RegenerateRecoveryCodes",
+            _request,
+            _m_clappform_authoriser_v1_otp_otp.TokenRequest,
+            _m_clappform_authoriser_v1_otp_otp.RecoveryCodesResponse,
+            timeout=timeout,
+            metadata=metadata,
+            location=location,
+        )
+
 
 class PasswordManagement(_runtime.ServiceBase):
     """Wrapper for clappform.authoriser.v1.password.PasswordManagement."""
@@ -1132,12 +1155,13 @@ class UserManagement(_runtime.ServiceBase):
         is_active: bool | None = None,
         extra_information: bytes | None = None,
         roles: Sequence[str] | None = None,
+        preferences: bytes | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_user_user.User:
         """RPC: /clappform.authoriser.v1.user.UserManagement/Create (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("email", email), ("first_name", first_name), ("last_name", last_name), ("password", password), ("is_active", is_active), ("extra_information", extra_information), ("roles", roles),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("email", email), ("first_name", first_name), ("last_name", last_name), ("password", password), ("is_active", is_active), ("extra_information", extra_information), ("roles", roles), ("preferences", preferences),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_user_user.CreateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -1161,12 +1185,13 @@ class UserManagement(_runtime.ServiceBase):
         password: str | None = None,
         extra_information: bytes | None = None,
         roles: Sequence[str] | None = None,
+        preferences: bytes | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_user_user.User:
         """RPC: /clappform.authoriser.v1.user.UserManagement/Update (unary-unary)"""
-        _provided = {_k: _v for _k, _v in (("id", id), ("email", email), ("first_name", first_name), ("last_name", last_name), ("password", password), ("extra_information", extra_information), ("roles", roles),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("id", id), ("email", email), ("first_name", first_name), ("last_name", last_name), ("password", password), ("extra_information", extra_information), ("roles", roles), ("preferences", preferences),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_user_user.UpdateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",

@@ -60,6 +60,11 @@ class OtpManagementStub(object):
                 request_serializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoverRequest.SerializeToString,
                 response_deserializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoverResponse.FromString,
                 _registered_method=True)
+        self.RegenerateRecoveryCodes = channel.unary_unary(
+                '/clappform.authoriser.v1.otp.OtpManagement/RegenerateRecoveryCodes',
+                request_serializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.TokenRequest.SerializeToString,
+                response_deserializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoveryCodesResponse.FromString,
+                _registered_method=True)
 
 
 class OtpManagementServicer(object):
@@ -95,6 +100,12 @@ class OtpManagementServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RegenerateRecoveryCodes(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_OtpManagementServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -122,6 +133,11 @@ def add_OtpManagementServicer_to_server(servicer, server):
                     servicer.Recover,
                     request_deserializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoverRequest.FromString,
                     response_serializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoverResponse.SerializeToString,
+            ),
+            'RegenerateRecoveryCodes': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegenerateRecoveryCodes,
+                    request_deserializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.TokenRequest.FromString,
+                    response_serializer=clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoveryCodesResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -259,6 +275,33 @@ class OtpManagement(object):
             '/clappform.authoriser.v1.otp.OtpManagement/Recover',
             clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoverRequest.SerializeToString,
             clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoverResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RegenerateRecoveryCodes(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/clappform.authoriser.v1.otp.OtpManagement/RegenerateRecoveryCodes',
+            clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.TokenRequest.SerializeToString,
+            clappform_dot_authoriser_dot_v1_dot_otp_dot_otp__pb2.RecoveryCodesResponse.FromString,
             options,
             channel_credentials,
             insecure,

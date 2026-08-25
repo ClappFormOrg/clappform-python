@@ -1,5 +1,6 @@
 from clappform.gen.google.api import annotations_pb2 as _annotations_pb2
 from clappform.gen.grpc.gateway.protoc_gen_openapiv2.options import annotations_pb2 as _annotations_pb2_1
+from google.protobuf import timestamp_pb2 as _timestamp_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
@@ -119,8 +120,28 @@ class ExtraInformation(_message.Message):
     bounds: bytes
     def __init__(self, bounds: _Optional[bytes] = ...) -> None: ...
 
+class QueryExecutionStats(_message.Message):
+    __slots__ = ("duration_ms", "docs_examined", "docs_returned", "cache_hit", "index_used", "database_type", "source_query_depth", "executed_at")
+    DURATION_MS_FIELD_NUMBER: _ClassVar[int]
+    DOCS_EXAMINED_FIELD_NUMBER: _ClassVar[int]
+    DOCS_RETURNED_FIELD_NUMBER: _ClassVar[int]
+    CACHE_HIT_FIELD_NUMBER: _ClassVar[int]
+    INDEX_USED_FIELD_NUMBER: _ClassVar[int]
+    DATABASE_TYPE_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_QUERY_DEPTH_FIELD_NUMBER: _ClassVar[int]
+    EXECUTED_AT_FIELD_NUMBER: _ClassVar[int]
+    duration_ms: int
+    docs_examined: int
+    docs_returned: int
+    cache_hit: bool
+    index_used: bool
+    database_type: str
+    source_query_depth: int
+    executed_at: _timestamp_pb2.Timestamp
+    def __init__(self, duration_ms: _Optional[int] = ..., docs_examined: _Optional[int] = ..., docs_returned: _Optional[int] = ..., cache_hit: bool = ..., index_used: bool = ..., database_type: _Optional[str] = ..., source_query_depth: _Optional[int] = ..., executed_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
 class AggregateResponse(_message.Message):
-    __slots__ = ("data", "total", "total_sent", "next_page", "previous_page", "last_page", "extra_information")
+    __slots__ = ("data", "total", "total_sent", "next_page", "previous_page", "last_page", "extra_information", "stats")
     DATA_FIELD_NUMBER: _ClassVar[int]
     TOTAL_FIELD_NUMBER: _ClassVar[int]
     TOTAL_SENT_FIELD_NUMBER: _ClassVar[int]
@@ -128,6 +149,7 @@ class AggregateResponse(_message.Message):
     PREVIOUS_PAGE_FIELD_NUMBER: _ClassVar[int]
     LAST_PAGE_FIELD_NUMBER: _ClassVar[int]
     EXTRA_INFORMATION_FIELD_NUMBER: _ClassVar[int]
+    STATS_FIELD_NUMBER: _ClassVar[int]
     data: bytes
     total: int
     total_sent: int
@@ -135,4 +157,5 @@ class AggregateResponse(_message.Message):
     previous_page: int
     last_page: int
     extra_information: ExtraInformation
-    def __init__(self, data: _Optional[bytes] = ..., total: _Optional[int] = ..., total_sent: _Optional[int] = ..., next_page: _Optional[int] = ..., previous_page: _Optional[int] = ..., last_page: _Optional[int] = ..., extra_information: _Optional[_Union[ExtraInformation, _Mapping]] = ...) -> None: ...
+    stats: QueryExecutionStats
+    def __init__(self, data: _Optional[bytes] = ..., total: _Optional[int] = ..., total_sent: _Optional[int] = ..., next_page: _Optional[int] = ..., previous_page: _Optional[int] = ..., last_page: _Optional[int] = ..., extra_information: _Optional[_Union[ExtraInformation, _Mapping]] = ..., stats: _Optional[_Union[QueryExecutionStats, _Mapping]] = ...) -> None: ...
