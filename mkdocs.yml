@@ -1,0 +1,119 @@
+site_name: Clappform Python Client
+site_description: DataFrame-first Python client for the Clappform gRPC APIs, multi-cluster and multi-tenant.
+site_url: https://clappform.readthedocs.io/
+repo_url: https://github.com/ClappFormOrg/clappform-python
+repo_name: ClappFormOrg/clappform-python
+copyright: Clappform B.V.
+
+# The reference is generated from the wrapper layer's docstrings, so the source
+# tree has to be importable when mkdocstrings resolves it.
+docs_dir: docs
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - toc.follow
+  palette:
+    # Light/dark toggle; the switch stamps the scheme and both are styled.
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+# No `extra.version` block on purpose. Staggered cluster rollouts do mean users
+# must read the docs for the version they are on, but Read the Docs builds one
+# copy per activated version and serves its own version flyout for switching.
+# Setting `provider: mike` here would make the theme fetch a versions.json that
+# the plain `mkdocs build` in .readthedocs.yaml never writes, leaving an empty
+# selector next to a working one. Switch to mike only by also moving the docs
+# publish to `mike deploy`.
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            # Render from the wrapper layer's docstrings only; the generated
+            # protobuf stubs are noise and are excluded from the nav entirely.
+            docstring_style: google
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            merge_init_into_class: true
+            filters: ["!^_"]
+
+markdown_extensions:
+  - admonition
+  # Collapsible admonitions (`??? note`), used to fold the old-API reference
+  # blocks in the migration guide under the v6 code they replace.
+  - pymdownx.details
+  - attr_list
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  # Pulls runnable code out of docs/snippets/ into the guides. Those modules
+  # run against LocalMock in the docs-test job, so a snippet that stops working
+  # (or a bad include path) fails the build, the same guarantee tests give the
+  # code.
+  - pymdownx.snippets:
+      base_path: [docs/snippets]
+      check_paths: true
+
+# Grouped by intent, not by document type: readers who already know the
+# concepts jump to the section that matches what they're trying to do:
+# get started, perform a task, understand a term, unblock an error, or look
+# something up, rather than scanning a flat guide list.
+nav:
+  - Home: index.md
+  - Get started:
+      - Quickstart: quickstart.md
+      - Migrating from 4.x / 5.x: guides/migrating.md
+  - Tasks:
+      # The Cookbook is the fast, copy-paste action index; the guides below it
+      # are the deeper "how it works" for each area. Cross-linked both ways.
+      - All recipes (Cookbook): guides/cookbook.md
+      - Read & query data: guides/dataframes.md
+      - Performance & large datasets: guides/performance.md
+      - Actionflows: guides/actionflow-scripts.md
+      - Actionflows & listings: guides/actionflows-and-listings.md
+      - Multi-cluster & multi-tenant: guides/multi-cluster.md
+      - Errors & retries: guides/errors-and-retries.md
+      - Testing with LocalMock: guides/testing.md
+  - Concepts:
+      - Key concepts & glossary: guides/concepts.md
+      - Security & credentials: guides/security.md
+  - Troubleshooting: guides/troubleshooting.md
+  - Reference:
+      - Client: reference/client.md
+      - DataFrame surface: reference/dataframes.md
+      - Errors: reference/errors.md
+      - Testing: reference/testing.md
+      - API families: reference/api-families.md
+  - Changelog: changelog.md

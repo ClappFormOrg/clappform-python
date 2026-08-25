@@ -1,0 +1,137 @@
+"""Every documented code snippet actually runs.
+
+The guides pull their fenced code out of ``docs/snippets/*.py`` via the mkdocs
+snippets extension, and each of those modules exposes a ``run()`` (or
+``build_mock()`` + ``run()``) entry point that exercises the snippet against
+``LocalMock``. This test drives every one of them, so a doc example that stops
+working fails the suite here as well as the docs build: the "docs can't rot"
+guarantee, enforced in CI.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+import pytest
+
+_SNIPPETS_DIR = Path(__file__).resolve().parent.parent / "docs" / "snippets"
+
+
+def _load(name: str):
+    """Import a snippet module by file path (docs/snippets is not on sys.path)."""
+    path = _SNIPPETS_DIR / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(f"docs_snippets_{name}", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_snippets_directory_is_present() -> None:
+    """Guard against the snippet source being moved out from under the guides."""
+    assert _SNIPPETS_DIR.is_dir()
+    found = {p.stem for p in _SNIPPETS_DIR.glob("*.py")}
+    assert {
+        "quickstart",
+        "dataframes",
+        "client_operations",
+        "multi_cluster",
+        "errors_and_retries",
+        "testing",
+        "migrating",
+        "cookbook",
+        "actionflow_scripts",
+        "troubleshooting",
+        "performance",
+    } <= found
+
+
+def test_quickstart_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The quickstart leads with location-only construction, which discovers the
+    # cluster from DNS. CI has no such record, so stub the resolver; the snippet
+    # itself stays clean and reader-facing.
+    from clappform import _discovery
+
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
+    module = _load("quickstart")
+    module.run(module.build_mock())
+
+
+def test_dataframes_snippet_runs() -> None:
+    module = _load("dataframes")
+    mock = module.build_mock()
+    mock.seed_query("monthly-revenue-per-region", collection="sales_orders-id")
+    module.run(mock)
+
+
+def test_client_operations_snippet_runs() -> None:
+    module = _load("client_operations")
+    module.run(module.build_mock())
+
+
+def test_multi_cluster_snippet_runs() -> None:
+    module = _load("multi_cluster")
+    module.run(module.build_mock(), module.build_mock())
+
+
+def test_errors_and_retries_snippet_runs() -> None:
+    module = _load("errors_and_retries")
+    module.run(module.build_mock())
+
+
+def test_testing_snippet_runs() -> None:
+    module = _load("testing")
+    module.run()
+
+
+def test_migrating_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The connect block constructs location-only (DNS discovery); stub it, same
+    # as the quickstart, so the reader-facing snippet stays clean.
+    from clappform import _discovery
+
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
+    module = _load("migrating")
+    module.run(module.build_mock())
+
+
+def test_cookbook_snippet_runs() -> None:
+    module = _load("cookbook")
+    module.run(module.build_mock(), module.build_second_cluster_mock())
+
+
+def test_actionflow_scripts_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The connect-in-worker block constructs location-only (DNS discovery).
+    from clappform import _discovery
+
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
+    module = _load("actionflow_scripts")
+    module.run(module.build_mock())
+
+
+def test_troubleshooting_snippet_runs() -> None:
+    module = _load("troubleshooting")
+    module.run(module.build_mock())
+
+
+def test_performance_snippet_runs() -> None:
+    module = _load("performance")
+    module.run(module.build_mock())
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "quickstart",
+        "dataframes",
+        "client_operations",
+        "multi_cluster",
+        "migrating",
+        "cookbook",
+        "actionflow_scripts",
+    ],
+)
+def test_snippet_modules_import_clean(name: str) -> None:
+    """Importing a snippet module must have no side effects (no top-level run)."""
+    module = _load(name)
+    assert hasattr(module, "run")

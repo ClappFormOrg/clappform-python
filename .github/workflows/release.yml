@@ -14,7 +14,7 @@ name: Release
 #     version on the public `clappform` project; choose `pypi` to dispatch a
 #     production publish instead.
 #
-# Auth is PyPI Trusted Publishing (OIDC) — no long-lived tokens live in the
+# Auth is PyPI Trusted Publishing (OIDC), so no long-lived tokens live in the
 # repo. One-time setup: add a trusted publisher on BOTH indexes you use
 # (pypi.org and/or test.pypi.org) for this repository + workflow (`release.yml`)
 # + the matching environment name (`pypi` / `testpypi`), and create GitHub
@@ -41,30 +41,34 @@ jobs:
     name: Build & verify distributions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: pyproject.toml
 
+      # twine 7.0 is the floor: hatchling stamps Metadata 2.5 on the build and
+      # older twine rejects a metadata version it does not know.
       - name: Install build tooling
-        run: python -m pip install build twine
+        run: python -m pip install "build>=1.2" "twine>=7.0"
 
       - name: Build sdist and wheel
         run: python -m build
 
       # On a Release trigger, fail loudly if the tag and the packaged version
-      # disagree — a mismatched tag is the classic way a wrong version ships.
-      # Tag may be `v6.0.0a1` or `6.0.0a1`; compare on the normalized value.
+      # disagree; a mismatched tag is the classic way a wrong version ships.
+      # The version comes from the wheel that was just built, not from a config
+      # file, so this checks what actually ships. Tag may be `v6.0.0a1` or
+      # `6.0.0a1`; the wheel filename already carries the normalized value.
       - name: Check tag matches package version
         if: github.event_name == 'release'
         run: |
-          PKG_VERSION="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+          PKG_VERSION="$(python -c 'import glob, os; print(os.path.basename(glob.glob("dist/*.whl")[0]).split("-")[1])')"
           TAG="${GITHUB_REF_NAME#v}"
           echo "package version: $PKG_VERSION   release tag: $TAG"
           if [ "$PKG_VERSION" != "$TAG" ]; then
-            echo "::error::Release tag ($TAG) does not match pyproject version ($PKG_VERSION). Bump the version or fix the tag."
+            echo "::error::Release tag ($TAG) does not match the built package version ($PKG_VERSION). Bump __version__ in src/clappform/__init__.py or fix the tag."
             exit 1
           fi
 
@@ -72,7 +76,7 @@ jobs:
         run: python -m twine check dist/*
 
       - name: Upload distributions artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -93,7 +97,7 @@ jobs:
       id-token: write
     steps:
       - name: Download built distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
@@ -101,7 +105,7 @@ jobs:
       - name: Publish to production PyPI (Trusted Publishing / OIDC)
         if: github.event_name == 'release' || inputs.target == 'pypi'
         uses: pypa/gh-action-pypi-publish@release/v1
-        # No `password:` — OIDC trusted publishing authenticates via the
+        # No `password:`, because OIDC trusted publishing authenticates via the
         # id-token above. Defaults to the production index (pypi.org).
 
       - name: Publish to TestPyPI (Trusted Publishing / OIDC)
