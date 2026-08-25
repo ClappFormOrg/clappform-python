@@ -291,7 +291,8 @@ def _emit_method(plan: _MethodPlan, index: _Index, out: list[str]) -> None:
 
 
 def _emit_pagination(plan: _MethodPlan, index: _Index, out: list[str]) -> None:
-    assert plan.pagination is not None
+    # Narrowing for mypy: callers only reach this for a plan with pagination.
+    assert plan.pagination is not None  # noqa: S101
     pagination_field, items_field, item_ref = plan.pagination
     fields = [f for f in plan.flattened if f.name != "page"]
     out.append(f"    def iter_{plan.name}(")
@@ -352,84 +353,91 @@ def _family_of(package: str) -> str | None:
     return parts[1]
 
 
-def generate_sources(descriptor_set: bytes) -> dict[str, str]:
-    """Return {module filename: source} for the full service layer."""
-    fds = descriptor_pb2.FileDescriptorSet()
-    fds.MergeFromString(descriptor_set)
-    index = _Index(fds)
+def _render_service(
+    file: descriptor_pb2.FileDescriptorProto,
+    service_idx: int,
+    service: descriptor_pb2.ServiceDescriptorProto,
+    index: _Index,
+    taken: set[str],
+) -> tuple[str, str, set[str]]:
+    """Return (class source, family attribute name, pb2 modules to import)."""
+    plans = [
+        _MethodPlan(file, service_idx, method_idx, method, index)
+        for method_idx, method in enumerate(service.method)
+    ]
 
-    families: dict[str, list[descriptor_pb2.FileDescriptorProto]] = {}
-    for file in fds.file:
-        family = _family_of(file.package)
-        if family is not None and file.service:
-            families.setdefault(family, []).append(file)
+    # Collect the pb2 modules this service touches, for imports. A pagination
+    # plan's item type needs no separate entry, since it is a field of the
+    # output message, whose file is added here.
+    pb2_paths: set[str] = set()
+    for plan in plans:
+        pb2_paths.add(index.owning_file(plan.input_type).name)
+        pb2_paths.add(index.owning_file(plan.output_type).name)
+        for field in plan.flattened:
+            if field.type == _F.TYPE_MESSAGE and not index.message(
+                field.type_name
+            ).options.map_entry:
+                pb2_paths.add(index.owning_file(field.type_name).name)
 
-    sources: dict[str, str] = {}
-    registry: list[tuple[str, str, str]] = []  # (attr, class, module)
+    out: list[str] = []
+    out.append(f"class {service.name}(_runtime.ServiceBase):")
+    out.append(f'    """Wrapper for {file.package}.{service.name}."""')
+    out.append("")
+    for plan in plans:
+        _emit_method(plan, index, out)
 
-    for family in sorted(families):
-        alias = FAMILY_ALIASES.get(family, family)
-        class_name = f"{alias.capitalize()}API"
-        files = sorted(families[family], key=lambda f: f.name)
+    attr = _service_attr(service.name, taken, file.package)
+    return "\n".join(out).rstrip() + "\n", attr, pb2_paths
 
-        pb2_paths: set[str] = set()
-        service_blocks: list[str] = []
-        wiring: list[tuple[str, str]] = []  # (attr, service class)
-        taken: set[str] = set()
 
-        for file in files:
-            for service_idx, service in enumerate(file.service):
-                plans = [
-                    _MethodPlan(file, service_idx, method_idx, method, index)
-                    for method_idx, method in enumerate(service.method)
-                ]
-                # Collect the pb2 modules this service touches, for imports.
-                # A pagination plan's item type needs no separate entry, since it is
-                # a field of the output message, whose file is added here.
-                for plan in plans:
-                    pb2_paths.add(index.owning_file(plan.input_type).name)
-                    pb2_paths.add(index.owning_file(plan.output_type).name)
-                    for field in plan.flattened:
-                        if field.type == _F.TYPE_MESSAGE and not index.message(
-                            field.type_name
-                        ).options.map_entry:
-                            pb2_paths.add(index.owning_file(field.type_name).name)
-                out: list[str] = []
-                out.append(f"class {service.name}(_runtime.ServiceBase):")
-                out.append(f'    """Wrapper for {file.package}.{service.name}."""')
-                out.append("")
-                for plan in plans:
-                    _emit_method(plan, index, out)
-                service_blocks.append("\n".join(out).rstrip() + "\n")
+def _render_family(
+    family: str,
+    files: list[descriptor_pb2.FileDescriptorProto],
+    index: _Index,
+) -> tuple[str, str, str]:
+    """Return (module alias, family class name, module source) for one family."""
+    alias = FAMILY_ALIASES.get(family, family)
+    class_name = f"{alias.capitalize()}API"
 
-                attr = _service_attr(service.name, taken, file.package)
-                taken.add(attr)
-                wiring.append((attr, service.name))
+    pb2_paths: set[str] = set()
+    service_blocks: list[str] = []
+    wiring: list[tuple[str, str]] = []  # (attr, service class)
+    taken: set[str] = set()
 
-        module_lines = [HEADER]
-        module_lines.append("from __future__ import annotations")
+    for file in sorted(files, key=lambda f: f.name):
+        for service_idx, service in enumerate(file.service):
+            block, attr, paths = _render_service(file, service_idx, service, index, taken)
+            service_blocks.append(block)
+            pb2_paths |= paths
+            taken.add(attr)
+            wiring.append((attr, service.name))
+
+    module_lines = [HEADER]
+    module_lines.append("from __future__ import annotations")
+    module_lines.append("")
+    module_lines.append("from collections.abc import Iterable, Iterator, Sequence")
+    module_lines.append("from typing import Any")
+    module_lines.append("")
+    module_lines.append("from clappform import _runtime")
+    for path in sorted(pb2_paths):
+        module_lines.append(f"import {_pb2_module(path)} as {_pb2_alias(path)}")
+    module_lines.append("")
+    module_lines.append("")
+    for block in service_blocks:
+        module_lines.append(block)
         module_lines.append("")
-        module_lines.append("from collections.abc import Iterable, Iterator, Sequence")
-        module_lines.append("from typing import Any")
-        module_lines.append("")
-        module_lines.append("from clappform import _runtime")
-        for path in sorted(pb2_paths):
-            module_lines.append(f"import {_pb2_module(path)} as {_pb2_alias(path)}")
-        module_lines.append("")
-        module_lines.append("")
-        for block in service_blocks:
-            module_lines.append(block)
-            module_lines.append("")
-        module_lines.append(f"class {class_name}:")
-        module_lines.append(f'    """Generated sub-client for the {family} API."""')
-        module_lines.append("")
-        module_lines.append("    def __init__(self, caller: _runtime.Caller) -> None:")
-        for attr, service_class in wiring:
-            module_lines.append(f"        self.{attr} = {service_class}(caller)")
-        module_lines.append("")
-        sources[f"{alias}.py"] = "\n".join(module_lines)
-        registry.append((alias, class_name, alias))
+    module_lines.append(f"class {class_name}:")
+    module_lines.append(f'    """Generated sub-client for the {family} API."""')
+    module_lines.append("")
+    module_lines.append("    def __init__(self, caller: _runtime.Caller) -> None:")
+    for attr, service_class in wiring:
+        module_lines.append(f"        self.{attr} = {service_class}(caller)")
+    module_lines.append("")
+    return alias, class_name, "\n".join(module_lines)
 
+
+def _render_init(registry: list[tuple[str, str, str]]) -> str:
+    """Return the services package __init__, given (alias, class, module) rows."""
     init_lines = [HEADER]
     init_lines.append("from __future__ import annotations")
     init_lines.append("")
@@ -447,7 +455,29 @@ def generate_sources(descriptor_set: bytes) -> dict[str, str]:
         + "]"
     )
     init_lines.append("")
-    sources["__init__.py"] = "\n".join(init_lines)
+    return "\n".join(init_lines)
+
+
+def generate_sources(descriptor_set: bytes) -> dict[str, str]:
+    """Return {module filename: source} for the full service layer."""
+    fds = descriptor_pb2.FileDescriptorSet()
+    fds.MergeFromString(descriptor_set)
+    index = _Index(fds)
+
+    families: dict[str, list[descriptor_pb2.FileDescriptorProto]] = {}
+    for file in fds.file:
+        family = _family_of(file.package)
+        if family is not None and file.service:
+            families.setdefault(family, []).append(file)
+
+    sources: dict[str, str] = {}
+    registry: list[tuple[str, str, str]] = []  # (attr, class, module)
+    for family in sorted(families):
+        alias, class_name, source = _render_family(family, families[family], index)
+        sources[f"{alias}.py"] = source
+        registry.append((alias, class_name, alias))
+
+    sources["__init__.py"] = _render_init(registry)
     return sources
 
 

@@ -1,4 +1,4 @@
-.PHONY: generate lint typecheck test check build release-check clean docs docs-serve docs-test
+.PHONY: generate lint typecheck test audit apicheck check build release-check clean docs docs-serve docs-test
 
 generate:
 	python tools/generate.py
@@ -11,6 +11,18 @@ typecheck:
 
 test:
 	python -m pytest -q
+
+# Resolve the installed tree against the PyPI and OSV advisory databases.
+# --skip-editable drops the local editable clappform install, which has no
+# published version to look up.
+audit:
+	python -m pip_audit --skip-editable --desc on
+
+# Report public API removals and signature changes against the integration
+# branch. Override the ref with `make apicheck AGAINST=v6.0.0a0`.
+AGAINST ?= origin/Major/6
+apicheck:
+	python tools/apicheck.py --against $(AGAINST)
 
 check: lint typecheck test
 

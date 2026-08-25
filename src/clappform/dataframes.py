@@ -529,7 +529,8 @@ class CollectionHandle(_AggregateReader):
                 timeout=timeout,
             )
             return
-        assert where is not None  # guaranteed by the XOR check above
+        # The XOR check above is the real guard; this only narrows for mypy.
+        assert where is not None  # noqa: S101
         self._client.data.delete.delete_many_by_query(
             collection=self.collection_id,
             query=_codec.encode_pipeline(dict(where)),

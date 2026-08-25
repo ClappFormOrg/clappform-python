@@ -102,6 +102,8 @@ pip install -e ".[dev,pandas]"
 make generate   # regenerate clappform/gen and clappform/services from protos
 make check      # ruff + mypy + pytest
 make docs-test  # run the doc snippets, then build the site with --strict
+make audit      # pip-audit the installed tree against the advisory databases
+make apicheck   # public API removals and signature changes vs origin/Major/6
 ```
 
 Code generation reads the proto definitions from the commons repository at
