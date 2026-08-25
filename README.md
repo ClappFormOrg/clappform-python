@@ -107,3 +107,11 @@ clone of commons (defaults to a sibling `../commons` checkout).
 
 Generated code under `src/clappform/gen/` and `src/clappform/services/` is
 committed; do not edit it by hand.
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE).
+
+Generated stubs under `src/clappform/gen/google/` and
+`src/clappform/gen/grpc/` come from googleapis (Apache-2.0) and grpc-gateway
+(BSD-3-Clause); [NOTICE](NOTICE) carries their terms.
