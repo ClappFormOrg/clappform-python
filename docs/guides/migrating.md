@@ -142,7 +142,7 @@ integer `actionflowid`, no magic `user=` number.
 
 To pass start parameters, use `custom_keys=`. Today that field takes JSON
 bytes, so build it with `json.dumps({...}).encode("utf-8")`. See
-[Running inside an actionflow](actionflow-scripts.md#passing-start-parameters).
+[Writing actionflow tasks](actionflow-scripts.md#passing-start-parameters).
 
 ??? note "Old reference"
 

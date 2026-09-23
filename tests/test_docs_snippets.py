@@ -44,6 +44,8 @@ def test_snippets_directory_is_present() -> None:
         "actionflow_scripts",
         "troubleshooting",
         "performance",
+        "actionflow_tasks",
+        "files_and_storage",
     } <= found
 
 
@@ -119,6 +121,28 @@ def test_performance_snippet_runs() -> None:
     module.run(module.build_mock())
 
 
+def test_actionflow_tasks_snippet_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The shared setup block constructs location-only (DNS discovery).
+    from clappform import _discovery
+
+    monkeypatch.setattr(_discovery, "discover_cluster", lambda location: "prod")
+    module = _load("actionflow_tasks")
+    module.run(module.build_mock())
+
+
+def test_files_and_storage_snippet_runs() -> None:
+    module = _load("files_and_storage")
+    module.run(module.build_mock())
+
+
+def test_files_and_storage_excel_snippet_runs() -> None:
+    # The Excel blocks write through xlsxwriter. The docs job installs it; the
+    # test matrix doesn't, so the suite skips this there rather than fail.
+    pytest.importorskip("xlsxwriter")
+    module = _load("files_and_storage")
+    module.run_excel(module.build_mock())
+
+
 @pytest.mark.parametrize(
     "name",
     [
@@ -129,6 +153,8 @@ def test_performance_snippet_runs() -> None:
         "migrating",
         "cookbook",
         "actionflow_scripts",
+        "actionflow_tasks",
+        "files_and_storage",
     ],
 )
 def test_snippet_modules_import_clean(name: str) -> None:

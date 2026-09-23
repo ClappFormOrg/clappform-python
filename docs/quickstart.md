@@ -96,8 +96,10 @@ No request objects, no `json.dumps(...).encode()`, no manual pagination, no
   write most: file ingest, aggregation, change requests, cross-cluster copy.
 - [DataFrame flows](guides/dataframes.md): filtering, batching, append /
   upsert, server-side updates and deletes.
-- [Running inside an actionflow](guides/actionflow-scripts.md): the in-worker
-  context: where `location` and the key come from, and passing start parameters.
+- [Writing actionflow tasks](guides/actionflow-scripts.md): the in-worker
+  context, the shape of a task notebook, and handing data between tasks.
+- [Files, Excel & storage](guides/files-and-storage.md): CSV and Excel exports,
+  Azure Storage and SFTP transfers, and loading files into a collection.
 - [Multi-cluster & multi-tenant](guides/multi-cluster.md): several clusters
   and tenants in one process.
 - [Error handling & retries](guides/errors-and-retries.md): the typed error

@@ -19,7 +19,7 @@ cf = Clappform(location="acme", api_key=os.environ["CLAPPFORM_API_KEY"])
 ```
 
 In an actionflow worker the tenant and key come from the worker's environment;
-see [Running inside an actionflow](actionflow-scripts.md).
+see [Writing actionflow tasks](actionflow-scripts.md).
 
 !!! danger "Never commit a key"
     A key in a notebook cell, a script literal, or a committed `.env` is a

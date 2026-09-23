@@ -69,6 +69,32 @@ pandas picks the reader from the format: `read_csv`, `read_excel` (needs
 upload; `append()` returns the number of rows written. For a full refresh of
 existing rows, use `upsert(df, on="...")` instead so a re-run updates in place.
 
+## Export a collection to an Excel report
+
+Filter server-side, summarise in pandas, write a workbook to a temp file, and
+upload it from disk.
+
+```python
+--8<-- "files_and_storage.py:export-pipeline"
+```
+
+`write_workbook` and the upload client are in
+[Files, Excel & storage](files-and-storage.md), with the SFTP variant and
+the helpers for safe sheet names.
+
+## Write in a mode chosen at run time
+
+When the write mode is configuration (a task parameter, a CLI flag), map it onto
+the handle's methods once:
+
+```python
+--8<-- "actionflow_tasks.py:write-mode"
+```
+
+`update` and `delete` match on `_id`; only `upsert` matches on a business
+column. See
+[A write whose mode is a parameter](actionflow-scripts.md#a-write-whose-mode-is-a-parameter).
+
 ## Aggregate a collection into a DataFrame
 
 Group, sort, or reshape server-side and get a frame back.
@@ -144,7 +170,7 @@ today, so encode a dict:
 ```
 
 More on the in-worker context in
-[Running inside an actionflow](actionflow-scripts.md), and on listing/inspecting
+[Writing actionflow tasks](actionflow-scripts.md), and on listing/inspecting
 flows in [Actionflows & listings](actionflows-and-listings.md).
 
 ## Manage indexes

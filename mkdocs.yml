@@ -101,8 +101,9 @@ nav:
       - All recipes (Cookbook): guides/cookbook.md
       - Read & query data: guides/dataframes.md
       - Performance & large datasets: guides/performance.md
-      - Actionflows: guides/actionflow-scripts.md
+      - Writing actionflow tasks: guides/actionflow-scripts.md
       - Actionflows & listings: guides/actionflows-and-listings.md
+      - Files, Excel & storage: guides/files-and-storage.md
       - Multi-cluster & multi-tenant: guides/multi-cluster.md
       - Errors & retries: guides/errors-and-retries.md
       - Testing with LocalMock: guides/testing.md
