@@ -13,20 +13,27 @@ It offers two layers:
   named collection, and built-in handlers for the core data RPCs read and
   mutate that store through the same JSON codec the real client uses:
 
-  - ``AggregateStream`` (honours the ``$match``/``$project``/``$limit`` stages
-    the DataFrame sugar compiles, and resolves a saved ``query`` through
-    :meth:`seed_query`),
-  - ``InsertSingle``/``InsertMany``, ``UpdateMany`` by ``_id``,
+  - ``AggregateStream`` (``$match`` with equality and the common comparison
+    operators, ``$project``, ``$sort``, ``$skip``, ``$limit``; any other
+    stage or operator raises rather than returning rows the server would
+    not, and a saved ``query`` resolves through :meth:`seed_query`),
+  - ``InsertSingle``/``InsertMany`` (rows carrying ``_id`` are rejected, as
+    the server does),
   - ``SyncManyByField`` (upsert on a business key),
-  - ``UpdateManyByQuery`` (``replace_where``) and ``DeleteManyByQuery``,
   - ``DeleteManyByOids`` and ``Clear``.
 
-  That is what lets the full DataFrame surface (read, filter, mutate, update,
-  upsert, replace-where, delete) round-trip end-to-end in tests and in the
-  guide snippets under ``docs/snippets/``. :meth:`seed_collection_slug` and
-  :meth:`seed_query` register the Client API listings so slug/name resolution
-  also runs without a server. An explicit stub for a method always wins over
-  the built-in handler.
+  :meth:`seed_collection_slug` and :meth:`seed_query` register the Client
+  API listings so slug/name resolution also runs without a server. An
+  explicit stub for a method always wins over the built-in handler.
+
+* **Server parity for unreleased RPCs.** ``UpdateMany``, ``UpdateManyByField``,
+  ``UpdateManyByQuery`` and ``DeleteManyByQuery`` (behind ``update()``,
+  ``update_where()`` and ``delete(where=)``) are declared in the protos but not
+  yet served by the Data Connector. By default the mock raises
+  :class:`~clappform.NotSupportedError` for them, exactly like a real cluster,
+  so a test cannot pass on a call production would reject. Pass
+  ``LocalMock(include_unreleased=True)`` to emulate them against the store
+  when testing client code ahead of the server rollout.
 
 Every call is recorded on :attr:`LocalMock.calls` for assertions.
 """
@@ -35,12 +42,18 @@ from __future__ import annotations
 
 import itertools
 import json
+import operator
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
 from typing import Any
 
 from clappform import _codec
-from clappform._errors import ClappformError
+from clappform._errors import (
+    ClappformError,
+    ConfigurationError,
+    InvalidRequestError,
+    NotSupportedError,
+)
 from clappform._runtime import CallKind
 
 # A stub is a plain response, a callable taking the request, or (for streaming
@@ -63,7 +76,8 @@ class RecordedCall:
 class LocalMock:
     """Transport double: canned responses, a data store, and call recording."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, include_unreleased: bool = False) -> None:
+        self.include_unreleased = include_unreleased
         self.calls: list[RecordedCall] = []
         self._stubs: dict[str, Any] = {}
         self._store: dict[str, list[_codec.Record]] = {}
@@ -195,12 +209,24 @@ class LocalMock:
         location: str | None = None,
     ) -> Any:
         if self._closed:
-            raise ClappformError("client is closed", method=method)
+            raise ConfigurationError("client is closed", method=method)
         materialised = list(request) if kind.startswith("stream") else request
         self.calls.append(RecordedCall(kind, method, materialised, timeout, metadata, location))
 
         if method in self._stubs:
             return self._dispatch_stub(kind, method, materialised, response_cls)
+
+        if method in _UNRELEASED_HANDLERS:
+            if not self.include_unreleased:
+                raise NotSupportedError(
+                    "LocalMock mirrors the Data Connector, which does not serve "
+                    "this RPC yet; pass LocalMock(include_unreleased=True) to "
+                    "emulate it",
+                    status="UNIMPLEMENTED",
+                    method=method,
+                    location=location,
+                )
+            return _UNRELEASED_HANDLERS[method](self, kind, materialised, response_cls)
 
         handler = _DATA_HANDLERS.get(method)
         if handler is not None:
@@ -262,34 +288,106 @@ def _aggregate_target(mock: LocalMock, request: Any) -> str:
     return mock._collection_of(request)
 
 
-def _apply_pipeline(rows: list[_codec.Record], pipeline: bytes) -> list[_codec.Record]:
-    """Apply the ``$match``/``$project``/``$limit`` stages the sugar emits.
+_COMPARISONS: dict[str, Callable[[Any, Any], bool]] = {
+    "$eq": lambda value, arg: value == arg,
+    "$ne": lambda value, arg: value != arg,
+    "$gt": lambda value, arg: value is not None and value > arg,
+    "$gte": lambda value, arg: value is not None and value >= arg,
+    "$lt": lambda value, arg: value is not None and value < arg,
+    "$lte": lambda value, arg: value is not None and value <= arg,
+    "$in": lambda value, arg: value in arg,
+    "$nin": lambda value, arg: value not in arg,
+}
 
-    Only the stages ``read(where=, fields=, limit=)`` compiles are honoured,
-    enough to test the client sugar without reimplementing an aggregation
-    engine. ``$match`` supports equality on top-level fields; other operators
-    and stages are passed over so a caller-supplied pipeline still streams the
-    whole collection rather than erroring.
+
+def _unsupported(what: str) -> ClappformError:
+    return ClappformError(
+        f"LocalMock does not emulate {what}; stub the call with "
+        f".on('/clappform.data.v1.aggregate.AggregateManagement/AggregateStream', ...)"
+    )
+
+
+def _matches(row: _codec.Record, query: dict[str, Any]) -> bool:
+    """Evaluate a ``$match`` filter: top-level fields, equality or operators."""
+    for field, condition in query.items():
+        if field.startswith("$"):
+            raise _unsupported(f"the top-level {field!r} operator")
+        if not isinstance(condition, dict):
+            if row.get(field) != condition:
+                return False
+        elif not all(_operator_holds(row, field, op, arg) for op, arg in condition.items()):
+            return False
+    return True
+
+
+def _operator_holds(row: _codec.Record, field: str, op: str, arg: Any) -> bool:
+    if op == "$exists":
+        return (field in row) == bool(arg)
+    compare = _COMPARISONS.get(op)
+    if compare is None:
+        raise _unsupported(f"the {op!r} operator")
+    try:
+        return compare(row.get(field), arg)
+    except TypeError:  # e.g. str against int, which Mongo would not match
+        return False
+
+
+def _sort(rows: list[_codec.Record], spec: dict[str, int]) -> list[_codec.Record]:
+    """A stable multi-key ``$sort``; missing/null values sort first ascending."""
+    result = list(rows)
+    for field, direction in reversed(list(spec.items())):
+        present = [row for row in result if row.get(field) is not None]
+        missing = [row for row in result if row.get(field) is None]
+        present.sort(key=operator.itemgetter(field), reverse=direction < 0)
+        result = missing + present if direction > 0 else present + missing
+    return result
+
+
+def _project(rows: list[_codec.Record], spec: dict[str, Any]) -> list[_codec.Record]:
+    """Inclusion (``{"a": 1}``) or exclusion (``{"a": 0}``) projection.
+
+    ``_id`` is kept unless excluded and may be excluded in either mode; mixing
+    inclusion and exclusion on other fields is an error, as in Mongo.
+    """
+    fields = {k: bool(v) for k, v in spec.items() if k != "_id"}
+    keep_id = bool(spec.get("_id", 1))
+    if len(set(fields.values())) > 1:
+        raise _unsupported("a $project that mixes inclusion and exclusion")
+    if fields and not next(iter(fields.values())):
+        drop = set(fields) | (set() if keep_id else {"_id"})
+        return [{k: v for k, v in row.items() if k not in drop} for row in rows]
+    keep = set(fields) | ({"_id"} if keep_id else set())
+    return [{k: v for k, v in row.items() if k in keep} for row in rows]
+
+
+def _apply_pipeline(rows: list[_codec.Record], pipeline: bytes) -> list[_codec.Record]:
+    """Apply the pipeline stages this double emulates.
+
+    ``$match`` (equality, ``$eq``/``$ne``/``$gt``/``$gte``/``$lt``/``$lte``/
+    ``$in``/``$nin``/``$exists`` on top-level fields), ``$project`` (inclusion),
+    ``$sort``, ``$skip`` and ``$limit``. Any other stage or operator raises:
+    returning the unfiltered collection would let a test pass on rows the
+    server would never send.
     """
     if not pipeline:
         return list(rows)
     result = list(rows)
     for stage in json.loads(pipeline):
         if not isinstance(stage, dict) or len(stage) != 1:
-            continue
+            raise _unsupported(f"the pipeline stage {stage!r}")
         ((op, arg),) = stage.items()
         if op == "$match" and isinstance(arg, dict):
-            result = [
-                row
-                for row in result
-                if all(not isinstance(v, dict) and row.get(k) == v for k, v in arg.items())
-            ]
+            result = [row for row in result if _matches(row, arg)]
         elif op == "$project" and isinstance(arg, dict):
-            keep = {k for k, v in arg.items() if v}
-            keep.add("_id")  # _id survives projection unless explicitly excluded
-            result = [{k: v for k, v in row.items() if k in keep} for row in result]
+            result = _project(result, arg)
+        elif op == "$sort" and isinstance(arg, dict):
+            result = _sort(result, arg)
+        elif op == "$skip" and isinstance(arg, int):
+            result = result[arg:]
         elif op == "$limit" and isinstance(arg, int):
             result = result[:arg]
+        else:
+            raise _unsupported(f"the {op!r} stage")
     return result
 
 
@@ -300,9 +398,7 @@ def _handle_aggregate_stream(
 
     Resolves the target collection from either the ``collection`` field or a
     saved ``query`` (registered via :meth:`LocalMock.seed_query`), then applies
-    the ``$match``/``$project``/``$limit`` stages the DataFrame sugar compiles,
-    so a filtered/projected/limited ``read()`` round-trips against the store.
-    Pipeline stages the sugar never emits are ignored by this double.
+    the pipeline through :func:`_apply_pipeline`.
     """
     collection = _aggregate_target(mock, request)
     records = _apply_pipeline(mock._store.get(collection, []), request.pipeline)
@@ -340,10 +436,16 @@ def _handle_insert(mock: LocalMock, kind: CallKind, request: Any, response_cls: 
         collection = mock._collection_of(req)
         store = mock._store.setdefault(collection, [])
         oids: list[str] = []
-        for record in _codec.bytes_to_records(req.data):
+        rows = _codec.bytes_to_records(req.data)
+        if any("_id" in row for row in rows):
+            raise InvalidRequestError(
+                "cannot insert data with _id field",
+                status="INVALID_ARGUMENT",
+                method="/clappform.data.v1.insert.InsertManagement/InsertMany",
+            )
+        for record in rows:
             row = dict(record)
-            if "_id" not in row or row["_id"] is None:
-                row["_id"] = mock._next_oid()
+            row["_id"] = mock._next_oid()
             store.append(row)
             oids.append(str(row["_id"]))
         return response_cls(processed_count=len(oids), oids=oids)
@@ -366,21 +468,23 @@ def _build_response(response_cls: type, **fields: Any) -> Any:
 
 
 def _handle_update_many(mock: LocalMock, kind: CallKind, request: Any, response_cls: type) -> Any:
-    """Apply field updates to stored rows matched by ``_id``.
+    """Set fields on stored rows matched by ``_id`` (``UpdateMany``) or by the
+    request's ``field_name`` (``UpdateManyByField``).
 
-    ``UpdateMany`` is stream-unary, so ``request`` is a list of update messages;
-    every message's records are applied in order.
+    Both are stream-unary, so ``request`` is a list of update messages; every
+    message's records are applied in order. Unmatched rows are skipped.
     """
     requests = request if isinstance(request, list) else [request]
     collection = ""
     for req in requests:
         collection = mock._collection_of(req)
+        key = getattr(req, "field_name", "") or "_id"
         store = mock._store.setdefault(collection, [])
-        by_id = {str(row.get("_id")): row for row in store}
+        by_key = {str(row.get(key)): row for row in store}
         for record in _codec.bytes_to_records(req.data):
-            target = by_id.get(str(record.get("_id")))
+            target = by_key.get(str(record.get(key)))
             if target is not None:
-                target.update({k: v for k, v in record.items() if k != "_id"})
+                target.update({k: v for k, v in record.items() if k not in ("_id", key)})
     store = mock._store.get(collection, [])
     return _build_response(
         response_cls,
@@ -409,7 +513,7 @@ def _handle_delete_oids(mock: LocalMock, kind: CallKind, request: Any, response_
 def _handle_sync_by_field(
     mock: LocalMock, kind: CallKind, request: Any, response_cls: type
 ) -> Any:
-    """Upsert rows keyed on ``field_name``: update matches, insert the rest.
+    """Upsert rows keyed on ``field_name``: replace matches whole, insert the rest.
 
     ``SyncManyByField`` is stream-unary, so ``request`` is a list of sync
     messages; each message's records are matched against the store by their
@@ -426,7 +530,12 @@ def _handle_sync_by_field(
             key = record.get(field)
             target = by_key.get(key)
             if target is not None:
+                # The server's SyncManyByField is a ReplaceOne with upsert:
+                # the matched document is replaced whole, keeping its _id.
+                oid = target.get("_id")
+                target.clear()
                 target.update(record)
+                target["_id"] = oid
             else:
                 row = dict(record)
                 if "_id" not in row or row["_id"] is None:
@@ -447,9 +556,8 @@ def _handle_update_by_query(
 ) -> Any:
     """Apply ``set_values`` to every stored row matching the query filter.
 
-    Backs ``replace_where``. The query and set-values are JSON as the client
-    sends them; only equality on top-level fields is matched, matching the
-    aggregate handler's ``$match`` support.
+    Backs ``update_where``. The query and set-values are JSON as the client
+    sends them; the filter is evaluated like the aggregate handler's ``$match``.
     """
     collection = mock._collection_of(request)
     store = mock._store.setdefault(collection, [])
@@ -457,7 +565,7 @@ def _handle_update_by_query(
     set_values = json.loads(request.set_values) if request.set_values else {}
     matched = 0
     for row in store:
-        if all(row.get(k) == v for k, v in query.items()):
+        if _matches(row, query):
             row.update(set_values)
             matched += 1
     return _build_response(
@@ -473,11 +581,11 @@ def _handle_update_by_query(
 def _handle_delete_by_query(
     mock: LocalMock, kind: CallKind, request: Any, response_cls: type
 ) -> Any:
-    """Remove stored rows matching the query filter (equality on top-level)."""
+    """Remove stored rows matching the query filter (evaluated like ``$match``)."""
     collection = mock._collection_of(request)
     store = mock._store.setdefault(collection, [])
     query = json.loads(request.query) if request.query else {}
-    kept = [row for row in store if not all(row.get(k) == v for k, v in query.items())]
+    kept = [row for row in store if not _matches(row, query)]
     removed = len(store) - len(kept)
     mock._store[collection] = kept
     return _build_response(
@@ -500,10 +608,16 @@ _DATA_HANDLERS: dict[str, Callable[[LocalMock, CallKind, Any, type], Any]] = {
     "/clappform.data.v1.aggregate.AggregateManagement/AggregateStream": _handle_aggregate_stream,
     "/clappform.data.v1.insert.InsertManagement/InsertSingle": _handle_insert,
     "/clappform.data.v1.insert.InsertManagement/InsertMany": _handle_insert,
-    "/clappform.data.v1.update.UpdateManagement/UpdateMany": _handle_update_many,
-    "/clappform.data.v1.update.UpdateManagement/UpdateManyByQuery": _handle_update_by_query,
     "/clappform.data.v1.sync.SyncManagement/SyncManyByField": _handle_sync_by_field,
     "/clappform.data.v1.delete.DeleteManagement/DeleteManyByOids": _handle_delete_oids,
-    "/clappform.data.v1.delete.DeleteManagement/DeleteManyByQuery": _handle_delete_by_query,
     "/clappform.data.v1.delete.DeleteManagement/Clear": _handle_clear,
+}
+
+# Declared in the protos but not served by the Data Connector yet. LocalMock
+# raises NotSupportedError for these unless include_unreleased=True.
+_UNRELEASED_HANDLERS: dict[str, Callable[[LocalMock, CallKind, Any, type], Any]] = {
+    "/clappform.data.v1.update.UpdateManagement/UpdateMany": _handle_update_many,
+    "/clappform.data.v1.update.UpdateManagement/UpdateManyByField": _handle_update_many,
+    "/clappform.data.v1.update.UpdateManagement/UpdateManyByQuery": _handle_update_by_query,
+    "/clappform.data.v1.delete.DeleteManagement/DeleteManyByQuery": _handle_delete_by_query,
 }
