@@ -203,17 +203,31 @@ def test_retry_policy_rejects_values_grpc_would_clamp_or_refuse(kwargs) -> None:
         RetryPolicy(**kwargs)
 
 
-def test_data_plane_writes_are_excluded_from_retries() -> None:
-    import json
+@pytest.mark.parametrize(
+    ("method", "retried"),
+    [
+        ("Get", True),
+        ("GetAll", True),
+        ("ReadAll", True),
+        ("ListProcesses", True),
+        ("AggregateStream", True),
+        ("DownloadFile", True),
+        ("Health", True),
+        # A read verb must end the word: these only start with the same letters.
+        ("Getaway", False),
+        ("Readmit", False),
+        ("InsertMany", False),
+        ("SyncManyByField", False),
+        ("Start", False),
+        ("ImportApp", False),
+        ("Create", False),
+        ("Delete", False),
+    ],
+)
+def test_only_read_methods_match_the_retry_allowlist(method, retried) -> None:
+    from clappform._transport import READ_METHOD
 
-    from clappform._transport import NON_RETRIED_SERVICES
-
-    configs = json.loads(RetryPolicy().service_config())["methodConfig"]
-    default, writes = configs
-    assert default["name"] == [{}] and "retryPolicy" in default
-    assert "retryPolicy" not in writes
-    assert writes["name"] == [{"service": s} for s in NON_RETRIED_SERVICES]
-    assert "clappform.data.v1.insert.InsertManagement" in NON_RETRIED_SERVICES
+    assert bool(READ_METHOD.match(method)) is retried
 
 
 def test_translating_iterator_cancels_the_call_when_closed_early() -> None:

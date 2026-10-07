@@ -10,9 +10,13 @@ errors raised mid-iteration on streaming responses.
 
 from __future__ import annotations
 
+import importlib
+import pkgutil
+import re
 import threading
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any
 
 import grpc
@@ -40,16 +44,34 @@ HOST_PREFIXES = {
 _PACKAGE_FAMILIES = {"authoriser": "auth"}
 
 
-# Data-plane services whose RPCs write. gRPC retries an UNAVAILABLE call even
-# when the server already applied it, so a retried InsertMany can duplicate
-# rows. These services get no retry policy; gRPC's transparent retries (the
-# request never reached the server) still apply to them.
-NON_RETRIED_SERVICES = (
-    "clappform.data.v1.insert.InsertManagement",
-    "clappform.data.v1.update.UpdateManagement",
-    "clappform.data.v1.sync.SyncManagement",
-    "clappform.data.v1.delete.DeleteManagement",
+# Only RPCs whose name says they read get the retry policy. gRPC retries an
+# UNAVAILABLE call even when the server already applied it, so a retried
+# InsertMany can duplicate rows and a retried actionflow Start can run the flow
+# twice. Matching on the read verb rather than listing the writes keeps a newly
+# generated write RPC unretried by default. gRPC's transparent retries (the
+# request never reached the server) still apply to every RPC.
+READ_METHOD = re.compile(
+    r"^(?:Get|List|Read|Describe|Aggregate|Download|Health|Preview)(?:[A-Z]|$)"
 )
+
+
+@lru_cache(maxsize=1)
+def retried_methods() -> tuple[tuple[str, str], ...]:
+    """``(service, method)`` for every generated RPC that :data:`READ_METHOD` matches."""
+    import clappform.gen.clappform as generated
+
+    found: list[tuple[str, str]] = []
+    for module_info in pkgutil.walk_packages(generated.__path__, f"{generated.__name__}."):
+        if not module_info.name.endswith("_pb2"):
+            continue
+        module = importlib.import_module(module_info.name)
+        for service in module.DESCRIPTOR.services_by_name.values():
+            found.extend(
+                (service.full_name, method.name)
+                for method in service.methods
+                if READ_METHOD.match(method.name)
+            )
+    return tuple(sorted(found))
 
 
 def _duration(value: float | str) -> str:
@@ -69,9 +91,9 @@ class RetryPolicy:
 
     Backoffs are seconds (``0.2``); the ``"0.2s"`` string form is also
     accepted. gRPC caps ``max_attempts`` at 5, so larger values are rejected
-    rather than silently clamped. The policy covers every RPC except the
-    data-plane writes in :data:`NON_RETRIED_SERVICES`, which may have been
-    applied before the failure.
+    rather than silently clamped. The policy covers the RPCs whose name says
+    they read (:data:`READ_METHOD`); writes and actions may have been applied
+    before the failure, so they are never retried.
     """
 
     max_attempts: int = 4
@@ -104,7 +126,11 @@ class RetryPolicy:
             {
                 "methodConfig": [
                     {
-                        "name": [{}],
+                        # Methods missing from this list run with no retry policy.
+                        "name": [
+                            {"service": service, "method": method}
+                            for service, method in retried_methods()
+                        ],
                         "retryPolicy": {
                             "maxAttempts": self.max_attempts,
                             "initialBackoff": _duration(self.initial_backoff),
@@ -113,9 +139,6 @@ class RetryPolicy:
                             "retryableStatusCodes": list(self.retryable_status_codes),
                         },
                     },
-                    # A service-level entry is more specific than the default
-                    # above, so these services run with no retry policy.
-                    {"name": [{"service": service} for service in NON_RETRIED_SERVICES]},
                 ]
             }
         )
