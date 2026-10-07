@@ -14,7 +14,9 @@ from clappform.testing import LocalMock
 
 
 def build_mock() -> LocalMock:
+    from clappform.gen.clappform.authoriser.v1.apikey import apikey_pb2
     from clappform.gen.clappform.client.v1.actionflow import actionflow_pb2
+    from clappform.gen.clappform.client.v1.actionflow_task import actionflow_task_pb2
     from clappform.gen.clappform.client.v1.app import app_pb2
     from clappform.gen.clappform.client.v1.collection import collection_pb2
     from clappform.gen.clappform.client.v1.cronjob import cronjob_pb2
@@ -40,6 +42,7 @@ def build_mock() -> LocalMock:
                 actionflow_pb2.Actionflow(id="af-1", name="recalculate-dashboards"),
                 actionflow_pb2.Actionflow(id="af-2", name="nightly-export"),
             ],
+            actionflow_tasks=[actionflow_task_pb2.ActionflowTask(id="t-1")],
             pagination=one_page("af-1", "af-2"),
         ),
     )
@@ -75,13 +78,21 @@ def build_mock() -> LocalMock:
             pagination=one_page("cj-1"),
         ),
     )
+    # The authoriser's listings are named read_all, not get_all.
+    mock.on(
+        "/clappform.authoriser.v1.apikey.APIKeyManagement/ReadAll",
+        apikey_pb2.APIKeys(
+            api_keys=[apikey_pb2.APIKey(id="k-1", name="nightly-etl")],
+            pagination=one_page("k-1"),
+        ),
+    )
     return mock
 
 
 def run(transport: LocalMock) -> None:
     from clappform import Clappform
 
-    cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...", transport=transport)
+    cf = Clappform(location="acme", cluster="", api_key="cf_live_...", transport=transport)
 
     with cf:
         # --8<-- [start:start-actionflow]
@@ -98,14 +109,16 @@ def run(transport: LocalMock) -> None:
         for actionflow in cf.client.actionflow.iter_get_all():
             handle(actionflow.name)
 
-        # Or take one page at a time when you want the pagination metadata.
-        page = cf.client.actionflow.get_all(limit=50)
+        # Or take one page at a time when you want the pagination metadata
+        # or every list in the response. limit is the page size.
+        page = cf.client.actionflow.get_all(page=1, limit=50)
         total = page.pagination.total
+        tasks = page.actionflow_tasks  # iter_get_all() yields only .actionflows
         # --8<-- [end:list-actionflows]
-        assert total == 2
+        assert total == 2 and len(tasks) == 1
 
         # --8<-- [start:list-collections]
-        # Read every collection in the tenant. Each Collection carries its slug
+        # Read every collection in the location. Each Collection carries its slug
         # and id, the same id cf.data.collection(slug) resolves to
         # internally, so this is how you discover what's there to read.
         collections = list(cf.client.collection.iter_get_all())
@@ -123,6 +136,12 @@ def run(transport: LocalMock) -> None:
         assert [a.slug for a in apps] == ["sales", "ops"]
         assert [q.name for q in queries] == ["monthly-revenue-per-region"]
         assert [c.name for c in cronjobs] == ["nightly-sync"]
+
+        # --8<-- [start:list-auth]
+        # The authoriser (cf.auth) names its listings read_all / iter_read_all.
+        key_names = [key.name for key in cf.auth.api_key.iter_read_all()]
+        # --8<-- [end:list-auth]
+        assert key_names == ["nightly-etl"]
 
 
 def handle(name: str) -> None:

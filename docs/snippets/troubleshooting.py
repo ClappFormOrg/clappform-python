@@ -27,7 +27,7 @@ def build_mock() -> LocalMock:
 def run(transport: LocalMock) -> None:
     from clappform import Clappform, NotFoundError
 
-    cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...", transport=transport)
+    cf = Clappform(location="acme", cluster="", api_key="cf_live_...", transport=transport)
 
     with cf:
         col = cf.data.collection("orders")
@@ -48,7 +48,7 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:not-found]
         # SYMPTOM: NotFoundError on a slug you're sure exists. Usually a typo,
-        # wrong tenant, or the collection was recreated. FIX: branch on it; the
+        # wrong location, or the collection was recreated. FIX: branch on it; the
         # message names the slug and the location it searched.
         try:
             cf.data.collection("does-not-exist").read()
@@ -58,10 +58,10 @@ def run(transport: LocalMock) -> None:
         assert "does-not-exist" in missing
 
         # --8<-- [start:group-in-mock]
-        # SYMPTOM: a $group pipeline returns the raw rows unchanged in a test.
-        # CAUSE: LocalMock runs $match/$project/$limit but does NOT compute
-        # $group (it's a transport double, not an aggregation engine). FIX: stub
-        # the grouped answer with .on() for that pipeline.
+        # SYMPTOM: "LocalMock does not emulate the '$group' stage" in a test.
+        # CAUSE: LocalMock runs $match/$project/$sort/$skip/$limit and raises on
+        # any other stage (it's a transport double, not an aggregation engine).
+        # FIX: stub the grouped answer with .on() for that pipeline.
         from clappform.gen.clappform.data.v1.aggregate import aggregate_pb2
 
         mock = build_mock()
@@ -69,7 +69,7 @@ def run(transport: LocalMock) -> None:
             "/clappform.data.v1.aggregate.AggregateManagement/AggregateStream",
             [aggregate_pb2.AggregateResponse(data=b'[{"_id":"A","n":1}]')],
         )
-        with Clappform(location="acme", cluster="prod", api_key="x", transport=mock) as c2:
+        with Clappform(location="acme", api_key="x", transport=mock) as c2:
             grouped = c2.data.collection("orders").aggregate(
                 [{"$group": {"_id": "$label", "n": {"$sum": 1}}}]
             )
@@ -77,9 +77,9 @@ def run(transport: LocalMock) -> None:
         assert list(grouped["_id"]) == ["A"]
 
         # --8<-- [start:per-call-timeout]
-        # SYMPTOM: a big read trips the default deadline (TransientError /
-        # DEADLINE_EXCEEDED). FIX: raise the deadline for that one call with
-        # timeout=, without changing the client-wide default.
+        # SYMPTOM: a big read fails with TransientError / DEADLINE_EXCEEDED.
+        # Streams have no deadline by default, so a timeout= or stream_timeout=
+        # you set was too short. FIX: raise it for that one call.
         big = col.read(pipeline=[{"$match": {"status": "open"}}], timeout=120.0)
         # --8<-- [end:per-call-timeout]
         assert len(big) == 2

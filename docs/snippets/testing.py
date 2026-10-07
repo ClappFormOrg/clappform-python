@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 
 def run() -> None:
     # --8<-- [start:seed]
@@ -17,23 +19,30 @@ def run() -> None:
     mock.seed(
         "customers-id",
         [
-            {"email": "a@example.com", "plan": "pro"},
-            {"email": "b@example.com", "plan": "free"},
+            {"email": "a@example.com", "plan": "pro", "seats": 5},
+            {"email": "b@example.com", "plan": "free", "seats": 1},
         ],
     )
-    cf = Clappform(location="acme", cluster="prod", api_key="test", transport=mock)
+    cf = Clappform(location="acme", api_key="test", transport=mock)
     # --8<-- [end:seed]
 
     with cf:
         # --8<-- [start:roundtrip]
         customers = cf.data.collection("customers")
 
-        pro = customers.read(pipeline=[{"$match": {"plan": "pro"}}])
+        pro = customers.read(
+            pipeline=[{"$match": {"plan": "pro", "seats": {"$gte": 2}}}, {"$sort": {"email": 1}}]
+        )
         assert list(pro["email"]) == ["a@example.com"]
 
         # writes mutate the store, so a follow-up read sees them
-        customers.replace_where({"plan": "free"}, {"plan": "pro"})
+        free = customers.read(pipeline=[{"$match": {"plan": "free"}}])
+        free["plan"] = "pro"
+        customers.upsert(free.drop(columns="_id"), on="email")
         assert len(customers.read(pipeline=[{"$match": {"plan": "pro"}}])) == 2
+
+        # records() returns a copy of the store for direct assertions
+        assert {row["plan"] for row in mock.records("customers-id")} == {"pro"}
         # --8<-- [end:roundtrip]
 
         # --8<-- [start:assert-calls]
@@ -43,6 +52,35 @@ def run() -> None:
         )
         assert mock.calls[-1].location == "acme"
         # --8<-- [end:assert-calls]
+
+    # --8<-- [start:unreleased]
+    from clappform import NotSupportedError
+
+    # By default the mock answers the RPCs the Data Connector does not serve
+    # yet (update, update_where, delete(where=)) the way a real cluster does.
+    with (
+        Clappform(location="acme", api_key="test", transport=mock) as cf,
+        pytest.raises(NotSupportedError),
+    ):
+        cf.data.collection("customers").update_where({"plan": "pro"}, {"seats": 10})
+
+    # include_unreleased=True emulates them, to test code written ahead of
+    # the server rollout.
+    ahead = LocalMock(include_unreleased=True)
+    ahead.seed_collection_slug("customers", id="customers-id")
+    ahead.seed("customers-id", mock.records("customers-id"))
+    with Clappform(location="acme", api_key="test", transport=ahead) as cf:
+        cf.data.collection("customers").update_where({"plan": "pro"}, {"seats": 10})
+    assert {row["seats"] for row in ahead.records("customers-id")} == {10}
+    # --8<-- [end:unreleased]
+
+    # --8<-- [start:saved-query]
+    # seed_query registers a saved query by name, backed by a seeded
+    # collection, so cf.data.query(name) resolves and reads with no server.
+    mock.seed_query("all-customers", collection="customers-id")
+    with Clappform(location="acme", api_key="test", transport=mock) as cf:
+        assert len(cf.data.query("all-customers").read()) == 2
+    # --8<-- [end:saved-query]
 
     # --8<-- [start:stub]
     # For RPCs without a built-in data handler, register a canned response with
@@ -56,10 +94,43 @@ def run() -> None:
         actionflow_pb2.StartActionflowResponse(message="started", uuid="af-123"),
     )
 
-    with Clappform(location="acme", cluster="prod", api_key="test", transport=mock) as cf:
+    with Clappform(location="acme", api_key="test", transport=mock) as cf:
         started = cf.client.actionflow.start(id="recalculate-dashboards")
         assert started.uuid == "af-123"
     # --8<-- [end:stub]
+
+    # --8<-- [start:stub-error]
+    from clappform import NotFoundError, TransientError
+
+    # A handler stub receives the request and may raise, so a test can drive
+    # the error paths. Raise the client's own exception types with the status
+    # the server would send.
+    def missing_flow(request):
+        raise NotFoundError(f"no actionflow {request.id!r}", status="NOT_FOUND")
+
+    mock.on("/clappform.client.v1.actionflow.ActionflowManagement/Start", missing_flow)
+
+    def unavailable(requests):
+        raise TransientError("connection reset", status="UNAVAILABLE")
+
+    mock.on("/clappform.data.v1.insert.InsertManagement/InsertMany", unavailable)
+
+    with Clappform(location="acme", api_key="test", transport=mock) as cf:
+        with pytest.raises(NotFoundError):
+            cf.client.actionflow.start(id="nope")
+        with pytest.raises(TransientError) as failure:
+            import pandas as pd
+
+            cf.data.collection("customers").append(pd.DataFrame([{"email": "c@example.com"}]))
+        assert failure.value.rows_written == 0
+    # --8<-- [end:stub-error]
+
+    # --8<-- [start:reset]
+    # reset() clears recorded calls, stubs, seeded collections and listings,
+    # so one mock can serve several independent tests.
+    mock.reset()
+    assert mock.calls == [] and mock.records("customers-id") == []
+    # --8<-- [end:reset]
 
 
 if __name__ == "__main__":
