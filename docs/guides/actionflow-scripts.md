@@ -1,7 +1,7 @@
 # Writing actionflow tasks
 
 Many scripts using this client don't run standalone; they run as tasks inside
-an actionflow, on a worker that hands the task its tenant, a key, and its input
+an actionflow, on a worker that hands the task its location, a key, and its input
 parameters. The client works the same way there as anywhere else. This guide
 covers what is specific to that context: constructing the client, the shape of
 a task notebook, handing data from one task to the next, and starting other
@@ -20,11 +20,13 @@ worker exposes and passes them in explicitly:
 That keeps the client honest about where its configuration comes from: there's
 no hidden global state, no implicit env lookup, and the same code runs
 identically on your laptop against a test tenant. Omitting `cluster=` discovers
-it from the tenant's DNS record, which is usually what you want; pin it if the
-worker runs somewhere discovery can't reach.
+it from the location's DNS record, which is usually what you want; pin it if the
+worker runs somewhere discovery can't reach. Open the client once per task, in
+the process that runs it, and close it when the task ends (see
+[Client lifecycle](concepts.md#client-lifecycle)).
 
 !!! note "Where the values come from is up to the worker"
-    Different worker setups expose the tenant and key differently (task
+    Different worker setups expose the location and key differently (task
     parameters, injected environment, a secrets helper). Whatever the source,
     the client's contract is the same: hand it a `location` and an `api_key`.
 
@@ -157,11 +159,15 @@ another. Map a `MODE` parameter onto the collection handle's write methods:
 | `upsert` | `upsert(df, on=ON_KEY)` | the business column `ON_KEY` |
 | `delete` | `delete(oids=...)` | `_id` |
 
-!!! warning "`update` and `delete` need `_id`"
-    `update()` sends rows by object id, and `delete(oids=...)` takes object
-    ids, so both need the `_id` column that `read()` keeps. Passing a business
-    column to either doesn't make it match on that column. To match on a
-    business key, use `upsert(df, on=...)`.
+!!! warning "`update` is not served yet"
+    `update()` raises [`NotSupportedError`][clappform.NotSupportedError] on
+    every cluster today, because the Data Connector does not implement
+    `UpdateMany` yet. Until it does, run the `upsert` mode instead.
+
+`update` and `delete` here need the `_id` column that `read()` keeps:
+`update(df)` matches on `_id` by default, and `delete(oids=...)` takes object
+ids. `update(df, on=...)` can match on another column, but this task keeps the
+business key for `upsert`.
 
 For a flow that runs on a schedule, `upsert` on a stable business key is the
 safe default: `insert` adds a second copy of every row on the second run, while
@@ -185,7 +191,9 @@ return the id it kicked off.
 
 Nothing about running in a worker changes how you read and write data. It's
 the same DataFrame surface as the [Quickstart](../quickstart.md) and
-[Cookbook](cookbook.md):
+[Cookbook](cookbook.md). A task can run again after a failure or a manual
+re-run, so prefer writes that are safe to repeat, such as `upsert(on=...)`,
+over `append()`:
 
 ```python
 --8<-- "actionflow_scripts.py:read-write"

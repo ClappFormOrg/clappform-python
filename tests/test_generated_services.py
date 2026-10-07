@@ -5,13 +5,19 @@ kwargs flattening, streaming adapters, and pagination, against an in-memory
 Caller, so they cover exactly what users import.
 """
 
+import typing
 from collections.abc import Iterator
 
 import pytest
 
+from clappform.gen.clappform.client.v1.actionflow_task import actionflow_task_pb2
 from clappform.gen.clappform.client.v1.query import query_pb2
+from clappform.gen.clappform.data.v1.export import export_pb2
 from clappform.gen.clappform.data.v1.insert import insert_pb2
 from clappform.gen.clappform.v1.commons import commons_pb2
+from clappform.services import client as client_services
+from clappform.services import data as data_services
+from clappform.services import notifier as notifier_services
 from clappform.services.client import ClientAPI
 from clappform.services.data import DataAPI
 
@@ -128,3 +134,90 @@ def test_iter_pagination_stops_when_pagination_unset() -> None:
 
     assert [q.id for q in client.query.iter_get_all()] == ["only"]
     assert len(caller.calls) == 1
+
+
+def queries_page(*ids: str, page: int, pages: int) -> query_pb2.Queries:
+    return query_pb2.Queries(
+        queries=[query_pb2.Query(id=i) for i in ids],
+        pagination=commons_pb2.Pagination(page=page, pages=pages),
+    )
+
+
+def test_iter_pagination_terminates_when_server_echoes_page_zero() -> None:
+    caller = RecordingCaller()
+    caller.responses = [queries_page(f"q{n}", page=0, pages=3) for n in range(1, 10)]
+    client = ClientAPI(caller)
+
+    ids = [q.id for q in client.query.iter_get_all()]
+
+    assert ids == ["q1", "q2", "q3"]
+    assert [c["request"].page for c in caller.calls] == [1, 2, 3]
+
+
+def test_iter_pagination_terminates_when_server_ignores_page() -> None:
+    caller = RecordingCaller()
+    caller.responses = [queries_page("q1", "q2", page=1, pages=2) for _ in range(10)]
+    client = ClientAPI(caller)
+
+    ids = [q.id for q in client.query.iter_get_all()]
+
+    assert ids == ["q1", "q2", "q1", "q2"]
+    assert [c["request"].page for c in caller.calls] == [1, 2]
+
+
+def test_iter_pagination_stops_on_empty_page() -> None:
+    caller = RecordingCaller()
+    caller.responses = [
+        queries_page("q1", page=1, pages=99),
+        queries_page(page=2, pages=99),
+    ]
+    client = ClientAPI(caller)
+
+    assert [q.id for q in client.query.iter_get_all()] == ["q1"]
+    assert len(caller.calls) == 2
+
+
+def test_colliding_field_is_set_through_trailing_underscore() -> None:
+    caller = RecordingCaller()
+    client = ClientAPI(caller)
+
+    client.actionflow_task.create(timeout_=300, timeout=5.0)
+
+    call = caller.calls[0]
+    assert call["request"].timeout == 300
+    assert call["options"]["timeout"] == 5.0
+
+
+def test_enum_field_accepts_value_name() -> None:
+    caller = RecordingCaller()
+    client = ClientAPI(caller)
+
+    client.actionflow_task.create(type="TEMPLATE")
+
+    assert caller.calls[0]["request"].type == actionflow_task_pb2.TEMPLATE
+
+
+def test_message_field_accepts_mapping() -> None:
+    caller = RecordingCaller()
+    data = DataAPI(caller)
+
+    data.export.create_export(inline={"collection": "orders"}, format="EXPORT_FORMAT_CSV")
+
+    request = caller.calls[0]["request"]
+    assert request.inline.collection == "orders"
+    assert request.format == export_pb2.EXPORT_FORMAT_CSV
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        client_services.QueryManagement.iter_get_all,
+        client_services.ActionflowTaskManagement.create,
+        data_services.ExportManagement.create_export,
+        data_services.UsageManagement.get_query_usage,
+        notifier_services.PreferenceManagement.set_preferences,
+    ],
+)
+def test_annotations_resolve(method) -> None:
+    hints = typing.get_type_hints(method)
+    assert "return" in hints

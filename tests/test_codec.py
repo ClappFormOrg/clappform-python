@@ -65,7 +65,8 @@ def test_extended_json_date_epoch_millis_is_converted() -> None:
 
 def test_chunk_records_splits_on_row_count() -> None:
     chunks = list(_codec.chunk_records(({"i": i} for i in range(5)), chunk_rows=2))
-    assert [len(_codec.bytes_to_records(c)) for c in chunks] == [2, 2, 1]
+    assert [len(_codec.bytes_to_records(c)) for c, _ in chunks] == [2, 2, 1]
+    assert [rows for _, rows in chunks] == [2, 2, 1]
 
 
 def test_chunk_records_empty_input_yields_nothing() -> None:
@@ -100,8 +101,8 @@ def test_array_of_scalars_is_rejected() -> None:
         _codec.bytes_to_records(b"[1,2,3]")
 
 
-def test_encode_elastic_pipeline_normalises_and_serialises() -> None:
-    encoded = _codec.encode_elastic_pipeline([{"match": {"ts": date(2020, 1, 1)}}])
+def test_encode_pipeline_normalises_and_serialises() -> None:
+    encoded = _codec.encode_pipeline([{"match": {"ts": date(2020, 1, 1)}}])
     assert json.loads(encoded) == [{"match": {"ts": "2020-01-01"}}]
 
 
@@ -185,3 +186,28 @@ def test_infinite_floats_are_rejected(value: float) -> None:
 def test_infinite_float_nested_in_container_is_rejected() -> None:
     with pytest.raises(ValueError, match="infinite float"):
         _codec.records_to_bytes([{"nested": {"deep": [math.inf]}}])
+
+
+def test_values_without_a_json_form_are_converted() -> None:
+    import uuid
+    from decimal import Decimal
+
+    import numpy as np
+
+    uid = uuid.uuid4()
+    data = _codec.records_to_bytes(
+        [{"n": np.int64(3), "a": np.array([1, 2]), "d": Decimal("1.5"), "u": uid, "s": {1}}]
+    )
+    assert json.loads(data) == [{"n": 3, "a": [1, 2], "d": 1.5, "u": str(uid), "s": [1]}]
+
+
+def test_numpy_array_cell_is_kept_not_nulled() -> None:
+    import numpy as np
+
+    data = _codec.records_to_bytes([{"a": np.array([1.0, float("nan")])}])
+    assert json.loads(data) == [{"a": [1.0, None]}]
+
+
+def test_unencodable_value_names_its_type() -> None:
+    with pytest.raises(TypeError, match="type bytes"):
+        _codec.records_to_bytes([{"b": b"raw"}])

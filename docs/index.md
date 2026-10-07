@@ -5,11 +5,7 @@ client, pandas DataFrame flows, and multi-cluster /
 multi-tenant support.
 
 ```python
-from clappform import Clappform
-
-# The cluster is discovered from DNS: location and an API key are all you need.
-cf = Clappform(location="acme", api_key="cf_live_...")
-df = cf.data.collection("sales_orders").read(pipeline=[{"$match": {"status": "open"}}])
+--8<-- "quickstart.py:index"
 ```
 
 ## What this client is
@@ -19,12 +15,14 @@ df = cf.data.collection("sales_orders").read(pipeline=[{"$match": {"status": "op
 - **Nothing global.** Every client is one `(cluster, location, credentials)`
   binding, so two clusters coexist in one process. The library reads no config
   files and no environment variables; everything is a constructor argument.
-- **Generated from the protos.** The API reference is generated from the
-  wrapper layer's docstrings, which come from the proto comments, so a new RPC
-  appears in these docs in the same release that adds it to the client.
-- **Typed errors.** Every failure derives from `ClappformError` and carries the
-  call context (method, cluster, location), so you never import `grpc` to handle
-  one. See [Error handling & retries](guides/errors-and-retries.md).
+- **Generated from the protos.** Every RPC in the four API families gets a
+  generated method, and the [API reference](reference/api-families.md) renders
+  those methods' docstrings: the RPC path, plus the proto comment where the
+  proto has one. A new RPC appears there in the release that adds it.
+- **Typed errors.** A failed call raises a `ClappformError` subclass carrying
+  the call context (method, cluster, location), so you never import `grpc` to
+  handle one. Argument mistakes raise `ValueError` or `TypeError` before any
+  call. See [Error handling & retries](guides/errors-and-retries.md).
 - **Testable without infrastructure.** `LocalMock` is an in-process transport
   double; the examples in these guides run against it in CI. See
   [Testing with LocalMock](guides/testing.md).
@@ -38,8 +36,15 @@ pip install --pre "clappform[pandas]"
 Version 6 is in pre-release, so `--pre` is required. Drop it and pip resolves to
 4.x, an unrelated HTTP-era package with none of this API.
 
-The core install pulls only `grpcio` and `protobuf`; pandas ships in the
-`[pandas]` extra so the DataFrame surface is available.
+Requires Python 3.10 or newer. The core install pulls only `grpcio` and
+`protobuf`; pandas ships in the `[pandas]` extra so the DataFrame surface is
+available.
+
+!!! warning "Not served yet"
+    `update()`, `update_where()` and `delete(where=...)` raise
+    `NotSupportedError` on every cluster today, because the Data Connector
+    does not implement their RPCs yet. See
+    [DataFrame flows](guides/dataframes.md).
 
 ## Reading these docs
 
@@ -50,5 +55,5 @@ The core install pulls only `grpcio` and `protobuf`; pandas ships in the
     running. The 4.x HTTP-era docs remain archived under their version tag.
 
 Start with the [Quickstart](quickstart.md), then reach for the how-to guides
-for a specific flow. The [Reference](reference/client.md) is the generated,
-exhaustive surface.
+for a specific flow. The [Reference](reference/client.md) renders the client's
+docstrings and the generated per-RPC surface.

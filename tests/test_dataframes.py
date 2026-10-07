@@ -18,7 +18,9 @@ CID = "1c9a7f3e-0000-4000-8000-000000000001"
 
 @pytest.fixture
 def cf():
-    mock = LocalMock()
+    # update()/update_where()/delete(where=) ride RPCs the Data Connector does
+    # not serve yet; emulate them so these tests exercise the client side.
+    mock = LocalMock(include_unreleased=True)
     client = Clappform("acme", "qa", api_key="k", transport=mock)
     yield client, mock
     client.close()
@@ -198,10 +200,10 @@ def test_upsert_updates_existing_and_inserts_new(cf) -> None:
     assert len(mock.records(CID)) == 4
 
 
-def test_replace_where_sets_values_on_matches(cf) -> None:
+def test_update_where_sets_values_on_matches(cf) -> None:
     client, mock = cf
     _seed_orders(mock)
-    client.data.collection(CID).replace_where({"status": "open"}, {"status": "seen"})
+    client.data.collection(CID).update_where({"status": "open"}, {"status": "seen"})
     statuses = sorted(r["status"] for r in mock.records(CID))
     assert statuses == ["closed", "seen", "seen"]
 
@@ -358,3 +360,184 @@ def test_query_handle_repr_shows_resolved_id_after_use(cf) -> None:
     assert "->" not in repr(q)  # unresolved before use
     q.read()
     assert f"-> {QID}" in repr(q)  # resolved id shown after use
+
+
+# --- review fixes --------------------------------------------------------------
+
+UPDATE_MANY = "/clappform.data.v1.update.UpdateManagement/UpdateMany"
+UPDATE_BY_FIELD = "/clappform.data.v1.update.UpdateManagement/UpdateManyByField"
+
+
+def test_update_on_business_key_uses_update_many_by_field(cf) -> None:
+    client, mock = cf
+    _seed_orders(mock)
+    client.data.collection(CID).update(
+        pd.DataFrame([{"order_id": 2, "status": "reopened"}]), on="order_id"
+    )
+    methods = [call.method for call in mock.calls]
+    assert UPDATE_BY_FIELD in methods and UPDATE_MANY not in methods
+    (request,) = next(c.request for c in mock.calls if c.method == UPDATE_BY_FIELD)
+    assert request.field_name == "order_id"
+    by_id = {r["order_id"]: r["status"] for r in mock.records(CID)}
+    assert by_id[2] == "reopened"
+
+
+def test_update_on_id_uses_update_many(cf) -> None:
+    client, mock = cf
+    _seed_orders(mock)
+    client.data.collection(CID).update(client.data.collection(CID).read())
+    methods = [call.method for call in mock.calls]
+    assert UPDATE_MANY in methods and UPDATE_BY_FIELD not in methods
+
+
+def test_update_rejects_null_key(cf) -> None:
+    client, mock = cf
+    _seed_orders(mock)
+    df = pd.DataFrame([{"order_id": None, "status": "x"}])
+    with pytest.raises(ValueError, match="row 0 has no value"):
+        client.data.collection(CID).update(df, on="order_id")
+
+
+def test_update_against_server_parity_mock_is_not_supported() -> None:
+    from clappform import NotSupportedError
+
+    mock = LocalMock()
+    mock.seed(CID, [{"order_id": 1}])
+    with Clappform("acme", "qa", api_key="k", transport=mock) as client:
+        df = client.data.collection(CID).read()
+        with pytest.raises(NotSupportedError, match="does not serve this RPC yet"):
+            client.data.collection(CID).update(df)
+
+
+def test_append_rejects_id_column(cf) -> None:
+    client, mock = cf
+    with pytest.raises(ValueError, match="drop it first"):
+        client.data.collection(CID).append(pd.DataFrame([{"_id": "a", "x": 1}]))
+    assert mock.calls == []
+
+
+def test_upsert_rejects_id_column(cf) -> None:
+    # read() returns _id as a string; the server writes it into the replacement
+    # document, where it no longer equals the stored ObjectId.
+    client, mock = cf
+    _seed_orders(mock)
+    df = client.data.collection(CID).read()
+    mock.calls.clear()
+    with pytest.raises(ValueError, match="drop it with"):
+        client.data.collection(CID).upsert(df, on="order_id")
+    with pytest.raises(ValueError, match="drop it with"):
+        client.data.collection(CID).upsert(df, on="_id")
+    assert mock.calls == []
+
+
+_WRITES = {
+    "append": lambda col, df: col.append(df),
+    "update": lambda col, df: col.update(df, on="amount"),
+    "upsert": lambda col, df: col.upsert(df, on="amount"),
+}
+
+
+@pytest.mark.parametrize("write", sorted(_WRITES))
+def test_writes_refuse_a_named_index(cf, write) -> None:
+    client, mock = cf
+    df = pd.DataFrame([{"order_id": 1, "amount": 5.0}]).set_index("order_id")
+    with pytest.raises(ValueError, match=rf"{write}\(\) .* drop the index \['order_id'\]"):
+        _WRITES[write](client.data.collection(CID), df)
+    assert mock.calls == []
+
+
+def test_writes_refuse_a_groupby_multiindex(cf) -> None:
+    client, mock = cf
+    rows = [
+        {"region": "N", "year": 2025, "amount": 1.0},
+        {"region": "S", "year": 2025, "amount": 2.0},
+    ]
+    df = pd.DataFrame(rows).groupby(["region", "year"]).sum()
+    with pytest.raises(ValueError, match=r"\['region', 'year'\].*reset_index"):
+        client.data.collection(CID).append(df)
+    assert mock.calls == []
+
+
+def test_writes_drop_an_unnamed_index(cf) -> None:
+    # A filter leaves gaps in a positional index; that index holds no data.
+    client, mock = cf
+    mock.seed(CID, [])
+    df = pd.DataFrame([{"n": 1}, {"n": 2}, {"n": 3}])
+    client.data.collection(CID).append(df[df["n"] > 1])
+    assert sorted(r["n"] for r in mock.records(CID)) == [2, 3]
+
+
+def test_append_progress_reports_acknowledged_rows(cf) -> None:
+    client, mock = cf
+    mock.seed(CID, [])
+    seen: list[int] = []
+    df = pd.DataFrame([{"n": i} for i in range(5)])
+    assert client.data.collection(CID).append(df, chunk_rows=2, progress=seen.append) == 5
+    assert seen == [2, 4, 5]
+
+
+def test_append_failure_records_rows_written(cf) -> None:
+    from clappform import TransientError
+    from clappform.gen.clappform.data.v1.insert import insert_pb2
+
+    client, mock = cf
+
+    def _partial(requests):
+        def _responses():
+            yield insert_pb2.InsertResponse(processed_count=2)
+            raise TransientError("connection dropped", status="UNAVAILABLE")
+
+        return _responses()
+
+    mock.on("/clappform.data.v1.insert.InsertManagement/InsertMany", _partial)
+    df = pd.DataFrame([{"n": i} for i in range(5)])
+    with pytest.raises(TransientError) as info:
+        client.data.collection(CID).append(df, chunk_rows=2)
+    assert info.value.rows_written == 2
+
+
+def test_delete_with_empty_oids_makes_no_call(cf) -> None:
+    client, mock = cf
+    client.data.collection(CID).delete(oids=[])
+    assert mock.calls == []
+
+
+def test_update_where_refuses_empty_filter(cf) -> None:
+    client, _mock = cf
+    with pytest.raises(ValueError, match="matches every document"):
+        client.data.collection(CID).update_where({}, {"status": "x"})
+
+
+def test_replace_where_is_a_deprecated_alias(cf) -> None:
+    client, mock = cf
+    _seed_orders(mock)
+    with pytest.warns(DeprecationWarning, match="update_where"):
+        client.data.collection(CID).replace_where({"status": "open"}, {"status": "seen"})
+    assert all(r["status"] != "open" for r in mock.records(CID))
+
+
+def test_iter_batches_closes_the_stream_when_abandoned(cf) -> None:
+    client, _mock = cf
+    closed: list[bool] = []
+
+    def _responses():
+        try:
+            for i in range(10):
+                yield aggregate_response(i)
+        finally:
+            closed.append(True)
+
+    client._transport.on(  # type: ignore[attr-defined]
+        "/clappform.data.v1.aggregate.AggregateManagement/AggregateStream",
+        lambda request: _responses(),
+    )
+    batches = client.data.collection(CID).iter_batches()
+    next(batches)
+    batches.close()
+    assert closed == [True]
+
+
+def aggregate_response(i: int):
+    from clappform.gen.clappform.data.v1.aggregate import aggregate_pb2
+
+    return aggregate_pb2.AggregateResponse(data=f'[{{"i":{i}}}]'.encode())

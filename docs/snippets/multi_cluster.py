@@ -17,13 +17,16 @@ def run(prod_transport: LocalMock, qa_transport: LocalMock) -> None:
     from clappform import Clappform
 
     # Two clusters, one process, nothing global. The `cluster` extension picks
-    # the endpoints (prod -> data.clappform.com, qa -> data-qa.clappform.com);
-    # `location` picks the tenant within them. Credentials are per client.
-    prod = Clappform(cluster="prod", location="acme", api_key="cf_live_prod_...")
+    # the endpoints ("" -> data.clappform.com:50051, the main cluster;
+    # "qa" -> data-qa.clappform.com on 443); `location` picks the tenant
+    # within them. Credentials are per client.
+    prod = Clappform(cluster="", location="acme", api_key="cf_live_prod_...")
     qa = Clappform(cluster="qa", location="acme", api_key="cf_live_qa_...")
     # --8<-- [end:two-clusters]
+    prod.close()
+    qa.close()
 
-    prod = Clappform(cluster="prod", location="acme", api_key="x", transport=prod_transport)
+    prod = Clappform(cluster="", location="acme", api_key="x", transport=prod_transport)
     qa = Clappform(cluster="qa", location="acme", api_key="x", transport=qa_transport)
 
     imported: dict[str, bytes] = {}
@@ -31,17 +34,18 @@ def run(prod_transport: LocalMock, qa_transport: LocalMock) -> None:
 
     with prod, qa:
         # --8<-- [start:cross-cluster]
-        # Pull from prod, mirror into qa by business key.
+        # Pull from prod, mirror into qa by business key. Drop _id: it names
+        # the document on prod, and qa assigns its own.
         df = prod.data.collection("orders").read()
-        qa.data.collection("orders").upsert(df, on="order_id")
+        qa.data.collection("orders").upsert(df.drop(columns="_id"), on="order_id")
         # --8<-- [end:cross-cluster]
         assert len(df) == 1
         # the row was mirrored into the qa cluster's store
         assert len(qa_transport.records("orders-id")) == 1
 
         # --8<-- [start:with-location]
-        # Same cluster, another tenant: with_location() clones cheaply and
-        # shares the underlying connections; only the tenant metadata differs.
+        # Same cluster, another location: with_location() clones cheaply and
+        # shares the underlying connections; only the location metadata differs.
         beta = prod.with_location("beta")
         beta_orders = beta.data.collection("orders").read()
         # --8<-- [end:with-location]
@@ -49,16 +53,16 @@ def run(prod_transport: LocalMock, qa_transport: LocalMock) -> None:
         assert len(beta_orders) == 1
 
         # --8<-- [start:fan-out-tenants]
-        # Run the same operation across many tenants on one cluster: clone per
-        # tenant with with_location() (connections are shared, so this is cheap)
-        # and loop. Each iteration only changes the location metadata.
+        # Run the same operation across many locations: clone per location with
+        # with_location() and loop. Use each clone as a context manager: a
+        # clone that shares prod's connections ignores close(), and one that
+        # discovered another cluster closes its own.
         totals = {}
-        for tenant in ("acme", "beta", "gamma"):
-            client = prod.with_location(tenant)
-            df = client.data.collection("orders").read()
-            totals[tenant] = len(df)
+        for tenant in ("beta", "gamma", "delta"):
+            with prod.with_location(tenant) as client:
+                totals[tenant] = len(client.data.collection("orders").read())
         # --8<-- [end:fan-out-tenants]
-        assert totals == {"acme": 1, "beta": 1, "gamma": 1}
+        assert totals == {"beta": 1, "gamma": 1, "delta": 1}
 
         # --8<-- [start:transfer-app]
         # Move a whole app, with its collections and optionally its queries,

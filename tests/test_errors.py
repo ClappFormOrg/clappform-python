@@ -12,6 +12,7 @@ from clappform._errors import (
     NotFoundError,
     NotSupportedError,
     PermissionDeniedError,
+    ResourceExhaustedError,
     TransientError,
     translate_rpc_error,
 )
@@ -41,6 +42,7 @@ class FakeRpcError(grpc.RpcError):
         (grpc.StatusCode.ABORTED, ConflictError),
         (grpc.StatusCode.UNIMPLEMENTED, NotSupportedError),
         (grpc.StatusCode.UNAVAILABLE, TransientError),
+        (grpc.StatusCode.RESOURCE_EXHAUSTED, ResourceExhaustedError),
         (grpc.StatusCode.DEADLINE_EXCEEDED, TransientError),
         (grpc.StatusCode.INTERNAL, ClappformError),
     ],

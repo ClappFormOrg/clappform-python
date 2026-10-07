@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package clappform.demo.v1.parts;
+
+// Referenced only as a map value, so its module is imported for that alone.
+message Widget {
+  string label = 1;
+}

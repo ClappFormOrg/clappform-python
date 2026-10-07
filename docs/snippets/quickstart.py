@@ -41,6 +41,15 @@ def build_mock() -> LocalMock:
 
 
 def run(transport: LocalMock) -> None:
+    # --8<-- [start:index]
+    from clappform import Clappform
+
+    # The cluster is discovered from DNS: location and an API key are all you need.
+    with Clappform(location="acme", api_key="cf_live_...") as cf:
+        df = cf.data.collection("sales_orders").read(pipeline=[{"$match": {"status": "open"}}])
+    # --8<-- [end:index]
+    _ = df
+
     # --8<-- [start:connect]
     from clappform import Clappform
 
@@ -52,8 +61,9 @@ def run(transport: LocalMock) -> None:
     )
 
     # In air-gapped or split-DNS environments where discovery can't run, pin
-    # the cluster explicitly, which skips DNS entirely.
-    cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...")
+    # the cluster explicitly, which skips DNS entirely. "" is the main cluster
+    # ("prod" is another name for it); other clusters are e.g. "qa" or "prod-lts".
+    cf = Clappform(location="acme", cluster="", api_key="cf_live_...")
     # --8<-- [end:connect]
 
     # The env var is illustrative; set a placeholder so the block below runs in
@@ -74,30 +84,26 @@ def run(transport: LocalMock) -> None:
 
     # The docs example connects for real; the test swaps in a stubbed transport
     # so the round-trip below runs with no network.
-    cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...", transport=transport)
+    cf = Clappform(location="acme", cluster="", api_key="cf_live_...", transport=transport)
 
     with cf:
         # --8<-- [start:roundtrip]
         orders = cf.data.collection("sales_orders")
 
         # read a filtered slice straight into a pandas DataFrame by passing an
-        # aggregation pipeline; $match filters, $project picks columns
-        df = orders.read(
-            pipeline=[
-                {"$match": {"status": "open"}},
-                {"$project": {"order_id": 1, "amount": 1, "region": 1}},
-            ]
-        )
+        # aggregation pipeline; $match filters the rows
+        df = orders.read(pipeline=[{"$match": {"status": "open"}}])
 
         # mutate with plain pandas
         df["amount_eur"] = df["amount"] * 1.08
 
-        # write the changed rows back, matched on _id (kept by read())
-        orders.update(df)
+        # write the rows back keyed on a business column; upsert() replaces
+        # each matched document with its row, so send whole rows without _id
+        orders.upsert(df.drop(columns="_id"), on="order_id")
         # --8<-- [end:roundtrip]
 
         assert len(df) == 2
-        assert "amount_eur" in df.columns
+        assert all("amount_eur" in row for row in transport.records("sales_orders-id")[:2])
 
         # --8<-- [start:full-task]
         # A complete task has the same shape almost every time: connect, read a
@@ -111,7 +117,7 @@ def run(transport: LocalMock) -> None:
         df["amount_eur"] = df["amount"] * 1.08
         df["priority"] = df["amount_eur"] > 100
 
-        orders.update(df)                          # matched on _id, no args needed
+        orders.upsert(df.drop(columns="_id"), on="order_id")   # keyed on order_id
 
         # trigger a downstream actionflow; the response carries the run's uuid
         started = cf.client.actionflow.start(id="recalculate-dashboards")

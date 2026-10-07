@@ -25,7 +25,9 @@ log = logging.getLogger("actionflow_tasks")
 
 
 def build_mock() -> LocalMock:
-    mock = LocalMock()
+    # include_unreleased=True emulates update(), which the Data Connector does
+    # not serve yet; the guide marks the update mode with a warning.
+    mock = LocalMock(include_unreleased=True)
     mock.seed_collection_slug("rental_units", id="rental_units-id")
     mock.seed(
         "rental_units-id",
@@ -49,7 +51,7 @@ def task_shape() -> Any:
     # parameters-tagged cell: every input, with a `# meta:` annotation that
     # drives the platform's input form.
     LOG_LEVEL: str = "INFO"  # meta: {"enum": ["INFO", "DEBUG"], "description": "log level"}
-    LOCATION: str = ""  # meta: {"description": "Tenant; the cluster is discovered from it"}
+    LOCATION: str = ""  # meta: {"description": "Location; the cluster is discovered from it"}
     API_KEY: str = ""  # meta: {"secret": true, "description": "Clappform API key"}
     COLLECTION: str = ""  # meta: {"description": "Collection id or slug"}
     # Upstream DataFrame: no annotation, so the service doesn't type-check it.

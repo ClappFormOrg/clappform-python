@@ -16,7 +16,7 @@ from clappform.testing import LocalMock, RecordedCall
 
 @pytest.fixture
 def cf():
-    mock = LocalMock()
+    mock = LocalMock(include_unreleased=True)
     client = Clappform("acme", "qa", api_key="test-key", transport=mock)
     yield client, mock
     client.close()
@@ -190,3 +190,117 @@ def test_closed_mock_rejects_calls() -> None:
     mock.close()  # a caller-owned transport is closed directly, not via client
     with pytest.raises(ClappformError, match="client is closed"):
         client.data.insert.insert_single(collection="orders", data=b"[]")
+
+
+# --- server parity -------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        "/clappform.data.v1.update.UpdateManagement/UpdateMany",
+        "/clappform.data.v1.update.UpdateManagement/UpdateManyByField",
+        "/clappform.data.v1.update.UpdateManagement/UpdateManyByQuery",
+        "/clappform.data.v1.delete.DeleteManagement/DeleteManyByQuery",
+    ],
+)
+def test_unreleased_rpcs_raise_not_supported_by_default(method: str) -> None:
+    from clappform import NotSupportedError
+
+    mock = LocalMock()
+    with pytest.raises(NotSupportedError, match="include_unreleased=True"):
+        mock.invoke("stream_unary", method, [], object, object)
+
+
+def test_insert_with_id_is_rejected_like_the_server() -> None:
+    from clappform import InvalidRequestError
+
+    mock = LocalMock()
+    client = Clappform("acme", "qa", api_key="k", transport=mock)
+    with pytest.raises(InvalidRequestError, match="_id"):
+        client.data.insert.insert_single(collection="orders", data=b'[{"_id":"a"}]')
+
+
+def _read(pipeline):
+    mock = LocalMock()
+    cid = "11111111-1111-1111-1111-111111111111"
+    mock.seed(cid, [{"n": 1, "s": "a"}, {"n": 3, "s": "b"}, {"n": 2}])
+    with Clappform("acme", "qa", api_key="k", transport=mock) as client:
+        return client.data.collection(cid).read(pipeline=pipeline)
+
+
+def test_match_supports_comparison_operators() -> None:
+    df = _read([{"$match": {"n": {"$gte": 2}}}, {"$sort": {"n": -1}}])
+    assert list(df["n"]) == [3, 2]
+
+
+def test_match_supports_in_and_exists() -> None:
+    assert list(_read([{"$match": {"s": {"$in": ["a", "b"]}}}])["n"]) == [1, 3]
+    assert list(_read([{"$match": {"s": {"$exists": False}}}])["n"]) == [2]
+
+
+def test_skip_and_limit() -> None:
+    assert list(_read([{"$sort": {"n": 1}}, {"$skip": 1}, {"$limit": 1}])["n"]) == [2]
+
+
+@pytest.mark.parametrize(
+    "pipeline",
+    [
+        [{"$group": {"_id": "$s"}}],
+        [{"$match": {"n": {"$regex": "x"}}}],
+        [{"$match": {"$or": [{"n": 1}]}}],
+    ],
+)
+def test_unemulated_stage_or_operator_raises(pipeline) -> None:
+    with pytest.raises(ClappformError, match="does not emulate"):
+        _read(pipeline)
+
+
+def test_exclusion_projection_drops_named_fields() -> None:
+    df = _read([{"$project": {"s": 0}}])
+    assert "s" not in df.columns and {"n", "_id"} <= set(df.columns)
+
+
+def test_mixed_projection_raises() -> None:
+    with pytest.raises(ClappformError, match="mixes inclusion and exclusion"):
+        _read([{"$project": {"s": 0, "n": 1}}])
+
+
+def test_upsert_replaces_the_matched_document_like_the_server() -> None:
+    import pandas as pd
+
+    mock = LocalMock()
+    cid = "11111111-1111-1111-1111-111111111111"
+    mock.seed(cid, [{"_id": "a", "key": 1, "keep": "x", "status": "old"}])
+    with Clappform("acme", "qa", api_key="k", transport=mock) as client:
+        client.data.collection(cid).upsert(pd.DataFrame([{"key": 1, "status": "new"}]), on="key")
+    assert mock.records(cid) == [{"_id": "a", "key": 1, "status": "new"}]
+
+
+def test_sync_rejects_a_replacement_that_alters_id_like_the_server() -> None:
+    from clappform.gen.clappform.data.v1.sync import sync_pb2
+
+    mock = LocalMock()
+    cid = "11111111-1111-1111-1111-111111111111"
+    mock.seed(cid, [{"_id": "a", "key": 1}])
+
+    def _sync(row):
+        request = sync_pb2.SyncRequestByField(
+            collection=cid, data=_codec.records_to_bytes([row]), field_name="key"
+        )
+        client.data.sync.sync_many_by_field(iter([request]))
+
+    with Clappform("acme", "qa", api_key="k", transport=mock) as client:
+        _sync({"_id": "a", "key": 1, "v": 2})  # the stored _id is accepted
+        with pytest.raises(ClappformError, match="immutable") as excinfo:
+            _sync({"_id": "b", "key": 1, "v": 3})
+    assert excinfo.value.status == "UNKNOWN"
+    assert mock.records(cid) == [{"_id": "a", "key": 1, "v": 2}]
+
+
+def test_closed_mock_raises_configuration_error_like_the_transport() -> None:
+    from clappform import ConfigurationError
+
+    mock = LocalMock()
+    mock.close()
+    with pytest.raises(ConfigurationError, match="client is closed"):
+        mock.invoke("unary_unary", "/x/Y", None, object, object)

@@ -24,9 +24,12 @@ Encoding rules (mirroring what the gateway's JSON handling expects):
 * ``_id`` is kept as an ordinary column on the way in, so a read -> mutate ->
   update round-trip can key on it without special handling.
 
+* Values JSON has no form for are converted: numpy scalars and arrays via
+  ``tolist()``, ``Decimal`` to ``float``, ``UUID`` to ``str``, sets to lists.
+  Anything else fails with a ``TypeError`` naming the type.
+
 Uploads are chunked at ``DEFAULT_CHUNK_ROWS`` rows, matching 5.x behaviour, so
-a failed chunk is retryable at the flow level rather than re-sending the whole
-frame.
+no single gRPC message has to carry a whole frame.
 """
 
 from __future__ import annotations
@@ -35,8 +38,10 @@ import json
 import math
 from collections.abc import Iterable, Iterator, Mapping
 from datetime import date, datetime, timezone
+from decimal import Decimal
 from enum import Enum
 from typing import Any
+from uuid import UUID
 
 Record = dict[str, Any]
 
@@ -84,6 +89,10 @@ def _normalise_value(value: Any) -> Any:
         return {str(k): _normalise_value(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [_normalise_value(v) for v in value]
+    if getattr(value, "ndim", 0) and hasattr(value, "tolist"):
+        # A numpy array cell. Without this branch the sentinel check below
+        # would see ``arr != arr`` fail to coerce to bool and call it missing.
+        return _normalise_value(value.tolist())
     # Missing-value singletons (pandas NaT/NA, numpy NaT) that slipped past the
     # float branch compare unequal to themselves. pandas NA is doubly awkward:
     # ``NA != NA`` returns NA, not a bool, and coercing that to bool raises
@@ -136,17 +145,41 @@ def _parse_extended_json(value: Any) -> Any:
     return {k: _parse_extended_json(v) for k, v in value.items()}
 
 
+def is_missing(value: Any) -> bool:
+    """Whether ``value`` encodes as JSON ``null`` (None, NaN, NaT, pandas NA)."""
+    return _normalise_value(value) is None
+
+
+def _encode_extra(value: Any) -> Any:
+    """``json.dumps`` fallback for values with no native JSON form."""
+    if hasattr(value, "tolist"):  # numpy scalars and arrays
+        return _normalise_value(value.tolist())
+    if isinstance(value, Decimal):
+        return _normalise_value(float(value))
+    if isinstance(value, UUID):
+        return str(value)
+    if isinstance(value, (set, frozenset)):
+        return [_normalise_value(v) for v in value]
+    raise TypeError(
+        f"cannot encode a value of type {type(value).__name__} as JSON; "
+        f"convert that column to str, int, float, bool or datetime first"
+    )
+
+
+def _dumps(value: Any) -> bytes:
+    return json.dumps(value, separators=(",", ":"), default=_encode_extra).encode("utf-8")
+
+
 def records_to_bytes(records: Iterable[Record]) -> bytes:
     """Encode a batch of records as a single JSON array of objects."""
-    normalised = [_normalise_value(dict(record)) for record in records]
-    return json.dumps(normalised, separators=(",", ":")).encode("utf-8")
+    return _dumps([_normalise_value(dict(record)) for record in records])
 
 
 def chunk_records(
     records: Iterable[Record],
     chunk_rows: int = DEFAULT_CHUNK_ROWS,
-) -> Iterator[bytes]:
-    """Yield JSON-encoded chunks of at most ``chunk_rows`` records each.
+) -> Iterator[tuple[bytes, int]]:
+    """Yield ``(payload, rows)`` for JSON chunks of at most ``chunk_rows`` records.
 
     Empty input yields nothing (no empty chunk is sent). A non-positive
     ``chunk_rows`` is a caller error.
@@ -157,10 +190,10 @@ def chunk_records(
     for record in records:
         batch.append(record)
         if len(batch) >= chunk_rows:
-            yield records_to_bytes(batch)
+            yield records_to_bytes(batch), len(batch)
             batch = []
     if batch:
-        yield records_to_bytes(batch)
+        yield records_to_bytes(batch), len(batch)
 
 
 def bytes_to_records(data: bytes, fmt: ChunkFormat = ChunkFormat.JSON) -> list[Record]:
@@ -216,9 +249,4 @@ def encode_pipeline(pipeline: Any) -> bytes:
     way record data is (``NaN``/``NaT`` -> ``null``, datetimes -> ISO-8601), so
     a pipeline referencing timestamps encodes consistently with the rows.
     """
-    return json.dumps(_normalise_value(pipeline), separators=(",", ":")).encode("utf-8")
-
-
-# Retained alias: the pipeline encoding was originally named for the Elastic
-# path before it was confirmed to be the single JSON encoding for all backends.
-encode_elastic_pipeline = encode_pipeline
+    return _dumps(_normalise_value(pipeline))

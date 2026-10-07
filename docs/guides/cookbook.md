@@ -10,8 +10,17 @@ For the full argument list behind any call, see [DataFrame flows](dataframes.md)
 
 ## Collection CRUD
 
-The four operations you'll use most, on a `cf.data.collection(ref)` handle.
-`ref` is a slug or a UUID; a slug is resolved once and cached per tenant.
+The operations you'll use most, on a `cf.data.collection(ref)` handle.
+`ref` is a collection slug or UUID; a slug is resolved once and cached per
+location.
+
+!!! warning "Update and delete-by-filter are not served yet"
+    `update()` and `delete(where=...)` raise
+    [`NotSupportedError`][clappform.NotSupportedError] on every cluster today,
+    because the Data Connector does not implement their RPCs yet. The recipes
+    below run them against `LocalMock(include_unreleased=True)`. Today, write
+    changes back with `upsert(on=...)` and delete with `delete(oids=...)` or
+    `clear()`.
 
 ### Create (insert new rows)
 
@@ -25,7 +34,7 @@ The four operations you'll use most, on a `cf.data.collection(ref)` handle.
 --8<-- "cookbook.py:crud-read"
 ```
 
-### Update (write changes back)
+### Update (write changes back, not served yet)
 
 ```python
 --8<-- "cookbook.py:crud-update"
@@ -66,8 +75,10 @@ Read the bytes into a DataFrame with pandas, then `append()`.
 
 pandas picks the reader from the format: `read_csv`, `read_excel` (needs
 `openpyxl`), `read_parquet`, `read_json`. The client chunks and streams the
-upload; `append()` returns the number of rows written. For a full refresh of
-existing rows, use `upsert(df, on="...")` instead so a re-run updates in place.
+upload; `append()` returns the number of rows the server acknowledged.
+`append()` is not idempotent, so running the ingest twice inserts the file
+twice. For a load you may re-run, use `upsert(df, on="...")` instead so a
+re-run replaces the same documents.
 
 ## Export a collection to an Excel report
 
@@ -91,8 +102,8 @@ the handle's methods once:
 --8<-- "actionflow_tasks.py:write-mode"
 ```
 
-`update` and `delete` match on `_id`; only `upsert` matches on a business
-column. See
+Here `update` and `delete` match on `_id`, and `upsert` on a business column.
+The `update` mode is not served yet (see the warning at the top). See
 [A write whose mode is a parameter](actionflow-scripts.md#a-write-whose-mode-is-a-parameter).
 
 ## Aggregate a collection into a DataFrame
@@ -103,10 +114,10 @@ Group, sort, or reshape server-side and get a frame back.
 --8<-- "cookbook.py:aggregate-to-df"
 ```
 
-`aggregate(p)` is exactly `read(pipeline=p)` returning a DataFrame, so use
-whichever name reads better at the call site. A plain filter/projection is just
-a pipeline with a `$match`/`$project` stage (see the read recipe above); reach
-for the `aggregate()` name when the call is conceptually a grouping or reshape.
+`aggregate(p)` is `read(pipeline=p)` returning a DataFrame, so use whichever
+name reads better at the call site. A plain filter/projection is a pipeline
+with a `$match`/`$project` stage (see the read recipe above); reach for the
+`aggregate()` name when the call is conceptually a grouping or reshape.
 
 ## Stream a large aggregation into DataFrames
 
@@ -151,8 +162,9 @@ A change request is a row in its own collection.
 --8<-- "cookbook.py:change-request"
 ```
 
-To amend an existing change-request row, keep its `_id` and call `update()`, or
-match on your own identifier with `upsert(df, on="cf_original_id")`.
+To amend an existing change-request row, match on your own identifier with
+`upsert(df, on="cf_original_id")`, sending the whole row. `update()` on its
+`_id` will also work once the server serves it.
 
 ## Start an actionflow
 
@@ -182,7 +194,7 @@ Create, list, and drop indexes on a collection through `cf.data.index`.
 ```
 
 `create()` also takes a `mongo_index_model=` (for compound or option-bearing
-indexes) or `elastic_settings=` for Elastic-backed collections; passing just
+indexes) or `elastic_settings=` for Elastic-backed collections; passing only
 `index_name` builds a simple single-field index.
 
 ## Move an app between instances
@@ -201,7 +213,8 @@ Choose what travels with the `include_*` flags on `export_app`, and set
 ## Copy data across clusters
 
 Two clients are two clusters in one process. Read from one and `upsert()` into
-the other on a business key so re-runs never duplicate.
+the other on a business key so re-runs never duplicate. Drop `_id` first: it
+identifies the document on the source cluster, and the target assigns its own.
 
 ```python
 --8<-- "cookbook.py:cross-cluster"
@@ -209,4 +222,3 @@ the other on a business key so re-runs never duplicate.
 
 See [Multi-cluster & multi-tenant](multi-cluster.md) for sharing connections
 across tenants on the same cluster.
-```

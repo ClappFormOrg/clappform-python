@@ -12,6 +12,128 @@ reports the pinned proto tag at runtime, and `repr(client)` includes it.
     versions below track the 6.x line; the 4.x HTTP-era docs remain archived
     under their own version tag.
 
+## 6.0.0a2 (unreleased)
+
+### Breaking changes
+
+- `CollectionHandle.replace_where()` is renamed to `update_where()`, since it
+  sets fields rather than replacing documents. `replace_where()` still works,
+  emits a `DeprecationWarning`, and is removed before 6.0.0. `update_where({})`
+  raises `ValueError`.
+- `append()` raises `ValueError` for a frame with an `_id` column, because the
+  server rejects inserts that carry one. Drop the column first.
+- `upsert()` raises `ValueError` for a frame with an `_id` column. The server
+  writes the row's `_id` into the replacement document, and the string `_id`
+  that `read()` returns does not equal the stored ObjectId. `LocalMock` rejects
+  a `SyncManyByField` row whose `_id` differs from the matched document's.
+- `append()`, `update()` and `upsert()` raise `ValueError` for a frame with a
+  named index, such as one from `set_index()` or `groupby()`, instead of
+  dropping it. Call `df.reset_index()` first.
+- Only RPCs named for a read (`Get*`, `List*`, `Read*`, `Describe*`,
+  `Aggregate*`, `Download*`, `Health`, `Preview*`) retry `UNAVAILABLE`.
+  Actions such as `actionflow.start` and `transfer.import_app`, and every
+  other write, no longer retry. `clappform._transport.NON_RETRIED_SERVICES` is
+  removed.
+- Streaming calls, which include every DataFrame read and write, have no
+  deadline by default. `timeout=` (default 60 s) now applies to unary calls
+  only; the new `stream_timeout=` (default `None`) applies to streams. A
+  per-call `timeout=` bounds that whole call, stream included.
+- `ReadResult.__arrow_c_stream__` is removed. Polars, DuckDB and pyarrow probe
+  for it and would call a stub that could only raise. `to_arrow()` and
+  `to_polars()` still raise `NotImplementedError`.
+- `grpcio>=1.68` is required: the generated stubs raise `RuntimeError` at
+  import on an older grpcio.
+- `RetryPolicy` takes backoffs in seconds as floats (`"0.2s"` strings still
+  work) and validates its fields: `max_attempts` must be 2 to 5, since gRPC
+  caps it at 5, and backoffs and the multiplier must be positive. Invalid values
+  raise `ConfigurationError`.
+- `LocalMock` raises `NotSupportedError` for `UpdateMany`, `UpdateManyByField`,
+  `UpdateManyByQuery` and `DeleteManyByQuery`, as the Data Connector does,
+  unless built with `LocalMock(include_unreleased=True)`. It rejects inserts
+  that carry `_id`.
+- `LocalMock`'s pipeline emulation raises `ClappformError` for any stage other
+  than `$match`, `$project`, `$sort`, `$skip` and `$limit`, and for any
+  `$match` operator other than `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`,
+  `$in`, `$nin` and `$exists`, instead of passing the rows through. Stub
+  `AggregateStream` with `.on()` for other pipelines.
+
+### Not served yet
+
+`update()`, `update_where()` and `delete(where=...)` call RPCs the Data
+Connector does not implement yet, so they raise `NotSupportedError` on every
+cluster. Use `upsert(on=...)`, `delete(oids=...)` and `clear()`.
+
+### Writes and retries
+
+- Writes and actions are never retried, because a retried `UNAVAILABLE`
+  call can apply twice. Reads still retry `UNAVAILABLE`.
+- `append()` reports progress, and returns, the rows the server acknowledged.
+  When it fails, the raised `ClappformError` carries `rows_written`.
+- `update(df, on=...)` sends `UpdateMany` for `on="_id"` and
+  `UpdateManyByField` for any other column, setting the frame's columns and
+  leaving other fields alone. A row with a null or NaN key raises `ValueError`.
+- `delete(oids=[])` makes no call.
+- New `ResourceExhaustedError` for `RESOURCE_EXHAUSTED`, such as a message
+  over the 64 MiB gRPC limit. It was a plain `ClappformError` before.
+- `TransientError` still covers `UNAVAILABLE` and `DEADLINE_EXCEEDED`;
+  `DEADLINE_EXCEEDED` is never retried.
+
+### Client and streams
+
+- Passing `transport=` skips DNS discovery; `cf.cluster` is then `None` unless
+  you pass `cluster=`.
+- DNS discovery gives up after 5 seconds and raises `ConfigurationError`
+  telling you to pass `cluster=`.
+- A response stream you stop reading is cancelled on the server.
+- An exception raised while the client produces a request stream, such as one
+  from a `progress` callback or a bad item, reaches the caller instead of
+  surfacing as a cancelled call.
+
+### Codec
+
+numpy scalars and arrays, `Decimal` (as a float), `UUID` (as a string) and sets
+now encode. Any other value JSON cannot hold raises `TypeError` naming its type.
+
+### Generated methods
+
+Generated methods take a request message or field keyword arguments. Setting
+two members of one `oneof` raises `TypeError` instead of keeping the last.
+
+### LocalMock
+
+`$match` supports equality and `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`,
+`$in`, `$nin` and `$exists` on top-level fields, alongside `$project`, `$sort`,
+`$skip` and `$limit`. The [testing guide](guides/testing.md) now covers
+`seed_collection_slug()`, `seed_query()`, `records()`, `reset()`,
+`include_unreleased` and stubs that raise.
+
+### Generated method names and arguments
+
+Changes since `6.0.0a1` to how the service layer names things:
+
+| Before | After |
+| --- | --- |
+| `cf.auth.azure.azure_auth_o_auth_acs` | `cf.auth.azure.azure_auth_oauth_acs` |
+| `cf.auth.azure.azure_auth_samlacs` | `cf.auth.azure.azure_auth_saml_acs` |
+| `cf.notifier.direct.send_whats_app_message` | `cf.notifier.direct.send_whatsapp_message` |
+| `cf.notifier.direct.send_whats_app_template` | `cf.notifier.direct.send_whatsapp_template` |
+
+A request field named `timeout`, `metadata`, `location`, `request`, `requests`
+or `self`, or named after a Python keyword such as `from`, is now a keyword
+argument with a trailing underscore. `cf.client.actionflow_task.create(timeout_=300)`
+sets the task's `timeout` field, while `timeout=` stays the gRPC deadline.
+Before, those fields could only be set through a prebuilt request message.
+
+`iter_*` methods request page 1, 2, 3 and so on, and stop at the first empty
+page or once the requested page reaches `pagination.pages`, so a server that
+echoes `page=0` or ignores the requested page no longer loops forever.
+
+### Documentation
+
+The `Clappform` constructor documents every argument in the
+[Client reference](reference/client.md), and the generated per-RPC reference is
+split into one page per API family.
+
 ## 6.0.0 (alpha)
 
 ### Dependencies
@@ -34,7 +156,7 @@ these methods no longer exist:
 | Removed | Replacement |
 | --- | --- |
 | `cf.notifier.outbound.send_message` (whole service) | `cf.notifier.direct.send_email` / `send_push` / `send_slack` / `send_teams`, or `cf.notifier.batch.send_batch` |
-| `cf.notifier.whatsapp.send_message` / `send_template` | `cf.notifier.direct.send_whats_app_message` / `send_whats_app_template` |
+| `cf.notifier.whatsapp.send_message` / `send_template` | `cf.notifier.direct.send_whatsapp_message` / `send_whatsapp_template` |
 | `cf.notifier.inbox.get_messages` / `stream_messages` | `cf.notifier.inbox.get_notifications` |
 | `cf.notifier.inbox.set_status` | `cf.notifier.inbox.mark_as_read` / `mark_as_acknowledged` / `bulk_update_status` |
 | `cf.notifier.inbox.send_message` | `cf.notifier.direct.*` or `cf.notifier.policy.send_from_policy` |

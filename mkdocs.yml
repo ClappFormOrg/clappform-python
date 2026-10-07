@@ -98,23 +98,28 @@ nav:
   - Tasks:
       # The Cookbook is the fast, copy-paste action index; the guides below it
       # are the deeper "how it works" for each area. Cross-linked both ways.
-      - All recipes (Cookbook): guides/cookbook.md
-      - Read & query data: guides/dataframes.md
+      - Cookbook: guides/cookbook.md
+      - DataFrame flows: guides/dataframes.md
       - Performance & large datasets: guides/performance.md
       - Writing actionflow tasks: guides/actionflow-scripts.md
       - Actionflows & listings: guides/actionflows-and-listings.md
       - Files, Excel & storage: guides/files-and-storage.md
       - Multi-cluster & multi-tenant: guides/multi-cluster.md
-      - Errors & retries: guides/errors-and-retries.md
+      - Error handling & retries: guides/errors-and-retries.md
       - Testing with LocalMock: guides/testing.md
   - Concepts:
       - Key concepts & glossary: guides/concepts.md
       - Security & credentials: guides/security.md
-  - Troubleshooting: guides/troubleshooting.md
+  - Troubleshooting & FAQ: guides/troubleshooting.md
   - Reference:
       - Client: reference/client.md
       - DataFrame surface: reference/dataframes.md
       - Errors: reference/errors.md
       - Testing: reference/testing.md
-      - API families: reference/api-families.md
+      - API families:
+          - API families: reference/api-families.md
+          - "Data: cf.data": reference/api-data.md
+          - "Client: cf.client": reference/api-client.md
+          - "Authoriser: cf.auth": reference/api-auth.md
+          - "Notifier: cf.notifier": reference/api-notifier.md
   - Changelog: changelog.md

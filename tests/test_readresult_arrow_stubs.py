@@ -1,7 +1,7 @@
 """Reserved Arrow output surfaces on ``ReadResult``.
 
 The Arrow read path is server-gated: this client version always reads JSON, so
-``to_arrow`` / ``to_polars`` / ``__arrow_c_stream__`` exist but do not yet
+``to_arrow`` / ``to_polars`` exist but do not yet
 produce a result. They must fail *loudly and helpfully* rather than as a bare
 ``AttributeError``:
 
@@ -64,12 +64,6 @@ def test_to_polars_without_polars_points_at_the_extra(monkeypatch: pytest.Monkey
         _empty_result().to_polars()
 
 
-def test_arrow_stream_without_pyarrow_points_at_the_extra(monkeypatch: pytest.MonkeyPatch) -> None:
-    _hide_module(monkeypatch, "pyarrow")
-    with pytest.raises(ClappformError, match=r"clappform\[arrow\]"):
-        _empty_result().__arrow_c_stream__()
-
-
 # --- dependency-present branch: server not ready yet ------------------------
 
 def test_to_arrow_with_pyarrow_reports_server_not_ready(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -84,17 +78,18 @@ def test_to_polars_with_polars_reports_server_not_ready(monkeypatch: pytest.Monk
         _empty_result().to_polars()
 
 
-def test_arrow_stream_with_pyarrow_reports_not_ready(monkeypatch: pytest.MonkeyPatch) -> None:
-    _provide_module(monkeypatch, "pyarrow")
-    with pytest.raises(NotImplementedError, match="not available yet"):
-        _empty_result().__arrow_c_stream__()
-
-
 # --- reserved, not AttributeError -------------------------------------------
 
 def test_reserved_methods_exist_rather_than_attributeerror() -> None:
     # The whole point of Phase 0: the names are present so callers discover the
     # capability and get a clear message, never a bare AttributeError.
     result = _empty_result()
-    for name in ("to_arrow", "to_polars", "__arrow_c_stream__"):
+    for name in ("to_arrow", "to_polars"):
         assert callable(getattr(result, name))
+
+
+def test_arrow_capsule_protocol_is_not_advertised() -> None:
+    # Polars, DuckDB and pyarrow probe for __arrow_c_stream__ and call it when
+    # present. A stub that can only raise would break them; they must fall
+    # back to iterating the records instead.
+    assert not hasattr(_empty_result(), "__arrow_c_stream__")

@@ -174,3 +174,75 @@ def test_retry_policy_service_config_defaults() -> None:
     cfg = RetryPolicy().service_config()
     assert '"maxAttempts": 4' in cfg
     assert "UNAVAILABLE" in cfg
+
+
+def test_retry_policy_accepts_seconds_and_strings() -> None:
+    import json
+
+    cfg = json.loads(RetryPolicy(initial_backoff=0.5, max_backoff="3s").service_config())
+    policy = cfg["methodConfig"][0]["retryPolicy"]
+    assert policy["initialBackoff"] == "0.5s"
+    assert policy["maxBackoff"] == "3s"
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"max_attempts": 6},
+        {"max_attempts": 1},
+        {"initial_backoff": 0},
+        {"max_backoff": "soon"},
+        {"backoff_multiplier": 0},
+        {"retryable_status_codes": ()},
+    ],
+)
+def test_retry_policy_rejects_values_grpc_would_clamp_or_refuse(kwargs) -> None:
+    from clappform import ConfigurationError
+
+    with pytest.raises(ConfigurationError):
+        RetryPolicy(**kwargs)
+
+
+@pytest.mark.parametrize(
+    ("method", "retried"),
+    [
+        ("Get", True),
+        ("GetAll", True),
+        ("ReadAll", True),
+        ("ListProcesses", True),
+        ("AggregateStream", True),
+        ("DownloadFile", True),
+        ("Health", True),
+        # A read verb must end the word: these only start with the same letters.
+        ("Getaway", False),
+        ("Readmit", False),
+        ("InsertMany", False),
+        ("SyncManyByField", False),
+        ("Start", False),
+        ("ImportApp", False),
+        ("Create", False),
+        ("Delete", False),
+    ],
+)
+def test_only_read_methods_match_the_retry_allowlist(method, retried) -> None:
+    from clappform._transport import READ_METHOD
+
+    assert bool(READ_METHOD.match(method)) is retried
+
+
+def test_translating_iterator_cancels_the_call_when_closed_early() -> None:
+    # Deterministic cancellation, independent of when the interpreter collects
+    # the abandoned gRPC call object.
+    class FakeCall:
+        cancelled = False
+
+        def __iter__(self):
+            yield from (1, 2, 3)
+
+        def cancel(self) -> None:
+            FakeCall.cancelled = True
+
+    stream = GrpcTransport._translating_iterator(FakeCall(), {}, None)
+    assert next(stream) == 1
+    stream.close()
+    assert FakeCall.cancelled

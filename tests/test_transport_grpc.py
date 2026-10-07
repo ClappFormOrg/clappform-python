@@ -6,6 +6,7 @@ and error translation. Only the data endpoint is overridden; nothing here
 touches the network beyond 127.0.0.1.
 """
 
+import threading
 import time
 from concurrent import futures
 
@@ -20,6 +21,7 @@ from clappform import (
     TransientError,
 )
 from clappform._transport import RetryPolicy
+from clappform.gen.clappform.client.v1.actionflow import actionflow_pb2, actionflow_pb2_grpc
 from clappform.gen.clappform.data.v1.aggregate import aggregate_pb2, aggregate_pb2_grpc
 from clappform.gen.clappform.data.v1.insert import insert_pb2, insert_pb2_grpc
 
@@ -38,6 +40,14 @@ class InsertServicer(insert_pb2_grpc.InsertManagementServicer):
             time.sleep(0.5)
         return insert_pb2.InsertResponse(processed_count=1, oids=["oid-1"])
 
+    def InsertMany(self, request_iterator, context):
+        for _request in request_iterator:
+            yield insert_pb2.InsertResponse(processed_count=1)
+
+
+# Set by the "endless" stream once the server sees the client cancel it.
+ENDLESS_CANCELLED = threading.Event()
+
 
 class AggregateServicer(aggregate_pb2_grpc.AggregateManagementServicer):
     def AggregateStream(self, request, context):
@@ -47,7 +57,17 @@ class AggregateServicer(aggregate_pb2_grpc.AggregateManagementServicer):
             # iteration onto the typed hierarchy, not just errors at call time.
             yield aggregate_pb2.AggregateResponse(data=b"[1]", total=3)
             context.abort(grpc.StatusCode.NOT_FOUND, "collection vanished mid-scan")
+        if request.collection == "endless":
+            context.add_callback(ENDLESS_CANCELLED.set)
+            for _ in range(500):
+                if not context.is_active():
+                    return
+                yield aggregate_pb2.AggregateResponse(data=b"[1]")
+                time.sleep(0.01)
+            return
         for chunk in (b"[1]", b"[2]", b"[3]"):
+            if request.collection == "slow-stream":
+                time.sleep(0.15)
             yield aggregate_pb2.AggregateResponse(data=chunk, total=3)
 
 
@@ -184,3 +204,122 @@ def test_retry_policy_service_config_shape() -> None:
     policy = config["methodConfig"][0]["retryPolicy"]
     assert policy["maxAttempts"] == 3
     assert policy["retryableStatusCodes"] == ["UNAVAILABLE"]
+
+
+def test_retry_policy_covers_reads_only() -> None:
+    import json
+
+    config = json.loads(RetryPolicy().service_config())
+    assert len(config["methodConfig"]) == 1
+    names = {(n["service"], n["method"]) for n in config["methodConfig"][0]["name"]}
+    assert ("clappform.data.v1.aggregate.AggregateManagement", "AggregateStream") in names
+    assert ("clappform.client.v1.collection.CollectionManagement", "GetAll") in names
+    assert ("clappform.authoriser.v1.user.UserManagement", "ReadAll") in names
+    for write in (
+        ("clappform.data.v1.insert.InsertManagement", "InsertMany"),
+        ("clappform.data.v1.sync.SyncManagement", "SyncManyByField"),
+        ("clappform.client.v1.actionflow.ActionflowManagement", "Start"),
+        ("clappform.client.v1.transfer.TransferManagement", "ImportApp"),
+    ):
+        assert write not in names
+
+
+class FlakyActionflowServicer(actionflow_pb2_grpc.ActionflowManagementServicer):
+    """Fails each RPC's first attempt with UNAVAILABLE and counts attempts."""
+
+    def __init__(self) -> None:
+        self.attempts: dict[str, int] = {}
+
+    def _attempt(self, name: str, context) -> None:
+        self.attempts[name] = self.attempts.get(name, 0) + 1
+        if self.attempts[name] == 1:
+            context.abort(grpc.StatusCode.UNAVAILABLE, "dropped")
+
+    def Get(self, request, context):
+        self._attempt("Get", context)
+        return actionflow_pb2.Actionflow(id=request.id)
+
+    def Start(self, request, context):
+        self._attempt("Start", context)
+        return actionflow_pb2.StartActionflowResponse(uuid="run-1")
+
+
+@pytest.fixture
+def flaky_actionflows():
+    servicer = FlakyActionflowServicer()
+    grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
+    actionflow_pb2_grpc.add_ActionflowManagementServicer_to_server(servicer, grpc_server)
+    port = grpc_server.add_insecure_port("127.0.0.1:0")
+    grpc_server.start()
+    client = Clappform(
+        "acme", "qa", api_key="k", endpoints={"client": f"127.0.0.1:{port}"},
+        insecure=True, timeout=5.0, retries=RetryPolicy(max_attempts=3),
+    )
+    yield client, servicer
+    client.close()
+    grpc_server.stop(grace=None)
+
+
+def test_unavailable_read_outside_the_data_plane_is_retried(flaky_actionflows) -> None:
+    cf, servicer = flaky_actionflows
+    assert cf.client.actionflow.get(id="af-1").id == "af-1"
+    assert servicer.attempts["Get"] == 2
+
+
+def test_unavailable_action_is_not_retried(flaky_actionflows) -> None:
+    # The server may have started the flow before the connection dropped, so a
+    # retry could run it twice; the caller gets the failure instead.
+    cf, servicer = flaky_actionflows
+    with pytest.raises(TransientError):
+        cf.client.actionflow.start(id="af-1")
+    assert servicer.attempts["Start"] == 1
+
+
+# --- deadlines, cancellation and request-side failures -------------------------
+
+def _short_deadline_client(server) -> Clappform:
+    address, _servicer = server
+    return Clappform(
+        "acme", "qa", api_key="k", endpoints={"data": address}, insecure=True, timeout=0.2
+    )
+
+
+def test_streams_have_no_default_deadline(server) -> None:
+    # 3 chunks at 0.15s each outlast the 0.2s unary deadline; a stream must not
+    # inherit it, or every large read fails after `timeout` seconds.
+    with _short_deadline_client(server) as cf:
+        chunks = list(cf.data.aggregate.aggregate_stream(collection="slow-stream"))
+        assert len(chunks) == 3
+        with pytest.raises(TransientError):
+            cf.data.insert.insert_single(collection="slow")
+
+
+def test_per_call_timeout_still_bounds_a_stream(cf) -> None:
+    with pytest.raises(TransientError):
+        list(cf.data.aggregate.aggregate_stream(collection="slow-stream", timeout=0.2))
+
+
+def test_stream_timeout_sets_a_client_wide_stream_deadline(server) -> None:
+    address, _servicer = server
+    with Clappform(
+        "acme", "qa", api_key="k", endpoints={"data": address}, insecure=True,
+        stream_timeout=0.2,
+    ) as cf, pytest.raises(TransientError):
+        list(cf.data.aggregate.aggregate_stream(collection="slow-stream"))
+
+
+def test_abandoned_stream_is_cancelled_on_the_server(cf) -> None:
+    ENDLESS_CANCELLED.clear()
+    stream = cf.data.aggregate.aggregate_stream(collection="endless")
+    next(stream)
+    stream.close()
+    assert ENDLESS_CANCELLED.wait(2), "server never saw the call end"
+
+
+def test_request_producer_error_reaches_the_caller(cf) -> None:
+    def requests():
+        yield insert_pb2.InsertRequest(collection="c", data=b"[]")
+        raise RuntimeError("boom in producer")
+
+    with pytest.raises(RuntimeError, match="boom in producer"):
+        list(cf.data.insert.insert_many(requests()))

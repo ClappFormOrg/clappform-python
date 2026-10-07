@@ -22,12 +22,16 @@ handling from the caller.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+import warnings
+from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Sequence
 from typing import TYPE_CHECKING, Any
 
 from clappform import _codec
 from clappform._codec import Record
 from clappform._errors import ClappformError, NotFoundError
+from clappform.gen.clappform.data.v1.insert import insert_pb2
+from clappform.gen.clappform.data.v1.sync import sync_pb2
+from clappform.gen.clappform.data.v1.update import update_pb2
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -35,6 +39,10 @@ if TYPE_CHECKING:
     from clappform._client import Clappform
 
 ProgressCallback = Callable[[int], None]
+
+# A chunk stream the read machinery can close (cancelling the call) when the
+# caller stops early.
+_Chunks = Generator[tuple[_codec.ChunkFormat, bytes], None, None]
 
 
 def _require_pandas() -> Any:
@@ -85,13 +93,25 @@ _ARROW_NOT_READY = (
 )
 
 
-def _records_from_frame(df: pd.DataFrame) -> list[Record]:
+def _records_from_frame(df: pd.DataFrame, op: str) -> list[Record]:
     """Turn a DataFrame into plain records (the codec's input form).
 
     ``to_dict("records")`` yields one dict per row with native Python scalars;
     the codec then normalises ``NaN``/``NaT``/datetimes on encode, so nothing
     pandas-specific leaks past this boundary.
+
+    Records carry columns only, so the index is not written. An unnamed index
+    is positional (a filter's leftover row labels) and is dropped. A named one
+    (``set_index("order_id")``, a ``groupby`` result) holds data, so it is
+    refused rather than lost.
     """
+    named = [name for name in df.index.names if name is not None]
+    if named:
+        raise ValueError(
+            f"{op}() writes columns only and would drop the index {named}; call "
+            f"df.reset_index() to write it as columns, or df.reset_index(drop=True) "
+            f"to discard it"
+        )
     return df.to_dict("records")
 
 
@@ -104,12 +124,10 @@ class ReadResult:
     consumed once, so iterate or convert exactly one way. Materialising the
     same result twice raises rather than silently returning an empty set.
 
-    Shipping this now (rather than returning a DataFrame straight from
-    ``read()``) is deliberate: ``to_polars`` / ``to_arrow`` / the Arrow
-    PyCapsule protocol are reserved as methods here (they raise until server
-    Arrow support ships) so they can light up as a purely additive change, and
-    the batch-wise internals let that future Arrow reader map one Arrow batch
-    per gRPC chunk.
+    ``to_arrow`` / ``to_polars`` are reserved and raise ``NotImplementedError``
+    until server Arrow support ships. The Arrow PyCapsule protocol
+    (``__arrow_c_stream__``) is deliberately *not* defined: Polars, DuckDB and
+    pyarrow probe for it and would call a stub that can only raise.
     """
 
     __slots__ = ("_chunks", "_consumed")
@@ -175,18 +193,6 @@ class ReadResult:
         _require_polars()
         raise NotImplementedError(_ARROW_NOT_READY)
 
-    def __arrow_c_stream__(self, requested_schema: object | None = None) -> Any:
-        """Arrow PyCapsule stream interface (reserved).
-
-        Arrow-native consumers (Polars, DuckDB, ...) pull results directly
-        with no clappform glue. Requires ``pip install clappform[arrow]``.
-
-        Reserved for the v6 Arrow read path; raises until server Arrow support
-        ships.
-        """
-        _require_pyarrow()
-        raise NotImplementedError(_ARROW_NOT_READY)
-
 
 class _AggregateReader:
     """Shared read machinery for collection and saved-query handles.
@@ -209,7 +215,7 @@ class _AggregateReader:
         query: str | None,
         batch_size: int | None,
         timeout: float | None,
-    ) -> Iterator[tuple[_codec.ChunkFormat, bytes]]:
+    ) -> _Chunks:
         responses = self._client.data.aggregate.aggregate_stream(
             collection=collection,
             pipeline=pipeline,
@@ -218,14 +224,21 @@ class _AggregateReader:
             location=self._location,
             timeout=timeout,
         )
-        for response in responses:
-            # The stream carries only JSON today; the codec branches on the
-            # format so an Arrow chunk type slots in without changing callers.
-            yield _codec.ChunkFormat.JSON, response.data
+        try:
+            for response in responses:
+                # The stream carries only JSON today; the codec branches on the
+                # format so an Arrow chunk type slots in without changing callers.
+                yield _codec.ChunkFormat.JSON, response.data
+        finally:
+            # Closing the transport's iterator cancels the call when the
+            # caller stopped reading before the end.
+            close = getattr(responses, "close", None)
+            if close is not None:
+                close()
 
     def _read_reresolving(
         self,
-        open_stream: Callable[[], Iterator[tuple[_codec.ChunkFormat, bytes]]],
+        open_stream: Callable[[], _Chunks],
         on_stale: Callable[[], None],
     ) -> Iterator[tuple[_codec.ChunkFormat, bytes]]:
         """Open a read stream, re-resolving once if the id is stale.
@@ -253,8 +266,11 @@ class _AggregateReader:
             on_stale()
             yield from open_stream()
             return
-        yield first
-        yield from stream
+        try:
+            yield first
+            yield from stream
+        finally:
+            stream.close()
 
 
 class CollectionHandle(_AggregateReader):
@@ -373,7 +389,7 @@ class CollectionHandle(_AggregateReader):
         nothing to re-resolve.
         """
 
-        def _open() -> Iterator[tuple[_codec.ChunkFormat, bytes]]:
+        def _open() -> _Chunks:
             return self._stream(
                 collection=self.collection_id,
                 pipeline=pipeline,
@@ -400,27 +416,46 @@ class CollectionHandle(_AggregateReader):
     ) -> int:
         """Insert every row of ``df`` as new documents. Returns rows written.
 
-        Uploads stream in chunks of ``chunk_rows`` (a failed chunk is
-        retryable at the flow level, not a whole-frame resend). ``progress`` is
-        invoked with the cumulative row count after each chunk, handy for a
-        notebook progress bar.
+        Rows stream to the server in chunks of ``chunk_rows`` over one
+        ``InsertMany`` call, and the server acknowledges each chunk.
+        ``progress`` is called with the cumulative count of *acknowledged*
+        rows after each chunk, handy for a notebook progress bar.
+
+        ``append`` is not idempotent. If it fails partway, the chunks already
+        acknowledged stay inserted, and running it again inserts them again.
+        The raised error's ``rows_written`` says how many rows the server
+        acknowledged, i.e. ``df.iloc[err.rows_written:]`` is what is left.
+        For a load you may need to re-run, use :meth:`upsert` on a business
+        key instead.
+
+        The frame must not carry an ``_id`` column: the server assigns ids and
+        rejects inserts that bring their own. To write rows read from a
+        collection back by ``_id``, use :meth:`update`.
         """
-        insert_pb2 = _import("clappform.gen.clappform.data.v1.insert.insert_pb2")
-        records = _records_from_frame(df)
+        if "_id" in df.columns:
+            raise ValueError(
+                "append() inserts new documents and the server rejects rows that "
+                "carry an _id; drop it first with df.drop(columns='_id'), or use "
+                "update() to write rows back by _id"
+            )
+        records = _records_from_frame(df, "append")
+        collection = self.collection_id
 
         def _requests() -> Iterator[Any]:
-            written = 0
-            for chunk in _codec.chunk_records(records, chunk_rows):
-                yield insert_pb2.InsertRequest(collection=self.collection_id, data=chunk)
-                written += _rows_in(chunk)
-                if progress is not None:
-                    progress(written)
+            for payload, _rows in _codec.chunk_records(records, chunk_rows):
+                yield insert_pb2.InsertRequest(collection=collection, data=payload)
 
         total = 0
-        for response in self._client.data.insert.insert_many(
-            _requests(), location=self._location, timeout=timeout
-        ):
-            total += response.processed_count
+        try:
+            for response in self._client.data.insert.insert_many(
+                _requests(), location=self._location, timeout=timeout
+            ):
+                total += response.processed_count
+                if progress is not None:
+                    progress(total)
+        except ClappformError as exc:
+            exc.rows_written = total
+            raise
         return total
 
     def update(
@@ -433,19 +468,40 @@ class CollectionHandle(_AggregateReader):
     ) -> int:
         """Update existing documents, matched by the ``on`` column (default ``_id``).
 
-        Every row must carry the ``on`` key. Because ``read()`` keeps ``_id`` as
-        a column, the common case (read, mutate other columns, ``update(df)``)
-        needs no argument at all.
+        Each row's other columns are set on the matched document; fields the
+        frame does not carry are left alone. ``on="_id"`` matches on the
+        document id (``UpdateMany``); any other column matches on that field's
+        value (``UpdateManyByField``). Every row must have a value for ``on``.
+        Because ``read()`` keeps ``_id`` as a column, the common case (read,
+        mutate other columns, ``update(df)``) needs no argument at all.
+
+        Returns the number of rows sent; the server reports no match count.
+        Raises :class:`~clappform.NotSupportedError` on a cluster that does
+        not serve these RPCs yet.
         """
-        update_pb2 = _import("clappform.gen.clappform.data.v1.update.update_pb2")
-        records = _records_from_frame(df)
+        records = _records_from_frame(df, "update")
         _require_key(records, on, "update")
+        collection = self.collection_id
+        chunks = _codec.chunk_records(records, chunk_rows)
 
-        def _requests() -> Iterator[Any]:
-            for chunk in _codec.chunk_records(records, chunk_rows):
-                yield update_pb2.UpdateRequestByOid(collection=self.collection_id, data=chunk)
-
-        self._client.data.update.update_many(_requests(), location=self._location, timeout=timeout)
+        if on == "_id":
+            by_oid = (
+                update_pb2.UpdateRequestByOid(collection=collection, data=payload)
+                for payload, _rows in chunks
+            )
+            self._client.data.update.update_many(
+                by_oid, location=self._location, timeout=timeout
+            )
+        else:
+            by_field = (
+                update_pb2.UpdateRequestByField(
+                    collection=collection, data=payload, field_name=on
+                )
+                for payload, _rows in chunks
+            )
+            self._client.data.update.update_many_by_field(
+                by_field, location=self._location, timeout=timeout
+            )
         return len(records)
 
     def upsert(
@@ -458,26 +514,40 @@ class CollectionHandle(_AggregateReader):
     ) -> int:
         """Insert-or-update every row keyed on the business column ``on``.
 
-        Uses ``SyncManyByField``: rows whose ``on`` value already exists are
-        updated, the rest inserted. ``on`` is required, because an upsert has no
-        default key the way :meth:`update` does.
+        Uses ``SyncManyByField``: a document whose ``on`` value matches a row is
+        *replaced* by that row (fields the frame does not carry are dropped;
+        the document keeps its ``_id``), and unmatched rows are inserted. So
+        re-running the same upsert converges instead of duplicating. Send
+        every field the documents should keep. ``on`` is required, because an upsert has no
+        default key the way :meth:`update` does, and every row needs a value
+        for it. Returns the number of rows sent.
+
+        The frame must not carry an ``_id`` column. The server writes a row's
+        ``_id`` into the replacement document, and ``read()`` returns ``_id``
+        as a string, which does not equal the stored ObjectId: a matched row
+        fails as an altered ``_id`` and an unmatched row is inserted under a
+        string id. Drop it with ``df.drop(columns="_id")``.
         """
-        sync_pb2 = _import("clappform.gen.clappform.data.v1.sync.sync_pb2")
-        records = _records_from_frame(df)
+        if "_id" in df.columns:
+            raise ValueError(
+                "upsert() cannot write an _id column: read() returns _id as a string, "
+                "which the server cannot write over the stored ObjectId; drop it with "
+                "df.drop(columns='_id') and key on a business column"
+            )
+        records = _records_from_frame(df, "upsert")
         _require_key(records, on, "upsert")
+        collection = self.collection_id
 
-        def _requests() -> Iterator[Any]:
-            for chunk in _codec.chunk_records(records, chunk_rows):
-                yield sync_pb2.SyncRequestByField(
-                    collection=self.collection_id, data=chunk, field_name=on
-                )
-
+        requests = (
+            sync_pb2.SyncRequestByField(collection=collection, data=payload, field_name=on)
+            for payload, _rows in _codec.chunk_records(records, chunk_rows)
+        )
         self._client.data.sync.sync_many_by_field(
-            _requests(), location=self._location, timeout=timeout
+            requests, location=self._location, timeout=timeout
         )
         return len(records)
 
-    def replace_where(
+    def update_where(
         self,
         where: Mapping[str, Any],
         set_values: Mapping[str, Any],
@@ -487,8 +557,16 @@ class CollectionHandle(_AggregateReader):
         """Set ``set_values`` on every document matching the ``where`` filter.
 
         A single server-side ``$set`` over the matched documents
-        (``UpdateManyByQuery``), so no data is round-tripped through the client.
+        (``UpdateManyByQuery``), so no data is round-tripped through the
+        client. An empty ``where`` would match every document and is refused.
+        Raises :class:`~clappform.NotSupportedError` on a cluster that does
+        not serve this RPC yet.
         """
+        if not where:
+            raise ValueError(
+                "where={} matches every document; pass a filter that selects the "
+                "documents to update"
+            )
         self._client.data.update.update_many_by_query(
             collection=self.collection_id,
             query=_codec.encode_pipeline(dict(where)),
@@ -496,6 +574,26 @@ class CollectionHandle(_AggregateReader):
             location=self._location,
             timeout=timeout,
         )
+
+    def replace_where(
+        self,
+        where: Mapping[str, Any],
+        set_values: Mapping[str, Any],
+        *,
+        timeout: float | None = None,
+    ) -> None:
+        """Deprecated alias of :meth:`update_where`.
+
+        Renamed because it sets fields (``$set``) rather than replacing
+        documents. Removed before 6.0.0.
+        """
+        warnings.warn(
+            "replace_where() is renamed to update_where(); replace_where() is "
+            "removed before 6.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.update_where(where, set_values, timeout=timeout)
 
     def delete(
         self,
@@ -506,9 +604,12 @@ class CollectionHandle(_AggregateReader):
     ) -> None:
         """Delete documents by ``where`` filter or by explicit ``oids``.
 
-        Exactly one of ``where`` / ``oids`` must be given. To wipe the whole
-        collection use :meth:`clear`, which is explicit by design so a full
-        delete is never an accident of an empty filter.
+        Exactly one of ``where`` / ``oids`` must be given. An empty ``oids``
+        list deletes nothing and makes no call. To wipe the whole collection
+        use :meth:`clear`, which is explicit by design so a full delete is
+        never an accident of an empty filter. ``where=`` raises
+        :class:`~clappform.NotSupportedError` on a cluster that does not serve
+        ``DeleteManyByQuery`` yet.
         """
         if (where is None) == (oids is None):
             raise ValueError("pass exactly one of where= or oids=")
@@ -522,9 +623,12 @@ class CollectionHandle(_AggregateReader):
                 "whole collection explicitly"
             )
         if oids is not None:
+            oid_list = list(oids)
+            if not oid_list:
+                return
             self._client.data.delete.delete_many_by_oids(
                 collection=self.collection_id,
-                oids=list(oids),
+                oids=oid_list,
                 location=self._location,
                 timeout=timeout,
             )
@@ -592,7 +696,7 @@ class QueryHandle(_AggregateReader):
     ) -> Iterator[tuple[_codec.ChunkFormat, bytes]]:
         """Stream chunks, re-resolving the query once on a stale UUID."""
 
-        def _open() -> Iterator[tuple[_codec.ChunkFormat, bytes]]:
+        def _open() -> _Chunks:
             return self._stream(
                 collection=None,
                 pipeline=None,
@@ -611,20 +715,12 @@ class QueryHandle(_AggregateReader):
 # -- small helpers -------------------------------------------------------
 
 
-def _import(module: str) -> Any:
-    """Import a generated pb2 module by dotted path (kept lazy and local)."""
-    import importlib
-
-    return importlib.import_module(module)
-
-
-def _rows_in(chunk: bytes) -> int:
-    """Count the records a JSON chunk carries (for progress reporting)."""
-    return len(_codec.bytes_to_records(chunk))
-
-
 def _require_key(records: list[Record], key: str, op: str) -> None:
-    """Fail fast if any record lacks the join key an update/upsert needs."""
-    for record in records:
+    """Fail fast if any record lacks a value for the join key an update/upsert needs."""
+    for index, record in enumerate(records):
         if key not in record:
             raise ValueError(f"{op} keyed on {key!r} but a row is missing that column")
+        if _codec.is_missing(record[key]):
+            raise ValueError(
+                f"{op} keyed on {key!r} but row {index} has no value for it (null/NaN)"
+            )
