@@ -21,6 +21,7 @@ from clappform import (
     TransientError,
 )
 from clappform._transport import RetryPolicy
+from clappform.gen.clappform.client.v1.actionflow import actionflow_pb2, actionflow_pb2_grpc
 from clappform.gen.clappform.data.v1.aggregate import aggregate_pb2, aggregate_pb2_grpc
 from clappform.gen.clappform.data.v1.insert import insert_pb2, insert_pb2_grpc
 
@@ -203,6 +204,75 @@ def test_retry_policy_service_config_shape() -> None:
     policy = config["methodConfig"][0]["retryPolicy"]
     assert policy["maxAttempts"] == 3
     assert policy["retryableStatusCodes"] == ["UNAVAILABLE"]
+
+
+def test_retry_policy_covers_reads_only() -> None:
+    import json
+
+    config = json.loads(RetryPolicy().service_config())
+    assert len(config["methodConfig"]) == 1
+    names = {(n["service"], n["method"]) for n in config["methodConfig"][0]["name"]}
+    assert ("clappform.data.v1.aggregate.AggregateManagement", "AggregateStream") in names
+    assert ("clappform.client.v1.collection.CollectionManagement", "GetAll") in names
+    assert ("clappform.authoriser.v1.user.UserManagement", "ReadAll") in names
+    for write in (
+        ("clappform.data.v1.insert.InsertManagement", "InsertMany"),
+        ("clappform.data.v1.sync.SyncManagement", "SyncManyByField"),
+        ("clappform.client.v1.actionflow.ActionflowManagement", "Start"),
+        ("clappform.client.v1.transfer.TransferManagement", "ImportApp"),
+    ):
+        assert write not in names
+
+
+class FlakyActionflowServicer(actionflow_pb2_grpc.ActionflowManagementServicer):
+    """Fails each RPC's first attempt with UNAVAILABLE and counts attempts."""
+
+    def __init__(self) -> None:
+        self.attempts: dict[str, int] = {}
+
+    def _attempt(self, name: str, context) -> None:
+        self.attempts[name] = self.attempts.get(name, 0) + 1
+        if self.attempts[name] == 1:
+            context.abort(grpc.StatusCode.UNAVAILABLE, "dropped")
+
+    def Get(self, request, context):
+        self._attempt("Get", context)
+        return actionflow_pb2.Actionflow(id=request.id)
+
+    def Start(self, request, context):
+        self._attempt("Start", context)
+        return actionflow_pb2.StartActionflowResponse(uuid="run-1")
+
+
+@pytest.fixture
+def flaky_actionflows():
+    servicer = FlakyActionflowServicer()
+    grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
+    actionflow_pb2_grpc.add_ActionflowManagementServicer_to_server(servicer, grpc_server)
+    port = grpc_server.add_insecure_port("127.0.0.1:0")
+    grpc_server.start()
+    client = Clappform(
+        "acme", "qa", api_key="k", endpoints={"client": f"127.0.0.1:{port}"},
+        insecure=True, timeout=5.0, retries=RetryPolicy(max_attempts=3),
+    )
+    yield client, servicer
+    client.close()
+    grpc_server.stop(grace=None)
+
+
+def test_unavailable_read_outside_the_data_plane_is_retried(flaky_actionflows) -> None:
+    cf, servicer = flaky_actionflows
+    assert cf.client.actionflow.get(id="af-1").id == "af-1"
+    assert servicer.attempts["Get"] == 2
+
+
+def test_unavailable_action_is_not_retried(flaky_actionflows) -> None:
+    # The server may have started the flow before the connection dropped, so a
+    # retry could run it twice; the caller gets the failure instead.
+    cf, servicer = flaky_actionflows
+    with pytest.raises(TransientError):
+        cf.client.actionflow.start(id="af-1")
+    assert servicer.attempts["Start"] == 1
 
 
 # --- deadlines, cancellation and request-side failures -------------------------

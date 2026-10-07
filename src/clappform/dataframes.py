@@ -93,13 +93,25 @@ _ARROW_NOT_READY = (
 )
 
 
-def _records_from_frame(df: pd.DataFrame) -> list[Record]:
+def _records_from_frame(df: pd.DataFrame, op: str) -> list[Record]:
     """Turn a DataFrame into plain records (the codec's input form).
 
     ``to_dict("records")`` yields one dict per row with native Python scalars;
     the codec then normalises ``NaN``/``NaT``/datetimes on encode, so nothing
     pandas-specific leaks past this boundary.
+
+    Records carry columns only, so the index is not written. An unnamed index
+    is positional (a filter's leftover row labels) and is dropped. A named one
+    (``set_index("order_id")``, a ``groupby`` result) holds data, so it is
+    refused rather than lost.
     """
+    named = [name for name in df.index.names if name is not None]
+    if named:
+        raise ValueError(
+            f"{op}() writes columns only and would drop the index {named}; call "
+            f"df.reset_index() to write it as columns, or df.reset_index(drop=True) "
+            f"to discard it"
+        )
     return df.to_dict("records")
 
 
@@ -426,7 +438,7 @@ class CollectionHandle(_AggregateReader):
                 "carry an _id; drop it first with df.drop(columns='_id'), or use "
                 "update() to write rows back by _id"
             )
-        records = _records_from_frame(df)
+        records = _records_from_frame(df, "append")
         collection = self.collection_id
 
         def _requests() -> Iterator[Any]:
@@ -467,7 +479,7 @@ class CollectionHandle(_AggregateReader):
         Raises :class:`~clappform.NotSupportedError` on a cluster that does
         not serve these RPCs yet.
         """
-        records = _records_from_frame(df)
+        records = _records_from_frame(df, "update")
         _require_key(records, on, "update")
         collection = self.collection_id
         chunks = _codec.chunk_records(records, chunk_rows)
@@ -509,8 +521,20 @@ class CollectionHandle(_AggregateReader):
         every field the documents should keep. ``on`` is required, because an upsert has no
         default key the way :meth:`update` does, and every row needs a value
         for it. Returns the number of rows sent.
+
+        The frame must not carry an ``_id`` column. The server writes a row's
+        ``_id`` into the replacement document, and ``read()`` returns ``_id``
+        as a string, which does not equal the stored ObjectId: a matched row
+        fails as an altered ``_id`` and an unmatched row is inserted under a
+        string id. Drop it with ``df.drop(columns="_id")``.
         """
-        records = _records_from_frame(df)
+        if "_id" in df.columns:
+            raise ValueError(
+                "upsert() cannot write an _id column: read() returns _id as a string, "
+                "which the server cannot write over the stored ObjectId; drop it with "
+                "df.drop(columns='_id') and key on a business column"
+            )
+        records = _records_from_frame(df, "upsert")
         _require_key(records, on, "upsert")
         collection = self.collection_id
 

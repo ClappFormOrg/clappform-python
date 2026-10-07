@@ -105,6 +105,11 @@ returns the number of rows the server acknowledged.
   server acknowledged before the failure; a chunk in flight at that moment
   may also have been written. For a load you may need to re-run, use
   `upsert(on=...)` on a business key instead.
+- **The index is not written.** Every write sends columns only. An unnamed
+  index, such as the gaps a filter leaves, is dropped. A named index, from
+  `set_index("order_id")` or a `groupby`, holds data, so `append()`,
+  `update()` and `upsert()` raise `ValueError` for it. Call `df.reset_index()`
+  to write it as columns, or `df.reset_index(drop=True)` to discard it.
 
 ## Update existing rows
 
@@ -151,7 +156,10 @@ cross-cluster or external-source syncs (see
 - send whole rows: a field the frame does not carry is gone from the matched
   document afterwards;
 - drop `_id` from a frame you read, with `df.drop(columns="_id")`. The read
-  gives `_id` as a hex string, not the stored id.
+  gives `_id` as a hex string, not the stored ObjectId, and the server writes
+  it into the replacement, so a matched row fails and an unmatched row is
+  inserted under a string id. `upsert()` raises `ValueError` for a frame with
+  an `_id` column.
 
 `upsert()` returns the number of rows sent, and every row needs a value for
 `on`, as with `update()`.

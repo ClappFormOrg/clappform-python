@@ -85,8 +85,8 @@ class Clappform:
             connection. One deadline covers the whole stream, including the
             time your code spends between chunks.
         retries: The :class:`~clappform.RetryPolicy` for ``UNAVAILABLE``
-            failures, or ``None`` to disable retries. Data-plane writes are
-            never retried.
+            failures on reads, or ``None`` to disable retries. Writes and
+            actions such as ``actionflow.start`` are never retried.
         channel_options: Extra gRPC channel arguments, appended after the
             defaults (keepalive every 30s, 64 MiB message limits).
         transport: A replacement transport, such as

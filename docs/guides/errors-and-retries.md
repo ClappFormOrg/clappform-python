@@ -29,7 +29,7 @@ when a [`ReadResult`][clappform.ReadResult] is consumed twice.
 
 **`TransientError`** covers two cases. `UNAVAILABLE` means the server could not
 be reached or dropped the call; the client has already retried it if it was
-not a write (see [Retries](#retries)). `DEADLINE_EXCEEDED` means the call ran
+a read (see [Retries](#retries)). `DEADLINE_EXCEEDED` means the call ran
 past its deadline; it is never retried.
 
 **`ResourceExhaustedError`** usually means one gRPC message passed 64 MiB. Lower
@@ -44,7 +44,7 @@ These come from Python, not the server, and do not derive from
 
 | Exception | Raised when |
 |---|---|
-| `ValueError` | `append()` gets a frame with an `_id` column; `update()` / `upsert()` get a frame missing the `on` column, or a row whose key is null or NaN; `update_where({})` or `delete(where={})`; `delete()` without exactly one of `where=` / `oids=`; `chunk_rows` below 1; a row or pipeline holds `inf` or `-inf` |
+| `ValueError` | `append()` or `upsert()` gets a frame with an `_id` column; `append()`, `update()` or `upsert()` gets a frame with a named index; `update()` / `upsert()` get a frame missing the `on` column, or a row whose key is null or NaN; `update_where({})` or `delete(where={})`; `delete()` without exactly one of `where=` / `oids=`; `chunk_rows` below 1; a row or pipeline holds `inf` or `-inf` |
 | `TypeError` | A value the codec cannot encode (the message names its type); a generated method given both a request message and field keyword arguments, a message of the wrong type, two members of one `oneof`, or a stream item of the wrong type |
 | `NotImplementedError` | `ReadResult.to_arrow()` / `to_polars()`, reserved until the server sends Arrow |
 | `AttributeError` | A name that is not on the object, e.g. `cf.insert`; the message names the family that owns it when there is one |
@@ -78,13 +78,16 @@ support. The default, `clappform.DEFAULT_RETRIES`, makes up to 4 attempts on
 still works). `max_attempts` must be between 2 and 5, because gRPC caps it at
 5; any other value raises `ConfigurationError` rather than being clamped.
 
-!!! warning "Writes are never retried"
-    The data-plane write services (`InsertManagement`, `UpdateManagement`,
-    `SyncManagement` and `DeleteManagement`, listed in
-    `clappform._transport.NON_RETRIED_SERVICES`) run without a retry policy.
-    An `UNAVAILABLE` write may already have been applied, and retrying an
-    `InsertMany` could duplicate rows. gRPC's transparent retry, for a request
-    that never reached the server, still applies.
+!!! warning "Only reads are retried"
+    The policy applies to RPCs whose name starts with a read verb: `Get`,
+    `List`, `Read`, `Describe`, `Aggregate`, `Download`, `Health` or `Preview`
+    (`clappform._transport.READ_METHOD`). Every other RPC, such as
+    `InsertMany`, `SyncManyByField`, `actionflow.start` or
+    `transfer.import_app`, runs without one. An `UNAVAILABLE` write or action
+    may already have been applied: retrying an `InsertMany` could duplicate
+    rows, and retrying a `start` could run the actionflow twice. gRPC's
+    transparent retry, for a request that never reached the server, still
+    applies to every RPC.
 
 ### When `append()` fails partway
 

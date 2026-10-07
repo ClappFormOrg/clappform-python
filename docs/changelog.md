@@ -22,6 +22,18 @@ reports the pinned proto tag at runtime, and `repr(client)` includes it.
   raises `ValueError`.
 - `append()` raises `ValueError` for a frame with an `_id` column, because the
   server rejects inserts that carry one. Drop the column first.
+- `upsert()` raises `ValueError` for a frame with an `_id` column. The server
+  writes the row's `_id` into the replacement document, and the string `_id`
+  that `read()` returns does not equal the stored ObjectId. `LocalMock` rejects
+  a `SyncManyByField` row whose `_id` differs from the matched document's.
+- `append()`, `update()` and `upsert()` raise `ValueError` for a frame with a
+  named index, such as one from `set_index()` or `groupby()`, instead of
+  dropping it. Call `df.reset_index()` first.
+- Only RPCs named for a read (`Get*`, `List*`, `Read*`, `Describe*`,
+  `Aggregate*`, `Download*`, `Health`, `Preview*`) retry `UNAVAILABLE`.
+  Actions such as `actionflow.start` and `transfer.import_app`, and every
+  other write, no longer retry. `clappform._transport.NON_RETRIED_SERVICES` is
+  removed.
 - Streaming calls, which include every DataFrame read and write, have no
   deadline by default. `timeout=` (default 60 s) now applies to unary calls
   only; the new `stream_timeout=` (default `None`) applies to streams. A
@@ -53,9 +65,8 @@ cluster. Use `upsert(on=...)`, `delete(oids=...)` and `clear()`.
 
 ### Writes and retries
 
-- Data-plane writes (`InsertManagement`, `UpdateManagement`, `SyncManagement`,
-  `DeleteManagement`) are never retried, because a retried `UNAVAILABLE` write
-  can apply twice. Other RPCs still retry `UNAVAILABLE`.
+- Writes and actions are never retried, because a retried `UNAVAILABLE`
+  call can apply twice. Reads still retry `UNAVAILABLE`.
 - `append()` reports progress, and returns, the rows the server acknowledged.
   When it fails, the raised `ClappformError` carries `rows_written`.
 - `update(df, on=...)` sends `UpdateMany` for `on="_id"` and

@@ -416,6 +416,57 @@ def test_append_rejects_id_column(cf) -> None:
     assert mock.calls == []
 
 
+def test_upsert_rejects_id_column(cf) -> None:
+    # read() returns _id as a string; the server writes it into the replacement
+    # document, where it no longer equals the stored ObjectId.
+    client, mock = cf
+    _seed_orders(mock)
+    df = client.data.collection(CID).read()
+    mock.calls.clear()
+    with pytest.raises(ValueError, match="drop it with"):
+        client.data.collection(CID).upsert(df, on="order_id")
+    with pytest.raises(ValueError, match="drop it with"):
+        client.data.collection(CID).upsert(df, on="_id")
+    assert mock.calls == []
+
+
+_WRITES = {
+    "append": lambda col, df: col.append(df),
+    "update": lambda col, df: col.update(df, on="amount"),
+    "upsert": lambda col, df: col.upsert(df, on="amount"),
+}
+
+
+@pytest.mark.parametrize("write", sorted(_WRITES))
+def test_writes_refuse_a_named_index(cf, write) -> None:
+    client, mock = cf
+    df = pd.DataFrame([{"order_id": 1, "amount": 5.0}]).set_index("order_id")
+    with pytest.raises(ValueError, match=rf"{write}\(\) .* drop the index \['order_id'\]"):
+        _WRITES[write](client.data.collection(CID), df)
+    assert mock.calls == []
+
+
+def test_writes_refuse_a_groupby_multiindex(cf) -> None:
+    client, mock = cf
+    rows = [
+        {"region": "N", "year": 2025, "amount": 1.0},
+        {"region": "S", "year": 2025, "amount": 2.0},
+    ]
+    df = pd.DataFrame(rows).groupby(["region", "year"]).sum()
+    with pytest.raises(ValueError, match=r"\['region', 'year'\].*reset_index"):
+        client.data.collection(CID).append(df)
+    assert mock.calls == []
+
+
+def test_writes_drop_an_unnamed_index(cf) -> None:
+    # A filter leaves gaps in a positional index; that index holds no data.
+    client, mock = cf
+    mock.seed(CID, [])
+    df = pd.DataFrame([{"n": 1}, {"n": 2}, {"n": 3}])
+    client.data.collection(CID).append(df[df["n"] > 1])
+    assert sorted(r["n"] for r in mock.records(CID)) == [2, 3]
+
+
 def test_append_progress_reports_acknowledged_rows(cf) -> None:
     client, mock = cf
     mock.seed(CID, [])

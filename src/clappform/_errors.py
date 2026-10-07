@@ -93,9 +93,9 @@ class TransientError(ClappformError):
     """The call failed in a way that may succeed if repeated.
 
     ``UNAVAILABLE``: the server could not be reached or dropped the call. Reads
-    and other non-write RPCs were already retried by the client's
-    :class:`~clappform.RetryPolicy`; data-plane writes are never retried
-    automatically, because the server may have applied them.
+    were already retried by the client's :class:`~clappform.RetryPolicy`;
+    writes and actions are never retried automatically, because the server
+    may have applied them.
 
     ``DEADLINE_EXCEEDED``: the call ran past its ``timeout``. It is never
     retried; pass a larger ``timeout=`` to that call.

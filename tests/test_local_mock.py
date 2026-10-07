@@ -276,6 +276,27 @@ def test_upsert_replaces_the_matched_document_like_the_server() -> None:
     assert mock.records(cid) == [{"_id": "a", "key": 1, "status": "new"}]
 
 
+def test_sync_rejects_a_replacement_that_alters_id_like_the_server() -> None:
+    from clappform.gen.clappform.data.v1.sync import sync_pb2
+
+    mock = LocalMock()
+    cid = "11111111-1111-1111-1111-111111111111"
+    mock.seed(cid, [{"_id": "a", "key": 1}])
+
+    def _sync(row):
+        request = sync_pb2.SyncRequestByField(
+            collection=cid, data=_codec.records_to_bytes([row]), field_name="key"
+        )
+        client.data.sync.sync_many_by_field(iter([request]))
+
+    with Clappform("acme", "qa", api_key="k", transport=mock) as client:
+        _sync({"_id": "a", "key": 1, "v": 2})  # the stored _id is accepted
+        with pytest.raises(ClappformError, match="immutable") as excinfo:
+            _sync({"_id": "b", "key": 1, "v": 3})
+    assert excinfo.value.status == "UNKNOWN"
+    assert mock.records(cid) == [{"_id": "a", "key": 1, "v": 2}]
+
+
 def test_closed_mock_raises_configuration_error_like_the_transport() -> None:
     from clappform import ConfigurationError
 

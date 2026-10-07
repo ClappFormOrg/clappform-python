@@ -19,7 +19,8 @@ It offers two layers:
     not, and a saved ``query`` resolves through :meth:`seed_query`),
   - ``InsertSingle``/``InsertMany`` (rows carrying ``_id`` are rejected, as
     the server does),
-  - ``SyncManyByField`` (upsert on a business key),
+  - ``SyncManyByField`` (upsert on a business key; a row whose ``_id``
+    differs from the matched document's is rejected, as the server does),
   - ``DeleteManyByOids`` and ``Clear``.
 
   :meth:`seed_collection_slug` and :meth:`seed_query` register the Client
@@ -532,7 +533,15 @@ def _handle_sync_by_field(
             if target is not None:
                 # The server's SyncManyByField is a ReplaceOne with upsert:
                 # the matched document is replaced whole, keeping its _id.
+                # Mongo refuses a replacement that carries a different _id,
+                # and the server passes that BulkWrite error on as UNKNOWN.
                 oid = target.get("_id")
+                if "_id" in record and record["_id"] != oid:
+                    raise ClappformError(
+                        "the (immutable) field '_id' was found to have been altered",
+                        status="UNKNOWN",
+                        method="/clappform.data.v1.sync.SyncManagement/SyncManyByField",
+                    )
                 target.clear()
                 target.update(record)
                 target["_id"] = oid
