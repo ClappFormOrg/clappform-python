@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import re
 import socket
+import threading
 from collections.abc import Callable
 
 from clappform._errors import ConfigurationError
@@ -42,11 +43,46 @@ _CANONICAL = re.compile(
 Resolver = Callable[[str], str]
 
 
+# socket lookups take no timeout of their own and can stall for the resolver's
+# full retry cycle on a broken network, so discovery bounds the wait.
+DISCOVERY_TIMEOUT = 5.0
+
+
 def _default_resolver(host: str) -> str:
     return socket.gethostbyname_ex(host)[0]
 
 
-def discover_cluster(location: str, *, resolver: Resolver | None = None) -> str:
+def _resolve_with_timeout(resolve: Resolver, host: str, timeout: float) -> str:
+    """Run ``resolve(host)`` on a worker thread, giving up after ``timeout``.
+
+    A lookup that outlives the timeout is abandoned, not interrupted; its
+    daemon thread finishes on its own and the result is discarded.
+    """
+    outcome: list[str] = []
+    failure: list[OSError] = []
+
+    def _run() -> None:
+        try:
+            outcome.append(resolve(host))
+        except OSError as exc:
+            failure.append(exc)
+
+    worker = threading.Thread(target=_run, name="clappform-discovery", daemon=True)
+    worker.start()
+    worker.join(timeout)
+    if failure:
+        raise failure[0]
+    if not outcome:
+        raise TimeoutError(f"no DNS answer within {timeout:g}s")
+    return outcome[0]
+
+
+def discover_cluster(
+    location: str,
+    *,
+    resolver: Resolver | None = None,
+    timeout: float = DISCOVERY_TIMEOUT,
+) -> str:
     """Derive the cluster extension for *location* from its CNAME target.
 
     Returns the extension string: ``""`` for the main cluster,
@@ -64,8 +100,8 @@ def discover_cluster(location: str, *, resolver: Resolver | None = None) -> str:
     host = f"{location}.{BASE_DOMAIN}"
     resolve = resolver or _default_resolver
     try:
-        canonical = resolve(host)
-    except OSError as exc:  # socket.gaierror and friends
+        canonical = _resolve_with_timeout(resolve, host, timeout)
+    except OSError as exc:  # socket.gaierror, TimeoutError and friends
         raise ConfigurationError(
             f"cluster discovery failed: could not resolve {host!r} ({exc}); "
             f"pass cluster= explicitly"

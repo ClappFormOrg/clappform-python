@@ -71,7 +71,25 @@ def build_request(request_cls: type, request: Any, kwargs: dict[str, Any]) -> An
                 f"request must be {request_cls.__name__}, got {type(request).__name__}"
             )
         return request
+    _check_oneofs(request_cls, kwargs)
     return request_cls(**kwargs)
+
+
+def _check_oneofs(request_cls: type, kwargs: dict[str, Any]) -> None:
+    """Reject keyword arguments that set two members of one ``oneof``.
+
+    The message constructor accepts both and silently keeps the last one, so
+    ``create_export(inline=..., saved_query=...)`` would drop ``inline``.
+    Synthetic oneofs (proto3 ``optional``) hold one field and never clash.
+    """
+    descriptor = getattr(request_cls, "DESCRIPTOR", None)
+    for oneof in getattr(descriptor, "oneofs", ()):
+        given = [field.name for field in oneof.fields if field.name in kwargs]
+        if len(given) > 1:
+            raise TypeError(
+                f"{request_cls.__name__}: fields {', '.join(given)} belong to the "
+                f"oneof {oneof.name!r}; pass only one of them"
+            )
 
 
 def ensure_iterable(requests: Iterable[Any], request_cls: type) -> Iterator[Any]:

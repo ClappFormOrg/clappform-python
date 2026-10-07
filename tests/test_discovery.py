@@ -107,3 +107,19 @@ def test_loose_bigip_prefix_is_not_matched() -> None:
 def test_extension_with_digits_is_extracted() -> None:
     resolver = lambda host: "bigip-v2.clappform.com"  # noqa: E731
     assert discover_cluster("acme", resolver=resolver) == "v2"
+
+
+def test_slow_lookup_times_out_with_hint() -> None:
+    import threading
+
+    release = threading.Event()
+
+    def stalled(host: str) -> str:
+        release.wait(5)
+        return "bigip.clappform.com"
+
+    try:
+        with pytest.raises(ConfigurationError, match="pass cluster= explicitly"):
+            discover_cluster("acme", resolver=stalled, timeout=0.05)
+    finally:
+        release.set()
