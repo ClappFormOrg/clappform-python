@@ -6,6 +6,7 @@ and error translation. Only the data endpoint is overridden; nothing here
 touches the network beyond 127.0.0.1.
 """
 
+import threading
 import time
 from concurrent import futures
 
@@ -38,6 +39,14 @@ class InsertServicer(insert_pb2_grpc.InsertManagementServicer):
             time.sleep(0.5)
         return insert_pb2.InsertResponse(processed_count=1, oids=["oid-1"])
 
+    def InsertMany(self, request_iterator, context):
+        for _request in request_iterator:
+            yield insert_pb2.InsertResponse(processed_count=1)
+
+
+# Set by the "endless" stream once the server sees the client cancel it.
+ENDLESS_CANCELLED = threading.Event()
+
 
 class AggregateServicer(aggregate_pb2_grpc.AggregateManagementServicer):
     def AggregateStream(self, request, context):
@@ -47,7 +56,17 @@ class AggregateServicer(aggregate_pb2_grpc.AggregateManagementServicer):
             # iteration onto the typed hierarchy, not just errors at call time.
             yield aggregate_pb2.AggregateResponse(data=b"[1]", total=3)
             context.abort(grpc.StatusCode.NOT_FOUND, "collection vanished mid-scan")
+        if request.collection == "endless":
+            context.add_callback(ENDLESS_CANCELLED.set)
+            for _ in range(500):
+                if not context.is_active():
+                    return
+                yield aggregate_pb2.AggregateResponse(data=b"[1]")
+                time.sleep(0.01)
+            return
         for chunk in (b"[1]", b"[2]", b"[3]"):
+            if request.collection == "slow-stream":
+                time.sleep(0.15)
             yield aggregate_pb2.AggregateResponse(data=chunk, total=3)
 
 
@@ -184,3 +203,53 @@ def test_retry_policy_service_config_shape() -> None:
     policy = config["methodConfig"][0]["retryPolicy"]
     assert policy["maxAttempts"] == 3
     assert policy["retryableStatusCodes"] == ["UNAVAILABLE"]
+
+
+# --- deadlines, cancellation and request-side failures -------------------------
+
+def _short_deadline_client(server) -> Clappform:
+    address, _servicer = server
+    return Clappform(
+        "acme", "qa", api_key="k", endpoints={"data": address}, insecure=True, timeout=0.2
+    )
+
+
+def test_streams_have_no_default_deadline(server) -> None:
+    # 3 chunks at 0.15s each outlast the 0.2s unary deadline; a stream must not
+    # inherit it, or every large read fails after `timeout` seconds.
+    with _short_deadline_client(server) as cf:
+        chunks = list(cf.data.aggregate.aggregate_stream(collection="slow-stream"))
+        assert len(chunks) == 3
+        with pytest.raises(TransientError):
+            cf.data.insert.insert_single(collection="slow")
+
+
+def test_per_call_timeout_still_bounds_a_stream(cf) -> None:
+    with pytest.raises(TransientError):
+        list(cf.data.aggregate.aggregate_stream(collection="slow-stream", timeout=0.2))
+
+
+def test_stream_timeout_sets_a_client_wide_stream_deadline(server) -> None:
+    address, _servicer = server
+    with Clappform(
+        "acme", "qa", api_key="k", endpoints={"data": address}, insecure=True,
+        stream_timeout=0.2,
+    ) as cf, pytest.raises(TransientError):
+        list(cf.data.aggregate.aggregate_stream(collection="slow-stream"))
+
+
+def test_abandoned_stream_is_cancelled_on_the_server(cf) -> None:
+    ENDLESS_CANCELLED.clear()
+    stream = cf.data.aggregate.aggregate_stream(collection="endless")
+    next(stream)
+    stream.close()
+    assert ENDLESS_CANCELLED.wait(2), "server never saw the call end"
+
+
+def test_request_producer_error_reaches_the_caller(cf) -> None:
+    def requests():
+        yield insert_pb2.InsertRequest(collection="c", data=b"[]")
+        raise RuntimeError("boom in producer")
+
+    with pytest.raises(RuntimeError, match="boom in producer"):
+        list(cf.data.insert.insert_many(requests()))

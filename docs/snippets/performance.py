@@ -23,7 +23,7 @@ def build_mock() -> LocalMock:
 def run(transport: LocalMock) -> None:
     from clappform import Clappform
 
-    cf = Clappform(location="acme", cluster="prod", api_key="cf_live_...", transport=transport)
+    cf = Clappform(location="acme", cluster="", api_key="cf_live_...", transport=transport)
 
     with cf:
         events = cf.data.collection("events")
@@ -38,10 +38,9 @@ def run(transport: LocalMock) -> None:
         # --8<-- [end:read-batch-size]
 
         # --8<-- [start:write-progress]
-        # append/update/upsert stream the upload in chunks of chunk_rows. Pass a
-        # progress callback to surface a running count: a notebook progress bar,
-        # a log line, whatever. It's called with the cumulative rows after each
-        # chunk.
+        # append() streams the upload in chunks of chunk_rows. Pass a progress
+        # callback to surface a running count: a notebook progress bar, a log
+        # line. It's called with the cumulative rows the server acknowledged.
         big = pd.DataFrame([{"n": i} for i in range(10_000)])
 
         def on_progress(rows_written: int) -> None:

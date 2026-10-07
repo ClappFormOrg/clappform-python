@@ -11,15 +11,15 @@ the key from a secret store or environment at the call site and pass it in;
 never hard-code it, never commit it:
 
 ```python
-import os
-
-from clappform import Clappform
-
-cf = Clappform(location="acme", api_key=os.environ["CLAPPFORM_API_KEY"])
+--8<-- "security.py:connect-env"
 ```
 
-In an actionflow worker the tenant and key come from the worker's environment;
-see [Running inside an actionflow](actionflow-scripts.md).
+The key travels as `x-api-key` metadata on every call. `repr(cf)` names only
+the credential type, an `ApiKey` prints as `ApiKey(***)`, and error messages do
+not include it.
+
+In an actionflow worker the location and key come from the worker; see
+[Running in an actionflow](actionflow-scripts.md).
 
 !!! danger "Never commit a key"
     A key in a notebook cell, a script literal, or a committed `.env` is a
@@ -29,37 +29,36 @@ see [Running inside an actionflow](actionflow-scripts.md).
 ## Scope keys to what they need
 
 The credential rides on every call from a client, because the client *is* a
-`(cluster, location, credential)` binding. Prefer a key scoped to one tenant and
-the minimum permissions for the job over a broad key reused everywhere: the blast
-radius of a leak is exactly what the key can do.
+`(cluster, location, credential)` binding. Prefer a key scoped to one location
+and the minimum permissions for the job over a broad key reused everywhere: the
+blast radius of a leak is what the key can do. `generate_key()` takes a
+`permissions=` list for that.
 
 ## Rotating a key
 
-Manage keys through the authoriser API (`cf.auth.api_keys`). Generate a
+Manage keys through the authoriser API, `cf.auth.api_key`. Generate a
 replacement, cut over to it, then delete the old one, so a leaked or ageing key
-stops working. `generate_key()` returns the new `APIKey`; `read_all()` lists what
-exists.
+stops working. `generate_key()` returns the new `APIKey`, whose `api_key` field
+is the secret; `iter_read_all()` lists the keys that exist; `delete_key(id=...)`
+revokes one.
 
 ```python
-# Illustrative: talks to a live authoriser.
-new_key = cf.auth.api_keys.generate_key(
-    name="nightly-etl",
-    expiration_date=EPOCH_SECONDS,      # set an expiry; don't mint eternal keys
-)
-# ... store new_key, redeploy jobs to use it, then revoke the old one.
+--8<-- "security.py:rotate"
 ```
 
-Give keys an **expiry** so an unrotated key fails closed rather than living
-forever, and give each job its **own** key so you can rotate one without
-disrupting the rest.
+`expiration_date` is required in practice: the authoriser rejects a date in the
+past, and an unset field is the Unix epoch. Give each job its **own** key so
+you can rotate one without disrupting the rest.
 
 ## Transport security
 
 Connections are TLS by default. The `insecure=True` escape hatch exists only for
-local development against a plaintext endpoint. Never use it against a real
-cluster. Endpoint overrides (`endpoints=`) are for reaching non-standard hosts
-(e.g. a legacy `:50051` cluster), not for disabling transport security.
+local development against a plaintext endpoint, and sends the key unencrypted.
+Never use it against a real cluster. Endpoint overrides (`endpoints=`) are for
+reaching non-standard hosts, such as a local development server or a cluster
+that moved port, not for disabling transport security. The default ports are
+`:50051` for the main cluster and 443 for every other cluster; both use TLS.
 
 See the [Client reference](../reference/client.md) for the constructor's
-security-relevant arguments and the [authoriser reference](../reference/api-families.md)
+security-relevant arguments and the [Authoriser reference](../reference/api-auth.md)
 for the full key-management surface.

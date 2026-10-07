@@ -34,13 +34,14 @@ def run(transport: LocalMock) -> None:
     API_KEY = "cf_live_..."
 
     # --8<-- [start:connect-in-worker]
-    # A task running in the worker is handed its tenant and a key. Nothing is
+    # A task running in the worker is handed its location and a key. Nothing is
     # read from the environment by the library; you pass them in, so pull them
     # from wherever the worker exposes them and construct the client explicitly.
     cf = Clappform(location=TENANT, api_key=API_KEY)
     # --8<-- [end:connect-in-worker]
 
-    cf = Clappform(location=TENANT, cluster="prod", api_key=API_KEY, transport=transport)
+    cf.close()
+    cf = Clappform(location=TENANT, cluster="", api_key=API_KEY, transport=transport)
 
     with cf:
         # --8<-- [start:start-params]
@@ -57,13 +58,15 @@ def run(transport: LocalMock) -> None:
 
         # --8<-- [start:read-write]
         # From there it's the ordinary DataFrame loop; nothing about running in
-        # a worker changes how you read and write collections.
+        # a worker changes how you read and write collections. upsert() keyed on
+        # a business column is safe to repeat if the task runs again.
         orders = cf.data.collection("sales_orders")
         df = orders.read(pipeline=[{"$match": {"status": "open"}}])
         df["amount"] = df["amount"] * 1.1
-        orders.update(df)
+        orders.upsert(df.drop(columns="_id"), on="order_id")
         # --8<-- [end:read-write]
         assert len(df) == 1
+        assert transport.records("sales_orders-id")[0]["amount"] == 10.0 * 1.1
 
 
 if __name__ == "__main__":

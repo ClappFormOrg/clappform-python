@@ -1,9 +1,12 @@
 """Typed exception hierarchy for the Clappform client.
 
-Users never need to import ``grpc`` to handle a failure: every error the
-client raises derives from :class:`ClappformError`, and each one carries the
-call context (API family, method, cluster, location) so "which tenant on
-which cluster failed" is always in the message.
+Users never need to import ``grpc`` to handle a failure: every failed call
+and every configuration problem raises a :class:`ClappformError` subclass
+carrying the call context (API family, method, cluster, location), so "which
+tenant on which cluster failed" is always in the message. Caller mistakes
+caught before any call is made stay plain Python errors: ``ValueError`` for
+bad arguments or data, ``TypeError`` for a wrong request type, and
+``NotImplementedError`` for reserved surfaces such as ``ReadResult.to_arrow``.
 """
 
 from __future__ import annotations
@@ -29,6 +32,10 @@ class ClappformError(Exception):
         details: str | None = None,
     ) -> None:
         self.status = status
+        #: Rows the server acknowledged before a chunked write failed. Set by
+        #: ``CollectionHandle.append`` so a caller can tell how far it got;
+        #: ``None`` for every other call.
+        self.rows_written: int | None = None
         self.method = method
         self.cluster = cluster
         self.cluster_discovered = cluster_discovered
@@ -83,8 +90,25 @@ class NotSupportedError(ClappformError):
 
 
 class TransientError(ClappformError):
-    """The call failed in a retryable way and retries were exhausted
-    (UNAVAILABLE / DEADLINE_EXCEEDED)."""
+    """The call failed in a way that may succeed if repeated.
+
+    ``UNAVAILABLE``: the server could not be reached or dropped the call. Reads
+    and other non-write RPCs were already retried by the client's
+    :class:`~clappform.RetryPolicy`; data-plane writes are never retried
+    automatically, because the server may have applied them.
+
+    ``DEADLINE_EXCEEDED``: the call ran past its ``timeout``. It is never
+    retried; pass a larger ``timeout=`` to that call.
+    """
+
+
+class ResourceExhaustedError(ClappformError):
+    """A size or rate limit was hit (RESOURCE_EXHAUSTED).
+
+    Usually a message above the 64 MiB gRPC limit (lower ``chunk_rows`` or
+    ``batch_size``, or raise ``grpc.max_*_message_length`` through
+    ``channel_options=``), or a server-side quota or rate limit.
+    """
 
 
 # The authoriser's location interceptor aborts calls that carry no usable
@@ -100,6 +124,7 @@ _STATUS_MAP: dict[str, type[ClappformError]] = {
     "OUT_OF_RANGE": InvalidRequestError,
     "ALREADY_EXISTS": ConflictError,
     "ABORTED": ConflictError,
+    "RESOURCE_EXHAUSTED": ResourceExhaustedError,
     "UNIMPLEMENTED": NotSupportedError,
     "UNAVAILABLE": TransientError,
     "DEADLINE_EXCEEDED": TransientError,

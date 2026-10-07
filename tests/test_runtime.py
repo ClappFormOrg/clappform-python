@@ -36,3 +36,23 @@ def test_ensure_iterable_validates_lazily() -> None:
     assert next(iterator).collection == "a"
     with pytest.raises(TypeError, match="stream items"):
         next(iterator)
+
+
+def test_build_request_rejects_two_members_of_one_oneof() -> None:
+    from clappform.gen.clappform.data.v1.export import export_pb2
+
+    with pytest.raises(TypeError, match="pass only one of them"):
+        _runtime.build_request(
+            export_pb2.CreateExportRequest,
+            None,
+            {"inline": export_pb2.PipelineSource(), "saved_query": export_pb2.SavedQuerySource()},
+        )
+
+
+def test_build_request_allows_one_oneof_member() -> None:
+    from clappform.gen.clappform.data.v1.export import export_pb2
+
+    request = _runtime.build_request(
+        export_pb2.CreateExportRequest, None, {"saved_query": export_pb2.SavedQuerySource()}
+    )
+    assert request.HasField("saved_query")

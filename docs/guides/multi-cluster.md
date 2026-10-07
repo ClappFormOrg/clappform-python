@@ -1,27 +1,38 @@
 # Multi-cluster & multi-tenant
 
-Cluster and tenant are independent axes. The **cluster** (the host extension:
-`""`, `"qa"`, `"qa-lts"`, `"prod"`, …) picks the endpoints. The **tenant**
-(`location`) picks the database within them and is sent as metadata on every
-call. Nothing is global, so any combination coexists in one process.
+Cluster and location are independent axes. The **cluster** is the host
+extension that picks the endpoints: `""` for the main cluster, or another
+cluster's extension such as `"qa"` or `"prod-lts"`. `"prod"` is accepted as
+another name for the main cluster `""`; it is not `"prod-lts"`. The
+**location** is the tenant: it picks the database within those endpoints and is
+sent as metadata on every call. Nothing is global, so any combination coexists
+in one process.
+
+Each API family has its own host: `data`, `client`, `login` (for `cf.auth`)
+and `notify` (for `cf.notifier`). The main cluster serves them on port 50051,
+e.g. `data.clappform.com:50051`; every other cluster serves TLS on port 443,
+e.g. `data-qa.clappform.com`. Override a family's address with
+`endpoints={"data": "host:port"}`.
 
 ## Two clusters, one process
 
-Each client is its own binding with its own credentials. Point one at prod and
-one at qa and use them side by side:
+Each client is its own binding with its own credentials. Point one at the main
+cluster and one at qa and use them side by side:
 
 ```python
 --8<-- "multi_cluster.py:two-clusters"
 ```
 
 Omit `cluster=` and the client discovers it from the DNS CNAME of
-`{location}.clappform.com`. An explicit `cluster=` always wins, so pass it in
-air-gapped or split-DNS environments where discovery can't run.
+`{location}.clappform.com`, giving up after 5 seconds. An explicit `cluster=`
+always wins, so pass it in air-gapped or split-DNS environments where discovery
+can't run.
 
 ## Copying across clusters
 
-Because both clients are just objects, a cross-cluster copy is a read on one and
-a write on the other:
+Because both clients are plain objects, a cross-cluster copy is a read on one
+and a write on the other. Drop `_id` before writing: it identifies the document
+on the source cluster, and the target assigns its own.
 
 ```python
 --8<-- "multi_cluster.py:cross-cluster"
@@ -47,12 +58,12 @@ intend to replace an app that already exists on the target; the default refuses
 to clobber it. `export_actionflow()` / `import_actionflow()` move a single
 actionflow the same way when you don't need the whole app.
 
-## Another tenant on the same cluster
+## Another location on the same cluster
 
-`with_location()` gives a cheap clone bound to a different tenant. When the
+`with_location()` gives a cheap clone bound to a different location. When the
 cluster is known (explicit, or a custom transport) the clone shares the parent's
-connections and configuration: only the tenant metadata differs, and no DNS is
-performed.
+connections and configuration: only the location metadata differs, and no DNS
+is performed.
 
 ```python
 --8<-- "multi_cluster.py:with-location"
@@ -62,22 +73,29 @@ performed.
     If the parent's cluster was *discovered* (no `cluster=`), a different
     location is re-resolved: if it lands on the same cluster the transport is
     still shared, otherwise the clone gets its own transport for its own
-    cluster. With an explicitly configured cluster, `with_location()` never
-    performs DNS.
+    cluster, which you must close. With an explicitly configured cluster,
+    `with_location()` never performs DNS. See
+    [Client lifecycle](concepts.md#client-lifecycle) for which clone owns
+    what.
 
-### Fanning out across many tenants
+### Fanning out across many locations
 
-Because `with_location()` is cheap and shares connections, running the same job
-across a list of tenants is just a loop: clone per tenant, do the work, move
-on. Only the tenant metadata changes between iterations.
+Running the same job across a list of locations is a loop: clone per
+location, do the work, move on. Open each clone with `with`, so a clone that
+re-discovered another cluster closes its own connections; a clone that shares
+the parent's connections ignores the close.
 
 ```python
 --8<-- "multi_cluster.py:fan-out-tenants"
 ```
 
-Each clone reuses the parent's channels (same cluster), so this doesn't open a
-connection per tenant. If the tenants span *different* clusters, construct a
-`Clappform` per cluster instead. See [two clusters, one process](#two-clusters-one-process).
+A clone on the parent's cluster reuses the parent's channels, so this doesn't
+open a connection per location.
+
+!!! warning "Don't `with` the parent's own location"
+    `cf.with_location(cf.location)` returns `cf` itself, not a clone, so
+    leaving a `with` block around it closes the parent. Keep the parent's own
+    location out of the loop, or use the parent directly for it.
 
 ## Staggered rollouts
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from typing import Any
 
 from clappform import _runtime
@@ -43,7 +43,10 @@ class AggregateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> Iterator[_m_clappform_data_v1_aggregate_aggregate.AggregateResponse]:
-        """RPC: /clappform.data.v1.aggregate.AggregateManagement/AggregateStream (unary-stream)"""
+        """Retrieve data from a database collection based on a supplied query
+
+        RPC: /clappform.data.v1.aggregate.AggregateManagement/AggregateStream (unary-stream)
+        """
         _provided = {_k: _v for _k, _v in (("pipeline", pipeline), ("batch_size", batch_size), ("collection", collection), ("query", query),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_aggregate_aggregate.AggregateStreamRequest, request, _provided)
         return self._caller.invoke(
@@ -65,13 +68,13 @@ class AggregateManagement(_runtime.ServiceBase):
         batch_size: int | None = None,
         collection: str | None = None,
         query: str | None = None,
-        filter_options: _m_clappform_data_v1_aggregate_aggregate.AggregateFilterOptions | None = None,
+        filter_options: _m_clappform_data_v1_aggregate_aggregate.AggregateFilterOptions | Mapping[str, Any] | None = None,
         deep_dive: bytes | None = None,
         options: bytes | None = None,
         inner_options: bytes | None = None,
         next_page: int | None = None,
         search: bytes | None = None,
-        bounds: _m_clappform_data_v1_aggregate_aggregate.BoundsRequest | None = None,
+        bounds: _m_clappform_data_v1_aggregate_aggregate.BoundsRequest | Mapping[str, Any] | None = None,
         sorting: bytes | None = None,
         explain: bool | None = None,
         custom_match: bytes | None = None,
@@ -79,7 +82,10 @@ class AggregateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_aggregate_aggregate.AggregateResponse:
-        """RPC: /clappform.data.v1.aggregate.AggregateManagement/AggregateUnary (unary-unary)"""
+        """Retrieve data from a database collection based on a supplied query
+
+        RPC: /clappform.data.v1.aggregate.AggregateManagement/AggregateUnary (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("pipeline", pipeline), ("batch_size", batch_size), ("collection", collection), ("query", query), ("filter_options", filter_options), ("deep_dive", deep_dive), ("options", options), ("inner_options", inner_options), ("next_page", next_page), ("search", search), ("bounds", bounds), ("sorting", sorting), ("explain", explain), ("custom_match", custom_match),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_aggregate_aggregate.AggregateUnaryRequest, request, _provided)
         return self._caller.invoke(
@@ -107,7 +113,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RequestChange (unary-unary)"""
+        """Create a new change request to propose modifications to a document. The request will enter the approval workflow and notify relevant approvers.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RequestChange (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("data", data), ("collection", collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.ChangeRequest, request, _provided)
         return self._caller.invoke(
@@ -133,7 +142,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/ModifyChange (unary-unary)"""
+        """Modify the actual content of a change request, can be used to modify the data (e.g. spelling mistakes) before approval
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/ModifyChange (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note), ("data", data),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.ModifyChangeRequest, request, _provided)
         return self._caller.invoke(
@@ -158,7 +170,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/ApproveChange (unary-unary)"""
+        """Approve a change request and apply the proposed changes to the target document. Automatically resolves field-level conflicts with other open requests.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/ApproveChange (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.UpdateStatusRequest, request, _provided)
         return self._caller.invoke(
@@ -183,7 +198,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RejectChange (unary-unary)"""
+        """Reject a change request. The proposed changes will not be applied and the requester will be notified.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RejectChange (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.UpdateStatusRequest, request, _provided)
         return self._caller.invoke(
@@ -208,7 +226,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/ReviewChange (unary-unary)"""
+        """Mark a change request as under review. This blocks any further modifications and notifies relevant parties.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/ReviewChange (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.UpdateStatusRequest, request, _provided)
         return self._caller.invoke(
@@ -233,7 +254,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/WithdrawChange (unary-unary)"""
+        """Withdraw a change request. Only the original requester can withdraw their own request.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/WithdrawChange (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.UpdateStatusRequest, request, _provided)
         return self._caller.invoke(
@@ -258,7 +282,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AddComment (unary-unary)"""
+        """Add a comment to a change request. Comments are added to the audit trail and relevant parties are notified.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AddComment (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.UpdateStatusRequest, request, _provided)
         return self._caller.invoke(
@@ -284,7 +311,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AddApprover (unary-unary)"""
+        """Add an additional approver to a change request. The new approver will be notified and their approval may be required based on the collection's configuration.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AddApprover (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note), ("approver_id", approver_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.ModifyApproverRequest, request, _provided)
         return self._caller.invoke(
@@ -310,7 +340,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RemoveApprover (unary-unary)"""
+        """Remove an approver from a change request. The approver will be notified of their removal.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RemoveApprover (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("request_id", request_id), ("collection", collection), ("note", note), ("approver_id", approver_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.ModifyApproverRequest, request, _provided)
         return self._caller.invoke(
@@ -332,13 +365,19 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         target_doc_id: str | None = None,
         field_name: str | None = None,
         original_value: bytes | None = None,
-        suggestions: Sequence[_m_clappform_data_v1_change_request_change_request.SuggestionOption] | None = None,
+        suggestions: Sequence[_m_clappform_data_v1_change_request_change_request.SuggestionOption | Mapping[str, Any]] | None = None,
         source: str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/CreateSuggestion (unary-unary)"""
+        """Create a suggestion-type change request from external sources (e.g., Python scripts). Provides suggested values with confidence scores for user review.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/CreateSuggestion (unary-unary)
+
+        Args:
+            original_value: JSON encoded
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("target_doc_id", target_doc_id), ("field_name", field_name), ("original_value", original_value), ("suggestions", suggestions), ("source", source),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.CreateSuggestionRequest, request, _provided)
         return self._caller.invoke(
@@ -365,7 +404,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AcceptSuggestion (unary-unary)"""
+        """Accept a specific suggestion from a suggestion request and apply it to the target document. Optionally adds the original unmapped value as an alias to the dictionary.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AcceptSuggestion (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("request_id", request_id), ("suggestion_id", suggestion_id), ("note", note), ("update_dictionary", update_dictionary),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.AcceptSuggestionRequest, request, _provided)
         return self._caller.invoke(
@@ -390,7 +432,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RejectSuggestions (unary-unary)"""
+        """Reject all suggestions in a suggestion request. No changes will be applied to the target document.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/RejectSuggestions (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("request_id", request_id), ("note", note),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.RejectSuggestionsRequest, request, _provided)
         return self._caller.invoke(
@@ -417,7 +462,13 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.RequestChangeResponse:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AcceptWithCustomValue (unary-unary)"""
+        """Accept a suggestion request with a user-provided custom value instead of the suggested options. Optionally adds the original value as an alias to the dictionary.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/AcceptWithCustomValue (unary-unary)
+
+        Args:
+            custom_value: JSON encoded
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("request_id", request_id), ("custom_value", custom_value), ("note", note), ("update_dictionary", update_dictionary),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.AcceptWithCustomValueRequest, request, _provided)
         return self._caller.invoke(
@@ -440,7 +491,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.ConflictsResponseAll:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/GetConflicts (unary-unary)"""
+        """Get all field-level conflicts for a collection. Returns a list of change requests with detected conflicts.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/GetConflicts (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.GetConflictsRequests, request, _provided)
         return self._caller.invoke(
@@ -464,7 +518,10 @@ class ChangeRequestManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_change_request_change_request.ConflictsResponseOne:
-        """RPC: /clappform.data.v1.change_request.ChangeRequestManagement/GetConflictsRequest (unary-unary)"""
+        """Get detailed conflict information for a specific change request. Returns which fields conflict with other open requests and when conflicts were detected.
+
+        RPC: /clappform.data.v1.change_request.ChangeRequestManagement/GetConflictsRequest (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("request_id", request_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_change_request_change_request.GetOneConflictsRequest, request, _provided)
         return self._caller.invoke(
@@ -488,14 +545,21 @@ class ChatManagement(_runtime.ServiceBase):
         *,
         app_id: str | None = None,
         model_id: str | None = None,
-        settings: _m_clappform_data_v1_chat_chat.ChatSettings | None = None,
+        settings: _m_clappform_data_v1_chat_chat.ChatSettings | Mapping[str, Any] | None = None,
         default_collection_scopes: Sequence[str] | None = None,
         keep_in_memory: bool | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_chat_chat.Chat:
-        """RPC: /clappform.data.v1.chat.ChatManagement/CreateChat (unary-unary)"""
+        """Create a new chat. The model is pinned at creation.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/CreateChat (unary-unary)
+
+        Args:
+            model_id: Must reference a model the calling user holds read_model_<id>
+                (or read_model_full / full_model_admin) for.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("model_id", model_id), ("settings", settings), ("default_collection_scopes", default_collection_scopes), ("keep_in_memory", keep_in_memory),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.CreateChatRequest, request, _provided)
         return self._caller.invoke(
@@ -518,7 +582,10 @@ class ChatManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_chat_chat.Chats:
-        """RPC: /clappform.data.v1.chat.ChatManagement/GetChats (unary-unary)"""
+        """List the calling user's chats.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/GetChats (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.GetChatsRequest, request, _provided)
         return self._caller.invoke(
@@ -541,7 +608,10 @@ class ChatManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_chat_chat.Chat:
-        """RPC: /clappform.data.v1.chat.ChatManagement/GetChat (unary-unary)"""
+        """Fetch a single chat by id (without messages).
+
+        RPC: /clappform.data.v1.chat.ChatManagement/GetChat (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.GetChatRequest, request, _provided)
         return self._caller.invoke(
@@ -560,12 +630,15 @@ class ChatManagement(_runtime.ServiceBase):
         request: _m_clappform_data_v1_chat_chat.UpdateChatRequest | None = None,
         *,
         id: str | None = None,
-        chat: _m_clappform_data_v1_chat_chat.ChatUpdate | None = None,
+        chat: _m_clappform_data_v1_chat_chat.ChatUpdate | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_chat_chat.Chat:
-        """RPC: /clappform.data.v1.chat.ChatManagement/UpdateChat (unary-unary)"""
+        """Update a chat's name or settings. Model is immutable.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/UpdateChat (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("chat", chat),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.UpdateChatRequest, request, _provided)
         return self._caller.invoke(
@@ -588,7 +661,10 @@ class ChatManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Empty:
-        """RPC: /clappform.data.v1.chat.ChatManagement/DeleteChat (unary-unary)"""
+        """Hard-delete a chat and all of its messages.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/DeleteChat (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.DeleteChatRequest, request, _provided)
         return self._caller.invoke(
@@ -607,12 +683,18 @@ class ChatManagement(_runtime.ServiceBase):
         request: _m_clappform_data_v1_chat_chat.SendMessageRequest | None = None,
         *,
         id: str | None = None,
-        payload: _m_clappform_data_v1_chat_chat.SendMessageRequestPayload | None = None,
+        payload: _m_clappform_data_v1_chat_chat.SendMessageRequestPayload | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> Iterator[_m_clappform_data_v1_chat_chat.StreamMessageResponse]:
-        """RPC: /clappform.data.v1.chat.ChatManagement/SendMessage (unary-stream)"""
+        """Send a user message and stream the assistant's reply. One active stream per (user, chat); concurrent calls return ALREADY_EXISTS.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/SendMessage (unary-stream)
+
+        Args:
+            id: Chat id from the URL path. Chat must already exist.
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("payload", payload),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.SendMessageRequest, request, _provided)
         return self._caller.invoke(
@@ -636,7 +718,10 @@ class ChatManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_chat_chat.Messages:
-        """RPC: /clappform.data.v1.chat.ChatManagement/GetMessages (unary-unary)"""
+        """List the messages in a chat. Reading an archived chat rehydrates it transparently.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/GetMessages (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("cursor", cursor),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.GetMessagesRequest, request, _provided)
         return self._caller.invoke(
@@ -660,7 +745,10 @@ class ChatManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_chat_chat.Chat:
-        """RPC: /clappform.data.v1.chat.ChatManagement/SetKeepInMemory (unary-unary)"""
+        """Toggle keep_in_memory to exempt the chat from the 30-day auto-archival worker. Per-user cap applies.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/SetKeepInMemory (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("keep_in_memory", keep_in_memory),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.SetKeepInMemoryRequest, request, _provided)
         return self._caller.invoke(
@@ -684,7 +772,13 @@ class ChatManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Empty:
-        """RPC: /clappform.data.v1.chat.ChatManagement/RefreshSchemaCache (unary-unary)"""
+        """Force-refresh the AI-query schema digest cache. Admin-only. Rate-limited per tenant.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/RefreshSchemaCache (unary-unary)
+
+        Args:
+            collection_id: Empty refreshes every collection in the tenant.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("collection_id", collection_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.RefreshSchemaCacheRequest, request, _provided)
         return self._caller.invoke(
@@ -709,7 +803,15 @@ class ChatManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_chat_chat.BuildQueryResponse:
-        """RPC: /clappform.data.v1.chat.ChatManagement/BuildQuery (unary-unary)"""
+        """Standalone AI-query planner. Returns a validated query plan as JSON bytes; does NOT execute. Caller-supplied collection ids without read RBAC are silently dropped.
+
+        RPC: /clappform.data.v1.chat.ChatManagement/BuildQuery (unary-unary)
+
+        Args:
+            collection_ids: Planning scope. Must be non-empty; entries the caller has no read
+                RBAC for are dropped silently.
+            model_id: Optional model pin. Empty falls back to the legacy default.
+        """
         _provided = {_k: _v for _k, _v in (("prompt", prompt), ("collection_ids", collection_ids), ("model_id", model_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_chat_chat.BuildQueryRequest, request, _provided)
         return self._caller.invoke(
@@ -737,7 +839,10 @@ class DeleteManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.data.v1.delete.DeleteManagement/DeleteManyByOids (unary-unary)"""
+        """Delete multiple records from the database collection based on the Object ID
+
+        RPC: /clappform.data.v1.delete.DeleteManagement/DeleteManyByOids (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("oids", oids), ("collection", collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_delete_delete.DeleteRequestOids, request, _provided)
         return self._caller.invoke(
@@ -762,7 +867,15 @@ class DeleteManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.data.v1.delete.DeleteManagement/DeleteManyByField (unary-unary)"""
+        """Delete multiple records from the database collection based on supplied query
+
+        RPC: /clappform.data.v1.delete.DeleteManagement/DeleteManyByField (unary-unary)
+
+        Args:
+            ids: Encoded list of ids, needs to be encoded to support both ints and strings
+            collection: The collection name to delete from
+            field_name: The field to match on (e.g., "email", "username", etc.)
+        """
         _provided = {_k: _v for _k, _v in (("ids", ids), ("collection", collection), ("field_name", field_name),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_delete_delete.DeleteRequestByField, request, _provided)
         return self._caller.invoke(
@@ -787,7 +900,10 @@ class DeleteManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_delete_delete.DataResponse:
-        """RPC: /clappform.data.v1.delete.DeleteManagement/DeleteManyByQuery (unary-unary)"""
+        """Delete multiple records from the database collection based on supplied query
+
+        RPC: /clappform.data.v1.delete.DeleteManagement/DeleteManyByQuery (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("query", query), ("collection", collection), ("dry_run", dry_run),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_delete_delete.DeleteRequestQuery, request, _provided)
         return self._caller.invoke(
@@ -810,7 +926,10 @@ class DeleteManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.data.v1.delete.DeleteManagement/Clear (unary-unary)"""
+        """Fully empties a database collection
+
+        RPC: /clappform.data.v1.delete.DeleteManagement/Clear (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_delete_delete.ClearRequest, request, _provided)
         return self._caller.invoke(
@@ -839,12 +958,32 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         name: str | None = None,
         size_bytes: int | None = None,
         tags: Sequence[str] | None = None,
-        visibility: int | None = None,
+        visibility: _m_clappform_data_v1_embeddings_embeddings.EmbeddingVisibility | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.CreateEmbeddingResponse:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Create (unary-unary)"""
+        """Begin an upload. Returns a write-only SAS URL the client uses to PUT the file directly to Azure plus the newly created EmbeddingMetadata record (status=processing). Finalize must be called afterwards to kick off chunking + embedding.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Create (unary-unary)
+
+        Args:
+            metadata_collection: metadata_collection is the Clappform Collection UUID where the
+                EmbeddingMetadata record will live. Must resolve via
+                CollectionManagement.Get. Required.
+            vector_collection: vector_collection is the Clappform Collection UUID backing the
+                Elasticsearch index that will hold this file's chunks. Must resolve via
+                CollectionManagement.Get. Required.
+            filename: filename is the original filename. Used as the storage path component
+                and (when name is empty) as the display name. Required.
+            name: name is an optional human-readable display name. Defaults to filename.
+            size_bytes: size_bytes is the declared upload size. Advisory only: the server
+                uses it as a pre-flight cap check before issuing the SAS URL; the
+                canonical size is whatever Azure reports at Finalize. Required.
+            tags: tags are free-form filterable labels attached to the metadata record.
+            visibility: visibility sets the access tier for this record. Defaults to PRIVATE on
+                the server when UNKNOWN. Immutable after Create; choose carefully.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("metadata_collection", metadata_collection), ("vector_collection", vector_collection), ("filename", filename), ("name", name), ("size_bytes", size_bytes), ("tags", tags), ("visibility", visibility),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.CreateEmbeddingRequest, request, _provided)
         return self._caller.invoke(
@@ -869,7 +1008,14 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.EmbeddingMetadata:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Finalize (unary-unary)"""
+        """Confirm an upload has completed and trigger the chunk + embed worker. For files <1MB the work runs inline and the response carries status=ready; larger files return status=processing and the client polls Get.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Finalize (unary-unary)
+
+        Args:
+            metadata_collection: metadata_collection is the Clappform Collection UUID holding the
+                EmbeddingMetadata record. Required.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("id", id), ("metadata_collection", metadata_collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.FinalizeEmbeddingRequest, request, _provided)
         return self._caller.invoke(
@@ -890,14 +1036,26 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         app_id: str | None = None,
         metadata_collection: str | None = None,
         tags: Sequence[str] | None = None,
-        visibility: int | None = None,
+        visibility: _m_clappform_data_v1_embeddings_embeddings.EmbeddingVisibility | int | str | None = None,
         cursor: int | None = None,
         limit: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.ListFilesResponse:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/ListFiles (unary-unary)"""
+        """Picker-optimised paginated list of ready, non-deleted files the caller has access to. Each entry is a slim EmbeddingFile (id, name, size, status, visibility, metadata_collection). Visibility filter (server-side) always applies: own records plus team records in collections the caller has CollectionGetOne_<uuid> or CollectionGetAll for. Admins bypass.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/ListFiles (unary-unary)
+
+        Args:
+            metadata_collection: metadata_collection optionally narrows the list to a single Clappform
+                Collection UUID. When unset, the server fans out across every metadata
+                collection the caller has read RBAC for (capped at 50 collections;
+                beyond that the client must pass a metadata_collection explicitly).
+            tags: tags filters to records that carry every listed tag.
+            visibility: visibility optionally restricts results to a single tier. The server's
+                auth filter still applies regardless; this is purely a UI-side narrow.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("metadata_collection", metadata_collection), ("tags", tags), ("visibility", visibility), ("cursor", cursor), ("limit", limit),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.ListFilesRequest, request, _provided)
         return self._caller.invoke(
@@ -923,7 +1081,10 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.ListFilesResponse:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/ListTrash (unary-unary)"""
+        """Paginated list of soft-deleted files the caller can see: their own deletions, plus team-visibility deletions in collections they have read RBAC for. Mirrors the picker auth filter so accidental deletions stay recoverable by anyone who could have seen the file before deletion. Returns slim EmbeddingFile entries with status=deleted and deleted_by populated.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/ListTrash (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("metadata_collection", metadata_collection), ("cursor", cursor), ("limit", limit),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.ListTrashRequest, request, _provided)
         return self._caller.invoke(
@@ -948,7 +1109,15 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.EmbeddingMetadata:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Get (unary-unary)"""
+        """Fetch a single embedding metadata record by id. Polling this endpoint is the simplest way to wait on async chunking + embedding completion (status transitions from "processing" to "ready" or "failed").
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Get (unary-unary)
+
+        Args:
+            metadata_collection: metadata_collection is the Clappform Collection UUID holding the
+                EmbeddingMetadata record. Required: the server no longer scans
+                collection-name prefixes to locate a record by id alone.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("id", id), ("metadata_collection", metadata_collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.GetEmbeddingRequest, request, _provided)
         return self._caller.invoke(
@@ -973,7 +1142,14 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Empty:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Delete (unary-unary)"""
+        """Soft-delete an embedding. Sets status=deleted; chunk cleanup runs on a 24-hour grace period. Chat history that references the file keeps working.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Delete (unary-unary)
+
+        Args:
+            metadata_collection: metadata_collection is the Clappform Collection UUID holding the
+                EmbeddingMetadata record. Required.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("id", id), ("metadata_collection", metadata_collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.DeleteEmbeddingRequest, request, _provided)
         return self._caller.invoke(
@@ -999,7 +1175,16 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.ReembedResponse:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Reembed (unary-unary)"""
+        """Admin: enqueue a re-embed job for every metadata record in a vector collection under a new embedding model. Idempotent (records already at target_model are skipped). Used when the platform embedding model changes; deploys do not auto-migrate.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/Reembed (unary-unary)
+
+        Args:
+            vector_collection: vector_collection is the Clappform Collection UUID whose records should
+                be re-embedded. Required.
+            target_model: target_model is the embedding model to use for the new versions. Must be
+                a Foundry embedding model the platform supports.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("vector_collection", vector_collection), ("target_model", target_model), ("dry_run", dry_run),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.ReembedRequest, request, _provided)
         return self._caller.invoke(
@@ -1024,7 +1209,17 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.CleanupOrphansResponse:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/CleanupOrphans (unary-unary)"""
+        """Admin: sweep stale processing records in a single metadata collection. Replaces the previous background poller. Records with status=processing older than older_than_ms are finalized inline (success -> ready, failure -> failed). Scoped to one metadata collection per call so admins can target a single tenant slice.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/CleanupOrphans (unary-unary)
+
+        Args:
+            metadata_collection: metadata_collection is the Clappform Collection UUID to sweep. Required.
+            older_than_ms: older_than_ms is the minimum age (in milliseconds since UTC epoch
+                creation) for a processing record to be considered orphaned. Records
+                newer than this are left untouched so an in-flight client-driven
+                Finalize is not raced. Optional; defaults to 90s on the server.
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("metadata_collection", metadata_collection), ("older_than_ms", older_than_ms),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.CleanupOrphansRequest, request, _provided)
         return self._caller.invoke(
@@ -1046,7 +1241,10 @@ class EmbeddingsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_embeddings_embeddings.ListSupportedFileTypesResponse:
-        """RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/ListSupportedFileTypes (unary-unary)"""
+        """List the MIME types the server can extract embeddings from for the calling tenant. The response is tenant-filtered: per-app feature flags may shrink the global registry list (e.g. an app with XLSX disabled will not see the spreadsheet MIME). Clients use this to populate the file-picker accept attribute and to validate uploads before calling Create. The list reflects the running server's state; clients should call this on session start, not cache across deployments.
+
+        RPC: /clappform.data.v1.embeddings.EmbeddingsManagement/ListSupportedFileTypes (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_data_v1_embeddings_embeddings.ListSupportedFileTypesRequest, request, _provided)
         return self._caller.invoke(
@@ -1068,9 +1266,9 @@ class ExportManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_export_export.CreateExportRequest | None = None,
         *,
-        inline: _m_clappform_data_v1_export_export.PipelineSource | None = None,
-        saved_query: _m_clappform_data_v1_export_export.SavedQuerySource | None = None,
-        format: int | None = None,
+        inline: _m_clappform_data_v1_export_export.PipelineSource | Mapping[str, Any] | None = None,
+        saved_query: _m_clappform_data_v1_export_export.SavedQuerySource | Mapping[str, Any] | None = None,
+        format: _m_clappform_data_v1_export_export.ExportFormat | int | str | None = None,
         filename: str | None = None,
         notify_on_complete: bool | None = None,
         disable_compression: bool | None = None,
@@ -1078,12 +1276,32 @@ class ExportManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_export_export.Export:
-        """Start an export. Returns inline {status: READY, sas_url, ...} when
-         both row and byte estimates fall under the sync threshold; otherwise
-         returns {status: QUEUED, job_id}. Rejects with FailedPrecondition /
-         export_too_large when estimates exceed the hard caps.
+        """Start an export.
+
+        Returns inline {status: READY, sas_url, ...} when
+        both row and byte estimates fall under the sync threshold; otherwise
+        returns {status: QUEUED, job_id}. Rejects with FailedPrecondition /
+        export_too_large when estimates exceed the hard caps.
 
         RPC: /clappform.data.v1.export.ExportManagement/CreateExport (unary-unary)
+
+        Args:
+            format: Required. EXPORT_FORMAT_UNSPECIFIED returns InvalidArgument /
+                unsupported_format.
+            filename: Optional. User-facing filename WITHOUT extension. Sanitised to
+                [A-Za-z0-9_-]{1,64}; the format-specific extension is appended by the
+                serialiser. Defaults to "export_<job_id>" when empty.
+            notify_on_complete: Reserved for Phase 2 (Notification Hub). At MVP, setting this to true
+                returns Unimplemented / notify_on_complete_not_available.
+            disable_compression: When true, skip gzip compression and upload the raw serialised
+                bytes. Default (false / unset) compresses every export with gzip
+                and uploads the blob with Content-Encoding: gzip — HTTP clients
+                that negotiate compression see the original uncompressed bytes
+                on the wire; raw consumers get the gzip stream.
+
+                Inverted naming is deliberate: proto3 bool fields default to
+                false, and gzip-by-default is the product choice. A caller that
+                wants raw output sets this to true.
         """
         _provided = {_k: _v for _k, _v in (("inline", inline), ("saved_query", saved_query), ("format", format), ("filename", filename), ("notify_on_complete", notify_on_complete), ("disable_compression", disable_compression),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_export_export.CreateExportRequest, request, _provided)
@@ -1107,11 +1325,13 @@ class ExportManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_export_export.Export:
-        """Poll the status of an export job. When status=READY the response
-         carries a fresh SAS URL valid for the configured TTL (re-signed on
-         every call while the blob exists). When the underlying blob has been
-         deleted by the retention janitor, status flips to FAILED with
-         reason "blob_expired".
+        """Poll the status of an export job.
+
+        When status=READY the response
+        carries a fresh SAS URL valid for the configured TTL (re-signed on
+        every call while the blob exists). When the underlying blob has been
+        deleted by the retention janitor, status flips to FAILED with
+        reason "blob_expired".
 
         RPC: /clappform.data.v1.export.ExportManagement/GetExport (unary-unary)
         """
@@ -1137,9 +1357,11 @@ class ExportManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_export_export.Export:
-        """Cancel a queued or running export job. Terminal jobs (READY, FAILED,
-         CANCELLED) are not cancellable — returns FailedPrecondition /
-         not_cancellable. In-flight blobs of cancelled jobs are deleted.
+        """Cancel a queued or running export job.
+
+        Terminal jobs (READY, FAILED,
+        CANCELLED) are not cancellable — returns FailedPrecondition /
+        not_cancellable. In-flight blobs of cancelled jobs are deleted.
 
         RPC: /clappform.data.v1.export.ExportManagement/CancelExport (unary-unary)
         """
@@ -1160,16 +1382,21 @@ class ExportManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_export_export.ListExportsRequest | None = None,
         *,
-        status: int | None = None,
+        status: _m_clappform_data_v1_export_export.ExportStatus | int | str | None = None,
         limit: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_export_export.ListExportsResponse:
-        """List recent export jobs owned by the calling user, ordered by
-         created_at DESC. Bounded to the last 30 days (matches job-row TTL).
+        """List recent export jobs owned by the calling user, ordered by created_at DESC.
+
+        Bounded to the last 30 days (matches job-row TTL).
 
         RPC: /clappform.data.v1.export.ExportManagement/ListExports (unary-unary)
+
+        Args:
+            status: Optional. When set, only jobs in this status are returned.
+            limit: Maximum number of entries to return. Defaults to 50; capped at 200.
         """
         _provided = {_k: _v for _k, _v in (("status", status), ("limit", limit),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_export_export.ListExportsRequest, request, _provided)
@@ -1196,7 +1423,10 @@ class GeneralManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_general_general.LandingPage:
-        """RPC: /clappform.data.v1.general.GeneralManagement/General (unary-unary)"""
+        """A general hello message
+
+        RPC: /clappform.data.v1.general.GeneralManagement/General (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -1223,7 +1453,13 @@ class IndexManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_index_index.ListIndexesResponse:
-        """RPC: /clappform.data.v1.index.IndexManagement/GetAll (unary-unary)"""
+        """Returns all index definitions for the specified collection (MongoDB) or index (Elasticsearch).
+
+        RPC: /clappform.data.v1.index.IndexManagement/GetAll (unary-unary)
+
+        Args:
+            collection: For MongoDB/Elasticsearch
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_index_index.ListIndexesRequest, request, _provided)
         return self._caller.invoke(
@@ -1247,7 +1483,10 @@ class IndexManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_index_index.GetIndexDetailsResponse:
-        """RPC: /clappform.data.v1.index.IndexManagement/Get (unary-unary)"""
+        """Returns detailed information about a specific index in the collection (MongoDB) or index (Elasticsearch).
+
+        RPC: /clappform.data.v1.index.IndexManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("index_name", index_name),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_index_index.GetIndexDetailsRequest, request, _provided)
         return self._caller.invoke(
@@ -1267,13 +1506,16 @@ class IndexManagement(_runtime.ServiceBase):
         *,
         collection: str | None = None,
         index_name: str | None = None,
-        mongo_index_model: _m_clappform_data_v1_index_index.MongoIndexModel | None = None,
+        mongo_index_model: _m_clappform_data_v1_index_index.MongoIndexModel | Mapping[str, Any] | None = None,
         elastic_settings: bytes | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_index_index.CreateIndexResponse:
-        """RPC: /clappform.data.v1.index.IndexManagement/Create (unary-unary)"""
+        """Creates a new index on the specified collection (MongoDB) or index (Elasticsearch) with the provided settings.
+
+        RPC: /clappform.data.v1.index.IndexManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("index_name", index_name), ("mongo_index_model", mongo_index_model), ("elastic_settings", elastic_settings),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_index_index.CreateIndexRequest, request, _provided)
         return self._caller.invoke(
@@ -1293,13 +1535,16 @@ class IndexManagement(_runtime.ServiceBase):
         *,
         collection: str | None = None,
         index_name: str | None = None,
-        mongo_index_model: _m_clappform_data_v1_index_index.MongoIndexModel | None = None,
+        mongo_index_model: _m_clappform_data_v1_index_index.MongoIndexModel | Mapping[str, Any] | None = None,
         elastic_settings: bytes | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_index_index.UpdateIndexResponse:
-        """RPC: /clappform.data.v1.index.IndexManagement/Update (unary-unary)"""
+        """Updates the settings or options of an existing index in the collection (MongoDB) or index (Elasticsearch).
+
+        RPC: /clappform.data.v1.index.IndexManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("index_name", index_name), ("mongo_index_model", mongo_index_model), ("elastic_settings", elastic_settings),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_index_index.UpdateIndexRequest, request, _provided)
         return self._caller.invoke(
@@ -1323,7 +1568,10 @@ class IndexManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_index_index.DeleteIndexResponse:
-        """RPC: /clappform.data.v1.index.IndexManagement/Delete (unary-unary)"""
+        """Deletes the specified index from the collection (MongoDB) or index (Elasticsearch).
+
+        RPC: /clappform.data.v1.index.IndexManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection", collection), ("index_name", index_name),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_index_index.DeleteIndexRequest, request, _provided)
         return self._caller.invoke(
@@ -1349,7 +1597,10 @@ class InsertManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> Iterator[_m_clappform_data_v1_insert_insert.InsertResponse]:
-        """RPC: /clappform.data.v1.insert.InsertManagement/InsertMany (stream-stream)"""
+        """Insert records into the database collection
+
+        RPC: /clappform.data.v1.insert.InsertManagement/InsertMany (stream-stream)
+        """
         _requests = _runtime.ensure_iterable(requests, _m_clappform_data_v1_insert_insert.InsertRequest)
         return self._caller.invoke(
             "stream_stream",
@@ -1372,7 +1623,10 @@ class InsertManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_insert_insert.InsertResponse:
-        """RPC: /clappform.data.v1.insert.InsertManagement/InsertSingle (unary-unary)"""
+        """Insert single record into the database collection. Currently only exists for webapp compatibility, will be removed in the future
+
+        RPC: /clappform.data.v1.insert.InsertManagement/InsertSingle (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("data", data), ("collection", collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_insert_insert.InsertRequest, request, _provided)
         return self._caller.invoke(
@@ -1415,13 +1669,16 @@ class ModelManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_model_model.GetModelsRequest | None = None,
         *,
-        capabilities: Sequence[int] | None = None,
+        capabilities: Sequence[_m_clappform_data_v1_model_model.Capability | int | str] | None = None,
         include_all: bool | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.Models:
-        """RPC: /clappform.data.v1.model.ModelManagement/GetModels (unary-unary)"""
+        """List the models the calling user is allowed to use. Drives the model-selection dropdown.
+
+        RPC: /clappform.data.v1.model.ModelManagement/GetModels (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("capabilities", capabilities), ("include_all", include_all),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.GetModelsRequest, request, _provided)
         return self._caller.invoke(
@@ -1444,7 +1701,10 @@ class ModelManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.GetModelAdminResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/GetModelAdmin (unary-unary)"""
+        """Fetch the full ModelDescriptor (admin fields included). api_key is scrubbed from every response.
+
+        RPC: /clappform.data.v1.model.ModelManagement/GetModelAdmin (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.GetModelAdminRequest, request, _provided)
         return self._caller.invoke(
@@ -1462,12 +1722,15 @@ class ModelManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_model_model.CreateModelRequest | None = None,
         *,
-        model: _m_clappform_data_v1_model_model.ModelDescriptorAdmin | None = None,
+        model: _m_clappform_data_v1_model_model.ModelDescriptorAdmin | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.CreateModelResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/CreateModel (unary-unary)"""
+        """Create a ModelDescriptor. Provider must be registered in the runtime registry; native_system must match the registered value. Server slugs id from name when empty.
+
+        RPC: /clappform.data.v1.model.ModelManagement/CreateModel (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("model", model),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.CreateModelRequest, request, _provided)
         return self._caller.invoke(
@@ -1486,12 +1749,18 @@ class ModelManagement(_runtime.ServiceBase):
         request: _m_clappform_data_v1_model_model.UpdateModelRequest | None = None,
         *,
         id: str | None = None,
-        model: _m_clappform_data_v1_model_model.ModelDescriptorAdmin | None = None,
+        model: _m_clappform_data_v1_model_model.ModelDescriptorAdmin | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.UpdateModelResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/UpdateModel (unary-unary)"""
+        """Replace a ModelDescriptor. Same validation as Create. Path id is authoritative; body's id is ignored. Invalidates the catalog cache on success.
+
+        RPC: /clappform.data.v1.model.ModelManagement/UpdateModel (unary-unary)
+
+        Args:
+            id: Path id is authoritative; the body's id field is ignored.
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("model", model),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.UpdateModelRequest, request, _provided)
         return self._caller.invoke(
@@ -1514,7 +1783,10 @@ class ModelManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Empty:
-        """RPC: /clappform.data.v1.model.ModelManagement/DeleteModel (unary-unary)"""
+        """Hard-delete a ModelDescriptor. Existing chats pinned to it surface MODEL_UNAVAILABLE on the next SendMessage; recover via RewriteModel.
+
+        RPC: /clappform.data.v1.model.ModelManagement/DeleteModel (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.DeleteModelRequest, request, _provided)
         return self._caller.invoke(
@@ -1538,7 +1810,10 @@ class ModelManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.SetModelEnabledResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/SetModelEnabled (unary-unary)"""
+        """Toggle the enabled flag. Disabled models drop out of GetModels; existing chats keep working through the fallback chain.
+
+        RPC: /clappform.data.v1.model.ModelManagement/SetModelEnabled (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("enabled", enabled),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.SetModelEnabledRequest, request, _provided)
         return self._caller.invoke(
@@ -1564,7 +1839,10 @@ class ModelManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.RewriteModelResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/RewriteModel (unary-unary)"""
+        """Bulk-rewrite chat.model_id from one model to another across the tenant. Audit-logged; supports dry_run.
+
+        RPC: /clappform.data.v1.model.ModelManagement/RewriteModel (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("from_model_id", from_model_id), ("to_model_id", to_model_id), ("dry_run", dry_run),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.RewriteModelRequest, request, _provided)
         return self._caller.invoke(
@@ -1582,13 +1860,16 @@ class ModelManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_model_model.SetCapabilityDefaultRequest | None = None,
         *,
-        capability: int | None = None,
+        capability: _m_clappform_data_v1_model_model.Capability | int | str | None = None,
         model_id: str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.SetCapabilityDefaultResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/SetCapabilityDefault (unary-unary)"""
+        """Upsert the default model for one capability in the calling tenant scope. Validates the named model exists, is enabled, and lists the requested capability.
+
+        RPC: /clappform.data.v1.model.ModelManagement/SetCapabilityDefault (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("capability", capability), ("model_id", model_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.SetCapabilityDefaultRequest, request, _provided)
         return self._caller.invoke(
@@ -1610,7 +1891,10 @@ class ModelManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.GetCapabilityDefaultsResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/GetCapabilityDefaults (unary-unary)"""
+        """Return the full per-capability default table for the calling tenant. Powers the admin UI for model routing.
+
+        RPC: /clappform.data.v1.model.ModelManagement/GetCapabilityDefaults (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.GetCapabilityDefaultsRequest, request, _provided)
         return self._caller.invoke(
@@ -1628,12 +1912,15 @@ class ModelManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_model_model.ClearCapabilityDefaultRequest | None = None,
         *,
-        capability: int | None = None,
+        capability: _m_clappform_data_v1_model_model.Capability | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_model_model.ClearCapabilityDefaultResponse:
-        """RPC: /clappform.data.v1.model.ModelManagement/ClearCapabilityDefault (unary-unary)"""
+        """Remove the default for one capability. Subsequent resolutions fall back to deterministic ordering (most-recent-enabled-capable wins), or cascade to CHAT.
+
+        RPC: /clappform.data.v1.model.ModelManagement/ClearCapabilityDefault (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("capability", capability),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_model_model.ClearCapabilityDefaultRequest, request, _provided)
         return self._caller.invoke(
@@ -1734,10 +2021,10 @@ class ProcessManagement(_runtime.ServiceBase):
         request: _m_clappform_data_v1_process_process.ExecuteRequest | None = None,
         *,
         process_id: str | None = None,
-        inputs: _m_google_protobuf_struct.Struct | None = None,
+        inputs: _m_google_protobuf_struct.Struct | Mapping[str, Any] | None = None,
         response_mode: str | None = None,
         response: str | None = None,
-        outputs: _m_google_protobuf_struct.Struct | None = None,
+        outputs: _m_google_protobuf_struct.Struct | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
@@ -1745,6 +2032,12 @@ class ProcessManagement(_runtime.ServiceBase):
         """ExecuteProcess runs a process synchronously and returns the result outputs.
 
         RPC: /clappform.data.v1.process.ProcessManagement/ExecuteProcess (unary-unary)
+
+        Args:
+            inputs: JSON object of input parameters
+            response_mode: Execution mode: only "sync" is supported
+            response: Response format: only "raw" is supported
+            outputs: Output selection: not supported; omit or leave empty
         """
         _provided = {_k: _v for _k, _v in (("process_id", process_id), ("inputs", inputs), ("response_mode", response_mode), ("response", response), ("outputs", outputs),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_process_process.ExecuteRequest, request, _provided)
@@ -1851,7 +2144,13 @@ class QueryEvalManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_query_evaluate_query_evaluate.EvaluateQueryResponse:
-        """RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/EvaluateQuery (unary-unary)"""
+        """Evaluate a single saved query. Runs $explain and LLM analysis; returns structured improvement suggestions. Serves from cache when evaluation is fresh (< 24 h and pipeline unchanged).
+
+        RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/EvaluateQuery (unary-unary)
+
+        Args:
+            model_id: Optional model pin; empty uses the default planner model.
+        """
         _provided = {_k: _v for _k, _v in (("query_id", query_id), ("model_id", model_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_query_evaluate_query_evaluate.EvaluateQueryRequest, request, _provided)
         return self._caller.invoke(
@@ -1876,7 +2175,10 @@ class QueryEvalManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_query_evaluate_query_evaluate.EvaluateCollectionResponse:
-        """RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/EvaluateCollection (unary-unary)"""
+        """Evaluate all queries for a collection (up to 200). Per-query cache respected; stale or missing evaluations trigger fresh evaluation.
+
+        RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/EvaluateCollection (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("collection_id", collection_id), ("model_id", model_id), ("force_refresh", force_refresh),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_query_evaluate_query_evaluate.EvaluateCollectionRequest, request, _provided)
         return self._caller.invoke(
@@ -1901,7 +2203,10 @@ class QueryEvalManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_query_evaluate_query_evaluate.EvaluateAppResponse:
-        """RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/EvaluateApp (unary-unary)"""
+        """Evaluate all queries across an app (up to 200, RBAC-scoped). High-usage queries prioritised via importance score. Dropped collections surfaced in dropped_collection_ids.
+
+        RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/EvaluateApp (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("model_id", model_id), ("force_refresh", force_refresh),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_query_evaluate_query_evaluate.EvaluateAppRequest, request, _provided)
         return self._caller.invoke(
@@ -1924,7 +2229,10 @@ class QueryEvalManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_query_evaluate_query_evaluate.GetEvaluationResponse:
-        """RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/GetEvaluation (unary-unary)"""
+        """Fetch a previously stored evaluation without triggering a new LLM call. Returns NOT_FOUND when no evaluation exists for the query.
+
+        RPC: /clappform.data.v1.query_evaluate.QueryEvalManagement/GetEvaluation (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("query_id", query_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_query_evaluate_query_evaluate.GetEvaluationRequest, request, _provided)
         return self._caller.invoke(
@@ -1946,16 +2254,25 @@ class RuleManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_rule_engine_rule_engine.CreateRuleRequest | None = None,
         *,
-        rule: _m_clappform_data_v1_rule_engine_rule_engine.Rule | None = None,
+        rule: _m_clappform_data_v1_rule_engine_rule_engine.Rule | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_rule_engine_rule_engine.Rule:
-        """Create a new rule. Validates conditions, recipients, schedule, and
-         template variables. Enforces max_custom_rules_per_user for custom
-         rules. Triggers an immediate first evaluation via EnqueueImmediate.
+        """Create a new rule.
+
+        Validates conditions, recipients, schedule, and
+        template variables. Enforces max_custom_rules_per_user for custom
+        rules. Triggers an immediate first evaluation via EnqueueImmediate.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/CreateRule (unary-unary)
+
+        Args:
+            rule: The rule to create. id, created_by, created_at, updated_at,
+                deleted_at are server-managed and ignored on input. The cap on
+                custom rules per user per collection counts every non-deleted
+                rule (enabled or disabled) so a user cannot bypass the cap by
+                saving disabled rules and toggling them later.
         """
         _provided = {_k: _v for _k, _v in (("rule", rule),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_rule_engine_rule_engine.CreateRuleRequest, request, _provided)
@@ -1974,16 +2291,27 @@ class RuleManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_rule_engine_rule_engine.UpdateRuleRequest | None = None,
         *,
-        rule: _m_clappform_data_v1_rule_engine_rule_engine.Rule | None = None,
+        rule: _m_clappform_data_v1_rule_engine_rule_engine.Rule | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_rule_engine_rule_engine.Rule:
-        """Update an existing rule. Re-validates the full payload. Cannot change
-         rule_type, created_by, or source_collection_id. Resets the schedule
-         epoch marker so the new schedule starts cleanly.
+        """Update an existing rule.
+
+        Re-validates the full payload. Cannot change
+        rule_type, created_by, or source_collection_id. Resets the schedule
+        epoch marker so the new schedule starts cleanly.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/UpdateRule (unary-unary)
+
+        Args:
+            rule: Full-replacement update. Must include id. The server re-validates
+                the entire payload and ignores changes to immutable fields
+                (rule_type, created_by, source_collection_id, created_at). The cap
+                on enabled+disabled custom rules is re-checked on every update so
+                toggling a previously-disabled rule cannot bypass it. Callers
+                should round-trip a Rule fetched via GetRule so no field is
+                accidentally cleared.
         """
         _provided = {_k: _v for _k, _v in (("rule", rule),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_rule_engine_rule_engine.UpdateRuleRequest, request, _provided)
@@ -2007,8 +2335,10 @@ class RuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """Soft-delete a rule by setting deleted_at. A TTL index purges the
-         document 90 days later.
+        """Soft-delete a rule by setting deleted_at.
+
+        A TTL index purges the
+        document 90 days later.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/DeleteRule (unary-unary)
         """
@@ -2034,8 +2364,10 @@ class RuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_rule_engine_rule_engine.Rule:
-        """Fetch a single rule by ID. Returns NOT_FOUND when the rule is
-         soft-deleted.
+        """Fetch a single rule by ID.
+
+        Returns NOT_FOUND when the rule is
+        soft-deleted.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/GetRule (unary-unary)
         """
@@ -2057,7 +2389,7 @@ class RuleManagement(_runtime.ServiceBase):
         request: _m_clappform_data_v1_rule_engine_rule_engine.ListRulesRequest | None = None,
         *,
         source_collection_id: str | None = None,
-        rule_type: int | None = None,
+        rule_type: _m_clappform_data_v1_rule_engine_rule_engine.RuleType | int | str | None = None,
         enabled: bool | None = None,
         include_deleted: bool | None = None,
         page: int | None = None,
@@ -2066,10 +2398,18 @@ class RuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_rule_engine_rule_engine.ListRulesResponse:
-        """List rules visible to the caller. Non-admins see only rules they
-         created. Paginated, filterable.
+        """List rules visible to the caller.
+
+        Non-admins see only rules they
+        created. Paginated, filterable.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/ListRules (unary-unary)
+
+        Args:
+            rule_type: RULE_TYPE_UNSPECIFIED matches both shared and custom rules.
+            enabled: Tri-state filter: only set when the caller wants to filter by
+                enabled status.
+            include_deleted: Admin-only. Non-admin requests with this flag set are rejected.
         """
         _provided = {_k: _v for _k, _v in (("source_collection_id", source_collection_id), ("rule_type", rule_type), ("enabled", enabled), ("include_deleted", include_deleted), ("page", page), ("batch_size", batch_size),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_rule_engine_rule_engine.ListRulesRequest, request, _provided)
@@ -2088,14 +2428,16 @@ class RuleManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_rule_engine_rule_engine.PreviewRuleRequest | None = None,
         *,
-        rule: _m_clappform_data_v1_rule_engine_rule_engine.Rule | None = None,
+        rule: _m_clappform_data_v1_rule_engine_rule_engine.Rule | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_rule_engine_rule_engine.PreviewRuleResponse:
-        """Evaluate a rule WITHOUT writing log or dispatching. Returns matched
-         count, top-5 sample documents, resolved recipient count (post
-         opt-out), and the rendered subject/body for the first recipient.
+        """Evaluate a rule WITHOUT writing log or dispatching.
+
+        Returns matched
+        count, top-5 sample documents, resolved recipient count (post
+        opt-out), and the rendered subject/body for the first recipient.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/PreviewRule (unary-unary)
         """
@@ -2121,9 +2463,10 @@ class RuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_rule_engine_rule_engine.TestFireRuleResponse:
-        """Force an immediate evaluation of a saved rule with cooldown
-         bypassed. Sends only to the rule creator (never to the rule's normal
-         recipient list). Writes an execution log with is_test=true.
+        """Force an immediate evaluation of a saved rule with cooldown bypassed.
+
+        Sends only to the rule creator (never to the rule's normal
+        recipient list). Writes an execution log with is_test=true.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/TestFireRule (unary-unary)
         """
@@ -2151,8 +2494,10 @@ class RuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_rule_engine_rule_engine.ListRuleExecutionsResponse:
-        """List execution log entries for a rule, newest first. Owner or
-         rule_admin only.
+        """List execution log entries for a rule, newest first.
+
+        Owner or
+        rule_admin only.
 
         RPC: /clappform.data.v1.rule_engine.RuleManagement/ListRuleExecutions (unary-unary)
         """
@@ -2185,11 +2530,22 @@ class SchemaManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_schema_schema.CollectionSchemaResponse:
-        """Sample documents from a collection and return per-field type/distribution
-         statistics. Collection rules are applied before sampling so callers only
-         see rows they are permitted to read.
+        """Sample documents from a collection and return per-field type/distribution statistics.
+
+        Collection rules are applied before sampling so callers only
+        see rows they are permitted to read.
 
         RPC: /clappform.data.v1.schema.SchemaManagement/GetCollectionSchema (unary-unary)
+
+        Args:
+            sample_size: Number of documents to sample. Defaults to 100; clamped server-
+                side to a maximum of 1000 to bound aggregation cost.
+            include_distribution: When true, every numeric / bool / string / date field gets a
+                populated `distribution` on the response. Off by default since
+                computing the distribution doubles the per-field bookkeeping
+                and produces a larger response payload.
+            include_sample_values: When true, up to 10 raw sample values are returned per field.
+                Respects the collection's PrivacyRules / AllowSampling settings.
         """
         _provided = {_k: _v for _k, _v in (("collection_id", collection_id), ("sample_size", sample_size), ("include_distribution", include_distribution), ("include_sample_values", include_sample_values),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_schema_schema.CollectionSchemaRequest, request, _provided)
@@ -2218,11 +2574,16 @@ class SchemaManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_schema_schema.QuerySchemaResponse:
-        """Same as GetCollectionSchema but operates on the *output* of a saved Query
-         or an inline pipeline rather than a raw collection. Useful for deriving the
-         shape of a query's result set without running the full query.
+        """Same as GetCollectionSchema but operates on the *output* of a saved Query or an inline pipeline rather than a raw collection.
+
+        Useful for deriving the
+        shape of a query's result set without running the full query.
 
         RPC: /clappform.data.v1.schema.SchemaManagement/GetQuerySchema (unary-unary)
+
+        Args:
+            inline_pipeline: Optional aggregation pipeline JSON appended after the saved/resolved
+                pipeline. Only valid when collection_id is set.
         """
         _provided = {_k: _v for _k, _v in (("query_id", query_id), ("collection_id", collection_id), ("inline_pipeline", inline_pipeline), ("sample_size", sample_size), ("include_distribution", include_distribution), ("include_sample_values", include_sample_values),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_schema_schema.QuerySchemaRequest, request, _provided)
@@ -2246,8 +2607,7 @@ class SchemaManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_schema_schema.CollectionInfoResponse:
-        """Returns non-sampling collection metadata: document count, storage size,
-         rule count, index count, and usage statistics derived from read_usage_daily.
+        """Returns non-sampling collection metadata: document count, storage size, rule count, index count, and usage statistics derived from read_usage_daily.
 
         RPC: /clappform.data.v1.schema.SchemaManagement/GetCollectionInfo (unary-unary)
         """
@@ -2274,12 +2634,17 @@ class SchemaManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_schema_schema.BuildFKGraphResponse:
-        """Scan every collection in the given app, detect foreign-key links by
-         UUID-overlap between sampled field values, and persist the resulting
-         graph to the platform database. Idempotent — re-running rebuilds and
-         overwrites.
+        """Scan every collection in the given app, detect foreign-key links by UUID-overlap between sampled field values, and persist the resulting graph to the platform database.
+
+        Idempotent — re-running rebuilds and
+        overwrites.
 
         RPC: /clappform.data.v1.schema.SchemaManagement/BuildFKGraph (unary-unary)
+
+        Args:
+            sample_size: Number of documents to sample per collection during detection.
+                Defaults server-side to 200; higher values improve overlap detection
+                at the cost of increased sampling time.
         """
         _provided = {_k: _v for _k, _v in (("app_id", app_id), ("sample_size", sample_size),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_schema_schema.BuildFKGraphRequest, request, _provided)
@@ -2304,7 +2669,8 @@ class SchemaManagement(_runtime.ServiceBase):
         location: str | None = None,
     ) -> _m_clappform_data_v1_schema_schema.GetFKGraphResponse:
         """Return the most recently persisted FK graph for the current app.
-         Returns NOT_FOUND when no graph has been built yet.
+
+        Returns NOT_FOUND when no graph has been built yet.
 
         RPC: /clappform.data.v1.schema.SchemaManagement/GetFKGraph (unary-unary)
         """
@@ -2333,7 +2699,10 @@ class SyncManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_sync_sync.SyncResponse:
-        """RPC: /clappform.data.v1.sync.SyncManagement/SyncManyByField (stream-unary)"""
+        """Sync multiple documents by matching a specific field value, inserting new documents and updating existing ones
+
+        RPC: /clappform.data.v1.sync.SyncManagement/SyncManyByField (stream-unary)
+        """
         _requests = _runtime.ensure_iterable(requests, _m_clappform_data_v1_sync_sync.SyncRequestByField)
         return self._caller.invoke(
             "stream_unary",
@@ -2363,6 +2732,10 @@ class UpdateManagement(_runtime.ServiceBase):
         """Consider migrating to client streaming RPC
 
         RPC: /clappform.data.v1.update.UpdateManagement/ReplaceMany (unary-unary)
+
+        Args:
+            data: Contains the array of documents with _id and update data
+            collection: The collection name to update
         """
         _provided = {_k: _v for _k, _v in (("data", data), ("collection", collection),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_update_update.UpdateRequestByOid, request, _provided)
@@ -2385,7 +2758,10 @@ class UpdateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_update_update.UpdateRequestResponse:
-        """RPC: /clappform.data.v1.update.UpdateManagement/ReplaceManyByField (stream-unary)"""
+        """Replace multiple documents by matching a specific field value
+
+        RPC: /clappform.data.v1.update.UpdateManagement/ReplaceManyByField (stream-unary)
+        """
         _requests = _runtime.ensure_iterable(requests, _m_clappform_data_v1_update_update.UpdateRequestByField)
         return self._caller.invoke(
             "stream_unary",
@@ -2409,7 +2785,15 @@ class UpdateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_update_update.UpdateRequestResponse:
-        """RPC: /clappform.data.v1.update.UpdateManagement/ReplaceManyByQuery (unary-unary)"""
+        """Replace multiple documents that match a MongoDB query
+
+        RPC: /clappform.data.v1.update.UpdateManagement/ReplaceManyByQuery (unary-unary)
+
+        Args:
+            set_values: Contains a map of fields and their new values, follows Mongo $set syntax
+            collection: The collection name to update
+            query: The query to perform the update against
+        """
         _provided = {_k: _v for _k, _v in (("set_values", set_values), ("collection", collection), ("query", query),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_update_update.UpdateRequestByQuery, request, _provided)
         return self._caller.invoke(
@@ -2431,7 +2815,10 @@ class UpdateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_update_update.UpdateRequestResponse:
-        """RPC: /clappform.data.v1.update.UpdateManagement/UpdateMany (stream-unary)"""
+        """Update multiple documents by their MongoDB ObjectIDs
+
+        RPC: /clappform.data.v1.update.UpdateManagement/UpdateMany (stream-unary)
+        """
         _requests = _runtime.ensure_iterable(requests, _m_clappform_data_v1_update_update.UpdateRequestByOid)
         return self._caller.invoke(
             "stream_unary",
@@ -2452,7 +2839,10 @@ class UpdateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_update_update.UpdateRequestResponse:
-        """RPC: /clappform.data.v1.update.UpdateManagement/UpdateManyByField (stream-unary)"""
+        """Update multiple documents by matching a specific field value
+
+        RPC: /clappform.data.v1.update.UpdateManagement/UpdateManyByField (stream-unary)
+        """
         _requests = _runtime.ensure_iterable(requests, _m_clappform_data_v1_update_update.UpdateRequestByField)
         return self._caller.invoke(
             "stream_unary",
@@ -2476,7 +2866,15 @@ class UpdateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_update_update.UpdateRequestResponse:
-        """RPC: /clappform.data.v1.update.UpdateManagement/UpdateManyByQuery (unary-unary)"""
+        """Update multiple documents that match a MongoDB query
+
+        RPC: /clappform.data.v1.update.UpdateManagement/UpdateManyByQuery (unary-unary)
+
+        Args:
+            set_values: Contains a map of fields and their new values, follows Mongo $set syntax
+            collection: The collection name to update
+            query: The query to perform the update against
+        """
         _provided = {_k: _v for _k, _v in (("set_values", set_values), ("collection", collection), ("query", query),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_update_update.UpdateRequestByQuery, request, _provided)
         return self._caller.invoke(
@@ -2499,18 +2897,21 @@ class UsageManagement(_runtime.ServiceBase):
         request: _m_clappform_data_v1_usage_usage.QueryUsageRequest | None = None,
         *,
         query_id: str | None = None,
-        to: _m_google_protobuf_timestamp.Timestamp | None = None,
+        from_: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
+        to: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_usage_usage.QueryUsageResponse:
-        """Returns aggregated usage statistics for a single saved Query over the
-         requested time window.
+        """Returns aggregated usage statistics for a single saved Query over the requested time window.
 
         RPC: /clappform.data.v1.usage.UsageManagement/GetQueryUsage (unary-unary)
-        Fields only settable via a request message (name collision): from
+
+        Args:
+            from_: Inclusive start of the time window. Defaults to 30 days ago.
+            to: Inclusive end of the time window. Defaults to now.
         """
-        _provided = {_k: _v for _k, _v in (("query_id", query_id), ("to", to),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("query_id", query_id), ("from", from_), ("to", to),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_usage_usage.QueryUsageRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -2528,18 +2929,17 @@ class UsageManagement(_runtime.ServiceBase):
         request: _m_clappform_data_v1_usage_usage.CollectionUsageRequest | None = None,
         *,
         collection_id: str | None = None,
-        to: _m_google_protobuf_timestamp.Timestamp | None = None,
+        from_: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
+        to: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_usage_usage.CollectionUsageResponse:
-        """Returns aggregated usage statistics for a single Collection over the
-         requested time window.
+        """Returns aggregated usage statistics for a single Collection over the requested time window.
 
         RPC: /clappform.data.v1.usage.UsageManagement/GetCollectionUsage (unary-unary)
-        Fields only settable via a request message (name collision): from
         """
-        _provided = {_k: _v for _k, _v in (("collection_id", collection_id), ("to", to),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("collection_id", collection_id), ("from", from_), ("to", to),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_usage_usage.CollectionUsageRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -2556,21 +2956,28 @@ class UsageManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_usage_usage.TopUsageRequest | None = None,
         *,
-        to: _m_google_protobuf_timestamp.Timestamp | None = None,
+        from_: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
+        to: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
         limit: int | None = None,
-        rank_by: int | None = None,
+        rank_by: _m_clappform_data_v1_usage_usage.UsageRankBy | int | str | None = None,
         min_call_count: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_data_v1_usage_usage.TopQueriesResponse:
         """Returns the top-N queries ranked by the requested dimension.
-         Useful for finding heavy-hitters, slow queries, and dead queries.
+
+        Useful for finding heavy-hitters, slow queries, and dead queries.
 
         RPC: /clappform.data.v1.usage.UsageManagement/ListTopQueries (unary-unary)
-        Fields only settable via a request message (name collision): from
+
+        Args:
+            limit: Maximum number of entries to return. Defaults to 20; capped at 200.
+            rank_by: Dimension to rank by. Defaults to USAGE_RANK_CALL_COUNT.
+            min_call_count: Exclude entries with fewer than this many calls. Useful when ranking
+                by duration so that a single freak-slow call does not dominate the list.
         """
-        _provided = {_k: _v for _k, _v in (("to", to), ("limit", limit), ("rank_by", rank_by), ("min_call_count", min_call_count),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("from", from_), ("to", to), ("limit", limit), ("rank_by", rank_by), ("min_call_count", min_call_count),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_usage_usage.TopUsageRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -2587,9 +2994,10 @@ class UsageManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_data_v1_usage_usage.TopUsageRequest | None = None,
         *,
-        to: _m_google_protobuf_timestamp.Timestamp | None = None,
+        from_: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
+        to: _m_google_protobuf_timestamp.Timestamp | Mapping[str, Any] | None = None,
         limit: int | None = None,
-        rank_by: int | None = None,
+        rank_by: _m_clappform_data_v1_usage_usage.UsageRankBy | int | str | None = None,
         min_call_count: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
@@ -2598,9 +3006,14 @@ class UsageManagement(_runtime.ServiceBase):
         """Returns the top-N collections ranked by the requested dimension.
 
         RPC: /clappform.data.v1.usage.UsageManagement/ListTopCollections (unary-unary)
-        Fields only settable via a request message (name collision): from
+
+        Args:
+            limit: Maximum number of entries to return. Defaults to 20; capped at 200.
+            rank_by: Dimension to rank by. Defaults to USAGE_RANK_CALL_COUNT.
+            min_call_count: Exclude entries with fewer than this many calls. Useful when ranking
+                by duration so that a single freak-slow call does not dominate the list.
         """
-        _provided = {_k: _v for _k, _v in (("to", to), ("limit", limit), ("rank_by", rank_by), ("min_call_count", min_call_count),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("from", from_), ("to", to), ("limit", limit), ("rank_by", rank_by), ("min_call_count", min_call_count),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_data_v1_usage_usage.TopUsageRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",

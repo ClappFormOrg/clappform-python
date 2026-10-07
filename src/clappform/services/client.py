@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from typing import Any
 
 from clappform import _runtime
@@ -55,7 +55,10 @@ class ActionflowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_actionflow.Actionflows:
-        """RPC: /clappform.client.v1.actionflow.ActionflowManagement/GetAll (unary-unary)"""
+        """Get all actionflows
+
+        RPC: /clappform.client.v1.actionflow.ActionflowManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -84,17 +87,18 @@ class ActionflowManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_actionflow_actionflow.Actionflow]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``actionflows`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``actionflows``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
+        Only ``actionflows`` is yielded; call ``get_all`` for ``actionflow_tasks``.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.actionflows
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.actionflows
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -107,7 +111,10 @@ class ActionflowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_actionflow.Actionflow:
-        """RPC: /clappform.client.v1.actionflow.ActionflowManagement/Get (unary-unary)"""
+        """Get a single actionflow
+
+        RPC: /clappform.client.v1.actionflow.ActionflowManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -135,7 +142,10 @@ class ActionflowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_actionflow.Actionflow:
-        """RPC: /clappform.client.v1.actionflow.ActionflowManagement/Create (unary-unary)"""
+        """Create a new actionflow
+
+        RPC: /clappform.client.v1.actionflow.ActionflowManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("settings", settings), ("start_keys", start_keys), ("fast", fast), ("multiple", multiple), ("actionflow_tasks", actionflow_tasks),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_actionflow_actionflow.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -164,7 +174,10 @@ class ActionflowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_actionflow.Actionflow:
-        """RPC: /clappform.client.v1.actionflow.ActionflowManagement/Update (unary-unary)"""
+        """Update an existing actionflow
+
+        RPC: /clappform.client.v1.actionflow.ActionflowManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("settings", settings), ("start_keys", start_keys), ("fast", fast), ("multiple", multiple), ("actionflow_tasks", actionflow_tasks),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_actionflow_actionflow.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -189,7 +202,10 @@ class ActionflowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.actionflow.ActionflowManagement/Delete (unary-unary)"""
+        """Delete an existing actionflow
+
+        RPC: /clappform.client.v1.actionflow.ActionflowManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -214,7 +230,10 @@ class ActionflowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_actionflow.StartActionflowResponse:
-        """RPC: /clappform.client.v1.actionflow.ActionflowManagement/Start (unary-unary)"""
+        """Start an actionflow
+
+        RPC: /clappform.client.v1.actionflow.ActionflowManagement/Start (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("user_id", user_id), ("custom_keys", custom_keys),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_actionflow_actionflow.StartActionflow, request, _provided)
         return self._caller.invoke(
@@ -247,7 +266,10 @@ class ActionflowTaskManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_task_actionflow_task.ActionflowTasks:
-        """RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/GetAll (unary-unary)"""
+        """Get all actionflow tasks
+
+        RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -276,17 +298,17 @@ class ActionflowTaskManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_actionflow_task_actionflow_task.ActionflowTask]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``actionflow_tasks`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``actionflow_tasks``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.actionflow_tasks
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.actionflow_tasks
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -299,7 +321,10 @@ class ActionflowTaskManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_task_actionflow_task.ActionflowTask:
-        """RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Get (unary-unary)"""
+        """Get a single actionflow task
+
+        RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -321,16 +346,18 @@ class ActionflowTaskManagement(_runtime.ServiceBase):
         settings: bytes | None = None,
         input: bytes | None = None,
         output: bytes | None = None,
-        type: int | None = None,
+        type: _m_clappform_client_v1_actionflow_task_actionflow_task.taskType | int | str | None = None,
         script: bytes | None = None,
+        timeout_: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_task_actionflow_task.ActionflowTask:
-        """RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Create (unary-unary)
-        Fields only settable via a request message (name collision): timeout
+        """Create a new actionflow task
+
+        RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Create (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("name", name), ("settings", settings), ("input", input), ("output", output), ("type", type), ("script", script),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("name", name), ("settings", settings), ("input", input), ("output", output), ("type", type), ("script", script), ("timeout", timeout_),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_actionflow_task_actionflow_task.CreateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -352,16 +379,18 @@ class ActionflowTaskManagement(_runtime.ServiceBase):
         settings: bytes | None = None,
         input: bytes | None = None,
         output: bytes | None = None,
-        type: int | None = None,
+        type: _m_clappform_client_v1_actionflow_task_actionflow_task.taskType | int | str | None = None,
         script: bytes | None = None,
+        timeout_: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_actionflow_task_actionflow_task.ActionflowTask:
-        """RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Update (unary-unary)
-        Fields only settable via a request message (name collision): timeout
+        """Update an existing actionflow task
+
+        RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Update (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("settings", settings), ("input", input), ("output", output), ("type", type), ("script", script),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("settings", settings), ("input", input), ("output", output), ("type", type), ("script", script), ("timeout", timeout_),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_actionflow_task_actionflow_task.UpdateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -385,7 +414,10 @@ class ActionflowTaskManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Delete (unary-unary)"""
+        """Delete an actionflow task
+
+        RPC: /clappform.client.v1.actionflow_task.ActionflowTaskManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -418,7 +450,10 @@ class AppManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_app_app.Apps:
-        """RPC: /clappform.client.v1.app.AppManagement/GetAll (unary-unary)"""
+        """Get all apps
+
+        RPC: /clappform.client.v1.app.AppManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -447,17 +482,17 @@ class AppManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_app_app.App]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``apps`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``apps``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.apps
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.apps
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -470,7 +505,10 @@ class AppManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_app_app.App:
-        """RPC: /clappform.client.v1.app.AppManagement/Get (unary-unary)"""
+        """Get a single app
+
+        RPC: /clappform.client.v1.app.AppManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -490,12 +528,15 @@ class AppManagement(_runtime.ServiceBase):
         *,
         slug: str | None = None,
         settings: bytes | None = None,
-        tags: Sequence[_m_clappform_client_v1_app_app.Tag] | None = None,
+        tags: Sequence[_m_clappform_client_v1_app_app.Tag | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_app_app.App:
-        """RPC: /clappform.client.v1.app.AppManagement/Create (unary-unary)"""
+        """Create a new app
+
+        RPC: /clappform.client.v1.app.AppManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("slug", slug), ("settings", settings), ("tags", tags),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_app_app.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -516,12 +557,15 @@ class AppManagement(_runtime.ServiceBase):
         id: str | None = None,
         slug: str | None = None,
         settings: bytes | None = None,
-        tags: Sequence[_m_clappform_client_v1_app_app.Tag] | None = None,
+        tags: Sequence[_m_clappform_client_v1_app_app.Tag | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_app_app.App:
-        """RPC: /clappform.client.v1.app.AppManagement/Update (unary-unary)"""
+        """Update an existing app
+
+        RPC: /clappform.client.v1.app.AppManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("slug", slug), ("settings", settings), ("tags", tags),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_app_app.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -546,7 +590,10 @@ class AppManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.app.AppManagement/Delete (unary-unary)"""
+        """Delete an app
+
+        RPC: /clappform.client.v1.app.AppManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -568,7 +615,7 @@ class AuditManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_client_v1_audit_audit.AuditListRequest | None = None,
         *,
-        pagination: _m_clappform_v1_commons_commons.PaginationRequest | None = None,
+        pagination: _m_clappform_v1_commons_commons.PaginationRequest | Mapping[str, Any] | None = None,
         start_date: int | None = None,
         end_date: int | None = None,
         user_id: str | None = None,
@@ -584,7 +631,17 @@ class AuditManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_audit_audit.Logs:
-        """RPC: /clappform.client.v1.audit.AuditManagement/GetAll (unary-unary)"""
+        """Get all logs
+
+        RPC: /clappform.client.v1.audit.AuditManagement/GetAll (unary-unary)
+
+        Args:
+            method: Filter by gRPC method (e.g., "/clappform.client.v1.transfer.TransferManagement/ExportApp")
+            method_prefix: Filter by method prefix (e.g., "/clappform.client.v1.transfer" for all transfer endpoints)
+            data_filters: Key-value pairs to filter on data fields
+            url: Filter by exact HTTP URL (e.g. "https://api.example.com/v1/pages/5/rows")
+            url_prefix: Filter by HTTP URL prefix (e.g. "https://api.example.com/v1/pages")
+        """
         _provided = {_k: _v for _k, _v in (("pagination", pagination), ("start_date", start_date), ("end_date", end_date), ("user_id", user_id), ("request_id", request_id), ("message", message), ("level", level), ("method", method), ("method_prefix", method_prefix), ("data_filters", data_filters), ("url", url), ("url_prefix", url_prefix),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_audit_audit.AuditListRequest, request, _provided)
         return self._caller.invoke(
@@ -611,6 +668,10 @@ class AuditManagement(_runtime.ServiceBase):
         """Get API usage statistics
 
         RPC: /clappform.client.v1.audit.AuditManagement/GetAPIUsageStats (unary-unary)
+
+        Args:
+            start_date: Start date in milliseconds since epoch
+            end_date: End date in milliseconds since epoch
         """
         _provided = {_k: _v for _k, _v in (("start_date", start_date), ("end_date", end_date),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_audit_audit.TimeRangeRequest, request, _provided)
@@ -638,6 +699,10 @@ class AuditManagement(_runtime.ServiceBase):
         """Get error statistics
 
         RPC: /clappform.client.v1.audit.AuditManagement/GetErrorStats (unary-unary)
+
+        Args:
+            start_date: Start date in milliseconds since epoch
+            end_date: End date in milliseconds since epoch
         """
         _provided = {_k: _v for _k, _v in (("start_date", start_date), ("end_date", end_date),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_audit_audit.TimeRangeRequest, request, _provided)
@@ -665,6 +730,10 @@ class AuditManagement(_runtime.ServiceBase):
         """Get user activity statistics
 
         RPC: /clappform.client.v1.audit.AuditManagement/GetUserActivityStats (unary-unary)
+
+        Args:
+            start_date: Start date in milliseconds since epoch
+            end_date: End date in milliseconds since epoch
         """
         _provided = {_k: _v for _k, _v in (("start_date", start_date), ("end_date", end_date),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_audit_audit.TimeRangeRequest, request, _provided)
@@ -692,6 +761,10 @@ class AuditManagement(_runtime.ServiceBase):
         """Get performance statistics
 
         RPC: /clappform.client.v1.audit.AuditManagement/GetPerformanceStats (unary-unary)
+
+        Args:
+            start_date: Start date in milliseconds since epoch
+            end_date: End date in milliseconds since epoch
         """
         _provided = {_k: _v for _k, _v in (("start_date", start_date), ("end_date", end_date),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_audit_audit.TimeRangeRequest, request, _provided)
@@ -719,6 +792,10 @@ class AuditManagement(_runtime.ServiceBase):
         """Get security statistics
 
         RPC: /clappform.client.v1.audit.AuditManagement/GetSecurityStats (unary-unary)
+
+        Args:
+            start_date: Start date in milliseconds since epoch
+            end_date: End date in milliseconds since epoch
         """
         _provided = {_k: _v for _k, _v in (("start_date", start_date), ("end_date", end_date),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_audit_audit.TimeRangeRequest, request, _provided)
@@ -752,7 +829,10 @@ class CollectionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_collection.Collections:
-        """RPC: /clappform.client.v1.collection.CollectionManagement/GetAll (unary-unary)"""
+        """Get all collections
+
+        RPC: /clappform.client.v1.collection.CollectionManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -781,17 +861,17 @@ class CollectionManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_collection_collection.Collection]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``collections`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``collections``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.collections
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.collections
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -805,7 +885,10 @@ class CollectionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_collection.Collection:
-        """RPC: /clappform.client.v1.collection.CollectionManagement/Get (unary-unary)"""
+        """Get a single collection
+
+        RPC: /clappform.client.v1.collection.CollectionManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted), ("app", app),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_collection_collection.CollectionRead, request, _provided)
         return self._caller.invoke(
@@ -826,12 +909,15 @@ class CollectionManagement(_runtime.ServiceBase):
         slug: str | None = None,
         settings: bytes | None = None,
         app_id: str | None = None,
-        database: int | None = None,
+        database: _m_clappform_client_v1_collection_collection.databaseType | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_collection.Collection:
-        """RPC: /clappform.client.v1.collection.CollectionManagement/Create (unary-unary)"""
+        """Create a new collection
+
+        RPC: /clappform.client.v1.collection.CollectionManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("slug", slug), ("settings", settings), ("app_id", app_id), ("database", database),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_collection_collection.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -856,7 +942,10 @@ class CollectionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_collection.Collection:
-        """RPC: /clappform.client.v1.collection.CollectionManagement/Update (unary-unary)"""
+        """Update an existing collection
+
+        RPC: /clappform.client.v1.collection.CollectionManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("settings", settings), ("slug", slug),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_collection_collection.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -881,7 +970,10 @@ class CollectionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.collection.CollectionManagement/Delete (unary-unary)"""
+        """Delete an existing collection
+
+        RPC: /clappform.client.v1.collection.CollectionManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -914,7 +1006,10 @@ class CollectionRuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_rule_collection_rule.CollectionRules:
-        """RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/GetAll (unary-unary)"""
+        """Get all collection rules
+
+        RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -943,17 +1038,17 @@ class CollectionRuleManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_collection_rule_collection_rule.CollectionRule]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``collection_rules`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``collection_rules``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.collection_rules
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.collection_rules
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -966,7 +1061,10 @@ class CollectionRuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_rule_collection_rule.CollectionRule:
-        """RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Get (unary-unary)"""
+        """Get a single collection rule
+
+        RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -991,7 +1089,10 @@ class CollectionRuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_rule_collection_rule.CollectionRule:
-        """RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Create (unary-unary)"""
+        """Create a new collections rule
+
+        RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("collection", collection), ("settings", settings),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_collection_rule_collection_rule.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -1017,7 +1118,10 @@ class CollectionRuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_collection_rule_collection_rule.CollectionRule:
-        """RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Update (unary-unary)"""
+        """Update an existing collection rule
+
+        RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("collection", collection), ("settings", settings),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_collection_rule_collection_rule.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -1042,7 +1146,10 @@ class CollectionRuleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Delete (unary-unary)"""
+        """Delete an existing collection rule
+
+        RPC: /clappform.client.v1.collection_rule.CollectionRuleManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1075,7 +1182,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_cronjob_cronjob.Cronjobs:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/GetAll (unary-unary)"""
+        """Get all cronjobs
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -1104,17 +1214,17 @@ class CronjobManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_cronjob_cronjob.Cronjob]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``cronjobs`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``cronjobs``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.cronjobs
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.cronjobs
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -1127,7 +1237,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_cronjob_cronjob.Cronjob:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/Get (unary-unary)"""
+        """Get a single cronjob
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1153,7 +1266,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_cronjob_cronjob.Cronjob:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/Create (unary-unary)"""
+        """Create a new cronjob
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("pattern", pattern), ("settings", settings), ("actionflows", actionflows),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_cronjob_cronjob.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -1180,7 +1296,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_cronjob_cronjob.Cronjob:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/Update (unary-unary)"""
+        """Update an existing cronjob
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("pattern", pattern), ("settings", settings), ("actionflows", actionflows),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_cronjob_cronjob.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -1205,7 +1324,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/Delete (unary-unary)"""
+        """Delete a cronjob
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1227,7 +1349,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/StopAll (unary-unary)"""
+        """Stop all cronjobs
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/StopAll (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -1252,7 +1377,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_cronjob_cronjob.Cronjob:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/Stop (unary-unary)"""
+        """Stop a single cronjob
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/Stop (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1274,7 +1402,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_cronjob_cronjob.Cronjobs:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/StartAll (unary-unary)"""
+        """Start all cronjobs
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/StartAll (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -1299,7 +1430,10 @@ class CronjobManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_cronjob_cronjob.Cronjob:
-        """RPC: /clappform.client.v1.cronjob.CronjobManagement/Start (unary-unary)"""
+        """Start a single cronjob
+
+        RPC: /clappform.client.v1.cronjob.CronjobManagement/Start (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1327,7 +1461,10 @@ class DuplicateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.duplicate.DuplicateManagement/Widget (unary-unary)"""
+        """Duplicate a single widget to a new location
+
+        RPC: /clappform.client.v1.duplicate.DuplicateManagement/Widget (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("target_id", target_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_duplicate_duplicate.DuplicateRequest, request, _provided)
         return self._caller.invoke(
@@ -1351,7 +1488,10 @@ class DuplicateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.duplicate.DuplicateManagement/Row (unary-unary)"""
+        """Duplicate a single row to a new location
+
+        RPC: /clappform.client.v1.duplicate.DuplicateManagement/Row (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("target_id", target_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_duplicate_duplicate.DuplicateRequest, request, _provided)
         return self._caller.invoke(
@@ -1375,7 +1515,10 @@ class DuplicateManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.duplicate.DuplicateManagement/Page (unary-unary)"""
+        """Duplicate a single page to a new location
+
+        RPC: /clappform.client.v1.duplicate.DuplicateManagement/Page (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("target_id", target_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_duplicate_duplicate.DuplicateRequest, request, _provided)
         return self._caller.invoke(
@@ -1408,7 +1551,10 @@ class FileWatcherManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_file_watcher_file_watcher.FileWatchers:
-        """RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/GetAll (unary-unary)"""
+        """Get all filewatchers
+
+        RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -1437,17 +1583,17 @@ class FileWatcherManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_file_watcher_file_watcher.FileWatcher]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``file_watchers`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``file_watchers``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.file_watchers
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.file_watchers
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -1460,7 +1606,10 @@ class FileWatcherManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_file_watcher_file_watcher.FileWatcher:
-        """RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Get (unary-unary)"""
+        """Get a single filewatcher
+
+        RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1485,16 +1634,18 @@ class FileWatcherManagement(_runtime.ServiceBase):
         environment: bytes | None = None,
         ignore_directories: bool | None = None,
         ignore_patterns: Sequence[str] | None = None,
+        timeout_: int | None = None,
         recursive: bool | None = None,
         events: Sequence[str] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_file_watcher_file_watcher.FileWatcher:
-        """RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Create (unary-unary)
-        Fields only settable via a request message (name collision): timeout
+        """Create a new filewatcher
+
+        RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Create (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("name", name), ("patterns", patterns), ("directory", directory), ("commands", commands), ("environment", environment), ("ignore_directories", ignore_directories), ("ignore_patterns", ignore_patterns), ("recursive", recursive), ("events", events),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("name", name), ("patterns", patterns), ("directory", directory), ("commands", commands), ("environment", environment), ("ignore_directories", ignore_directories), ("ignore_patterns", ignore_patterns), ("timeout", timeout_), ("recursive", recursive), ("events", events),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_file_watcher_file_watcher.CreateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -1519,16 +1670,18 @@ class FileWatcherManagement(_runtime.ServiceBase):
         environment: bytes | None = None,
         ignore_directories: bool | None = None,
         ignore_patterns: Sequence[str] | None = None,
+        timeout_: int | None = None,
         recursive: bool | None = None,
         events: Sequence[str] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_file_watcher_file_watcher.FileWatcher:
-        """RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Update (unary-unary)
-        Fields only settable via a request message (name collision): timeout
+        """Update an existing file
+
+        RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Update (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("patterns", patterns), ("directory", directory), ("commands", commands), ("environment", environment), ("ignore_directories", ignore_directories), ("ignore_patterns", ignore_patterns), ("recursive", recursive), ("events", events),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("patterns", patterns), ("directory", directory), ("commands", commands), ("environment", environment), ("ignore_directories", ignore_directories), ("ignore_patterns", ignore_patterns), ("timeout", timeout_), ("recursive", recursive), ("events", events),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_file_watcher_file_watcher.UpdateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -1552,7 +1705,10 @@ class FileWatcherManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Delete (unary-unary)"""
+        """Delete a filewatcher
+
+        RPC: /clappform.client.v1.file_watcher.FileWatcherManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1574,12 +1730,18 @@ class FileshareManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_client_v1_fileshare_fileshare.GenerateSASTokenRequest | None = None,
         *,
-        share: int | None = None,
+        share: _m_clappform_client_v1_fileshare_fileshare.SupportedShares | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_fileshare_fileshare.GenerateSASTokenResponse:
-        """RPC: /clappform.client.v1.fileshare.FileshareManagement/GenerateSASToken (unary-unary)"""
+        """Generate a SAS token
+
+        RPC: /clappform.client.v1.fileshare.FileshareManagement/GenerateSASToken (unary-unary)
+
+        Args:
+            share: The share type to access
+        """
         _provided = {_k: _v for _k, _v in (("share", share),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_fileshare_fileshare.GenerateSASTokenRequest, request, _provided)
         return self._caller.invoke(
@@ -1605,7 +1767,10 @@ class FileshareManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_fileshare_fileshare.FileRequest:
-        """RPC: /clappform.client.v1.fileshare.FileshareManagement/UploadFile (unary-unary)"""
+        """Upload a file
+
+        RPC: /clappform.client.v1.fileshare.FileshareManagement/UploadFile (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("file_name", file_name), ("file_path", file_path), ("file_data", file_data), ("signed_url", signed_url),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_fileshare_fileshare.FileData, request, _provided)
         return self._caller.invoke(
@@ -1623,7 +1788,7 @@ class FileshareManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_client_v1_fileshare_fileshare.FileRequest | None = None,
         *,
-        share: int | None = None,
+        share: _m_clappform_client_v1_fileshare_fileshare.SupportedShares | int | str | None = None,
         file_path: str | None = None,
         file_name: str | None = None,
         chunk_size: int | None = None,
@@ -1631,7 +1796,10 @@ class FileshareManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_fileshare_fileshare.FileData:
-        """RPC: /clappform.client.v1.fileshare.FileshareManagement/DownloadFile (unary-unary)"""
+        """Download a file
+
+        RPC: /clappform.client.v1.fileshare.FileshareManagement/DownloadFile (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("share", share), ("file_path", file_path), ("file_name", file_name), ("chunk_size", chunk_size),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_fileshare_fileshare.FileRequest, request, _provided)
         return self._caller.invoke(
@@ -1649,7 +1817,7 @@ class FileshareManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_client_v1_fileshare_fileshare.FileRequest | None = None,
         *,
-        share: int | None = None,
+        share: _m_clappform_client_v1_fileshare_fileshare.SupportedShares | int | str | None = None,
         file_path: str | None = None,
         file_name: str | None = None,
         chunk_size: int | None = None,
@@ -1657,7 +1825,10 @@ class FileshareManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.fileshare.FileshareManagement/DeleteFile (unary-unary)"""
+        """Delete a file
+
+        RPC: /clappform.client.v1.fileshare.FileshareManagement/DeleteFile (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("share", share), ("file_path", file_path), ("file_name", file_name), ("chunk_size", chunk_size),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_fileshare_fileshare.FileRequest, request, _provided)
         return self._caller.invoke(
@@ -1719,7 +1890,10 @@ class GroupManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_group_group.Groups:
-        """RPC: /clappform.client.v1.group.GroupManagement/GetAll (unary-unary)"""
+        """Get all groups
+
+        RPC: /clappform.client.v1.group.GroupManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -1748,17 +1922,18 @@ class GroupManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_group_group.Group]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``groups`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``groups``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
+        Only ``groups`` is yielded; call ``get_all`` for ``pages``.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.groups
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.groups
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -1771,7 +1946,10 @@ class GroupManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_group_group.GroupRead:
-        """RPC: /clappform.client.v1.group.GroupManagement/Get (unary-unary)"""
+        """Get a single group
+
+        RPC: /clappform.client.v1.group.GroupManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1798,7 +1976,10 @@ class GroupManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_group_group.Group:
-        """RPC: /clappform.client.v1.group.GroupManagement/Create (unary-unary)"""
+        """Create a new group
+
+        RPC: /clappform.client.v1.group.GroupManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("settings", settings), ("order", order), ("app_id", app_id), ("main_group_id", main_group_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_group_group.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -1825,7 +2006,10 @@ class GroupManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_group_group.Group:
-        """RPC: /clappform.client.v1.group.GroupManagement/Update (unary-unary)"""
+        """Update an existing group
+
+        RPC: /clappform.client.v1.group.GroupManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("settings", settings), ("order", order), ("main_group_id", main_group_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_group_group.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -1850,7 +2034,10 @@ class GroupManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.group.GroupManagement/Delete (unary-unary)"""
+        """Delete a group
+
+        RPC: /clappform.client.v1.group.GroupManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1878,14 +2065,16 @@ class HosterManagement(_runtime.ServiceBase):
         lime: bytes | None = None,
         shap: bytes | None = None,
         explain_type: str | None = None,
+        metadata_: bytes | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_hoster_hoster.PredictionContext:
-        """RPC: /clappform.client.v1.hoster.HosterManagement/Prediction (unary-unary)
-        Fields only settable via a request message (name collision): metadata
+        """Request a prediction from the hoster
+
+        RPC: /clappform.client.v1.hoster.HosterManagement/Prediction (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("model_name", model_name), ("model_version", model_version), ("data", data), ("lime", lime), ("shap", shap), ("explain_type", explain_type),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("model_name", model_name), ("model_version", model_version), ("data", data), ("lime", lime), ("shap", shap), ("explain_type", explain_type), ("metadata", metadata_),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_hoster_hoster.PredictionContext, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -1908,14 +2097,16 @@ class HosterManagement(_runtime.ServiceBase):
         lime: bytes | None = None,
         shap: bytes | None = None,
         explain_type: str | None = None,
+        metadata_: bytes | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_hoster_hoster.PredictionContext:
-        """RPC: /clappform.client.v1.hoster.HosterManagement/BatchPrediction (unary-unary)
-        Fields only settable via a request message (name collision): metadata
+        """Request a prediction from the hoster
+
+        RPC: /clappform.client.v1.hoster.HosterManagement/BatchPrediction (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("model_name", model_name), ("model_version", model_version), ("data", data), ("lime", lime), ("shap", shap), ("explain_type", explain_type),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("model_name", model_name), ("model_version", model_version), ("data", data), ("lime", lime), ("shap", shap), ("explain_type", explain_type), ("metadata", metadata_),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_hoster_hoster.PredictionContext, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -1940,7 +2131,10 @@ class MapboxManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_mapbox_mapbox.Styles:
-        """RPC: /clappform.client.v1.mapbox.MapboxManagement/GetAllStyles (unary-unary)"""
+        """Get all mapbox styles
+
+        RPC: /clappform.client.v1.mapbox.MapboxManagement/GetAllStyles (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -1965,7 +2159,10 @@ class MapboxManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_mapbox_mapbox.Style:
-        """RPC: /clappform.client.v1.mapbox.MapboxManagement/GetOneStyle (unary-unary)"""
+        """Get a single mapbox style
+
+        RPC: /clappform.client.v1.mapbox.MapboxManagement/GetOneStyle (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1987,7 +2184,10 @@ class MapboxManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_mapbox_mapbox.Tilesets:
-        """RPC: /clappform.client.v1.mapbox.MapboxManagement/GetAllTilesets (unary-unary)"""
+        """Get all tilesets
+
+        RPC: /clappform.client.v1.mapbox.MapboxManagement/GetAllTilesets (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -2012,7 +2212,10 @@ class MapboxManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_mapbox_mapbox.TilesetMetadata:
-        """RPC: /clappform.client.v1.mapbox.MapboxManagement/GetOneTileset (unary-unary)"""
+        """Get a single tileset
+
+        RPC: /clappform.client.v1.mapbox.MapboxManagement/GetOneTileset (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2045,7 +2248,10 @@ class PageManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_page_page.Pages:
-        """RPC: /clappform.client.v1.page.PageManagement/GetAll (unary-unary)"""
+        """Get all pages
+
+        RPC: /clappform.client.v1.page.PageManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -2074,17 +2280,18 @@ class PageManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_page_page.Page]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``pages`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``pages``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
+        Only ``pages`` is yielded; call ``get_all`` for ``rows``.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.pages
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.pages
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -2098,7 +2305,10 @@ class PageManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_page_page.Page:
-        """RPC: /clappform.client.v1.page.PageManagement/Get (unary-unary)"""
+        """Get a single page
+
+        RPC: /clappform.client.v1.page.PageManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted), ("app", app),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_page_page.PageRead, request, _provided)
         return self._caller.invoke(
@@ -2125,7 +2335,10 @@ class PageManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_page_page.Page:
-        """RPC: /clappform.client.v1.page.PageManagement/Create (unary-unary)"""
+        """Create a new page
+
+        RPC: /clappform.client.v1.page.PageManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("settings", settings), ("order", order), ("group_id", group_id), ("default_page", default_page),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_page_page.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -2153,7 +2366,10 @@ class PageManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_page_page.Page:
-        """RPC: /clappform.client.v1.page.PageManagement/Update (unary-unary)"""
+        """Update an existing page
+
+        RPC: /clappform.client.v1.page.PageManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("settings", settings), ("order", order), ("group_id", group_id), ("default_page", default_page),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_page_page.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -2178,7 +2394,10 @@ class PageManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.page.PageManagement/Delete (unary-unary)"""
+        """Delete a page
+
+        RPC: /clappform.client.v1.page.PageManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2207,7 +2426,10 @@ class PDFServiceManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.pdf_service.PDFServiceManagement/Generate (unary-unary)"""
+        """Start pdf generation
+
+        RPC: /clappform.client.v1.pdf_service.PDFServiceManagement/Generate (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("template", template), ("output_file", output_file), ("data", data),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_pdf_service_pdf_service.EmailRequest, request, _provided)
         return self._caller.invoke(
@@ -2230,7 +2452,10 @@ class PDFServiceManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_fileshare_fileshare.FileData:
-        """RPC: /clappform.client.v1.pdf_service.PDFServiceManagement/DownloadPDF (unary-unary)"""
+        """Start pdf generation
+
+        RPC: /clappform.client.v1.pdf_service.PDFServiceManagement/DownloadPDF (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("file_name", file_name),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_pdf_service_pdf_service.FileRequest, request, _provided)
         return self._caller.invoke(
@@ -2258,7 +2483,10 @@ class PostcodeAPIManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_postcode_api_postcode_api.Address:
-        """RPC: /clappform.client.v1.postcode_api.PostcodeAPIManagement/GetOneAddress (unary-unary)"""
+        """Get a single address
+
+        RPC: /clappform.client.v1.postcode_api.PostcodeAPIManagement/GetOneAddress (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("postal_code", postal_code), ("house_number", house_number),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_postcode_api_postcode_api.QueriedAddress, request, _provided)
         return self._caller.invoke(
@@ -2284,7 +2512,10 @@ class ProcessManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_process.ConformanceDeclaration:
-        """RPC: /clappform.client.v1.process.ProcessManagement/GetConformance (unary-unary)"""
+        """Information about standards and specifications this API conforms to
+
+        RPC: /clappform.client.v1.process.ProcessManagement/GetConformance (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_client_v1_process_process.GetConformanceRequest, request, _provided)
         return self._caller.invoke(
@@ -2309,7 +2540,13 @@ class ProcessManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_process.ProcessList:
-        """RPC: /clappform.client.v1.process.ProcessManagement/ListProcesses (unary-unary)"""
+        """Retrieve list of available processes (storage locations and their CRUD operations)
+
+        RPC: /clappform.client.v1.process.ProcessManagement/ListProcesses (unary-unary)
+
+        Args:
+            filter: e.g., filter by process type, default returns api specific processes
+        """
         _provided = {_k: _v for _k, _v in (("limit", limit), ("offset", offset), ("filter", filter),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_process.ListProcessesRequest, request, _provided)
         return self._caller.invoke(
@@ -2332,7 +2569,10 @@ class ProcessManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_process.ProcessDescription:
-        """RPC: /clappform.client.v1.process.ProcessManagement/DescribeProcess (unary-unary)"""
+        """Retrieve metadata and schema for a specific process
+
+        RPC: /clappform.client.v1.process.ProcessManagement/DescribeProcess (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("process_id", process_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_process.DescribeProcessRequest, request, _provided)
         return self._caller.invoke(
@@ -2351,14 +2591,22 @@ class ProcessManagement(_runtime.ServiceBase):
         request: _m_clappform_client_v1_process_process.ExecuteRequest | None = None,
         *,
         process_id: str | None = None,
-        inputs: _m_google_protobuf_struct.Struct | None = None,
+        inputs: _m_google_protobuf_struct.Struct | Mapping[str, Any] | None = None,
         mode: str | None = None,
         response: str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_process.ExecuteResponse:
-        """RPC: /clappform.client.v1.process.ProcessManagement/ExecuteProcess (unary-unary)"""
+        """Execute a process (insert, update, delete, or query operation)
+
+        RPC: /clappform.client.v1.process.ProcessManagement/ExecuteProcess (unary-unary)
+
+        Args:
+            inputs: JSON object of input parameters
+            mode: "sync" | "async"
+            response: "raw" | "document"
+        """
         _provided = {_k: _v for _k, _v in (("process_id", process_id), ("inputs", inputs), ("mode", mode), ("response", response),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_process.ExecuteRequest, request, _provided)
         return self._caller.invoke(
@@ -2381,7 +2629,10 @@ class ProcessManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_process.JobStatus:
-        """RPC: /clappform.client.v1.process.ProcessManagement/GetJobStatus (unary-unary)"""
+        """Get status of an asynchronous job
+
+        RPC: /clappform.client.v1.process.ProcessManagement/GetJobStatus (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("job_id", job_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_process.GetJobRequest, request, _provided)
         return self._caller.invoke(
@@ -2404,7 +2655,10 @@ class ProcessManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_process.JobStatus:
-        """RPC: /clappform.client.v1.process.ProcessManagement/DismissJob (unary-unary)"""
+        """Dismiss/cancel a running or pending job
+
+        RPC: /clappform.client.v1.process.ProcessManagement/DismissJob (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("job_id", job_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_process.DismissJobRequest, request, _provided)
         return self._caller.invoke(
@@ -2427,7 +2681,10 @@ class ProcessManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_process.JobResults:
-        """RPC: /clappform.client.v1.process.ProcessManagement/GetJobResults (unary-unary)"""
+        """Retrieve results of a completed job
+
+        RPC: /clappform.client.v1.process.ProcessManagement/GetJobResults (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("job_id", job_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_process.GetJobRequest, request, _provided)
         return self._caller.invoke(
@@ -2460,7 +2717,10 @@ class ProcessDefinitionsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_definitions_process_definitions.ProcessDefinitions:
-        """RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/GetAll (unary-unary)"""
+        """Get all processes
+
+        RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -2489,17 +2749,17 @@ class ProcessDefinitionsManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_process_definitions_process_definitions.ProcessDefinition]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``process_definitions`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``process_definitions``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.process_definitions
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.process_definitions
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -2512,7 +2772,10 @@ class ProcessDefinitionsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_definitions_process_definitions.ProcessDefinition:
-        """RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Get (unary-unary)"""
+        """Get a single process definitions
+
+        RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2532,15 +2795,20 @@ class ProcessDefinitionsManagement(_runtime.ServiceBase):
         *,
         name: str | None = None,
         source_id: str | None = None,
-        type: int | None = None,
+        type: _m_clappform_client_v1_process_definitions_process_definitions.ProcessDefinitionType | int | str | None = None,
+        metadata_: _m_google_protobuf_struct.Struct | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_definitions_process_definitions.ProcessDefinition:
-        """RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Create (unary-unary)
-        Fields only settable via a request message (name collision): metadata
+        """Create a new process definition
+
+        RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Create (unary-unary)
+
+        Args:
+            source_id: UUID of whatever is being used as source (questionnaire, query, actionflow)
         """
-        _provided = {_k: _v for _k, _v in (("name", name), ("source_id", source_id), ("type", type),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("name", name), ("source_id", source_id), ("type", type), ("metadata", metadata_),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_definitions_process_definitions.CreateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -2560,15 +2828,20 @@ class ProcessDefinitionsManagement(_runtime.ServiceBase):
         id: str | None = None,
         name: str | None = None,
         source_id: str | None = None,
-        type: int | None = None,
+        type: _m_clappform_client_v1_process_definitions_process_definitions.ProcessDefinitionType | int | str | None = None,
+        metadata_: _m_google_protobuf_struct.Struct | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_process_definitions_process_definitions.ProcessDefinition:
-        """RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Update (unary-unary)
-        Fields only settable via a request message (name collision): metadata
+        """Update an existing process definition
+
+        RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Update (unary-unary)
+
+        Args:
+            source_id: UUID of whatever is being used as source (questionnaire, query, actionflow)
         """
-        _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("source_id", source_id), ("type", type),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("source_id", source_id), ("type", type), ("metadata", metadata_),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_process_definitions_process_definitions.UpdateRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -2592,7 +2865,10 @@ class ProcessDefinitionsManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Delete (unary-unary)"""
+        """Delete a process definition
+
+        RPC: /clappform.client.v1.process_definitions.ProcessDefinitionsManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2625,7 +2901,10 @@ class QueryManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_query_query.Queries:
-        """RPC: /clappform.client.v1.query.QueryManagement/GetAll (unary-unary)"""
+        """Get all queries
+
+        RPC: /clappform.client.v1.query.QueryManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -2654,17 +2933,17 @@ class QueryManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_query_query.Query]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``queries`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``queries``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.queries
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.queries
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -2677,7 +2956,10 @@ class QueryManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_query_query.Query:
-        """RPC: /clappform.client.v1.query.QueryManagement/Get (unary-unary)"""
+        """Get a single query
+
+        RPC: /clappform.client.v1.query.QueryManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2701,7 +2983,10 @@ class QueryManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_widget_widget.Widgets:
-        """RPC: /clappform.client.v1.query.QueryManagement/GetRelatedWidgets (unary-unary)"""
+        """Get a single query
+
+        RPC: /clappform.client.v1.query.QueryManagement/GetRelatedWidgets (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("page", page),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_query_query.SourceQueryRequest, request, _provided)
         return self._caller.invoke(
@@ -2728,7 +3013,10 @@ class QueryManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_query_query.Query:
-        """RPC: /clappform.client.v1.query.QueryManagement/Create (unary-unary)"""
+        """Create a new query
+
+        RPC: /clappform.client.v1.query.QueryManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("pipeline", pipeline), ("source_query", source_query), ("collection", collection), ("exportable", exportable),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_query_query.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -2756,7 +3044,10 @@ class QueryManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_query_query.Query:
-        """RPC: /clappform.client.v1.query.QueryManagement/Update (unary-unary)"""
+        """Update an existing query
+
+        RPC: /clappform.client.v1.query.QueryManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("pipeline", pipeline), ("source_query", source_query), ("collection", collection), ("exportable", exportable),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_query_query.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -2781,7 +3072,10 @@ class QueryManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.query.QueryManagement/Delete (unary-unary)"""
+        """Delete a query
+
+        RPC: /clappform.client.v1.query.QueryManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2814,7 +3108,10 @@ class QuestionnaireManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_questionnaire_questionnaire.Questionnaires:
-        """RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/GetAll (unary-unary)"""
+        """Get all questionnaires
+
+        RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -2843,17 +3140,17 @@ class QuestionnaireManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_questionnaire_questionnaire.Questionnaire]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``questionnaires`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``questionnaires``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.questionnaires
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.questionnaires
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -2866,7 +3163,10 @@ class QuestionnaireManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_questionnaire_questionnaire.Questionnaire:
-        """RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Get (unary-unary)"""
+        """Get a single questionnaire
+
+        RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2890,7 +3190,10 @@ class QuestionnaireManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_questionnaire_questionnaire.Questionnaire:
-        """RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Create (unary-unary)"""
+        """Create a new questionnaire
+
+        RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("settings", settings),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_questionnaire_questionnaire.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -2915,7 +3218,10 @@ class QuestionnaireManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_questionnaire_questionnaire.Questionnaire:
-        """RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Update (unary-unary)"""
+        """Update an existing questionnaire
+
+        RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("settings", settings),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_questionnaire_questionnaire.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -2940,7 +3246,10 @@ class QuestionnaireManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Delete (unary-unary)"""
+        """Delete a questionnaire
+
+        RPC: /clappform.client.v1.questionnaire.QuestionnaireManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -2973,7 +3282,10 @@ class RowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_row_row.Rows:
-        """RPC: /clappform.client.v1.row.RowManagement/GetAll (unary-unary)"""
+        """Get a all rows
+
+        RPC: /clappform.client.v1.row.RowManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -3002,17 +3314,18 @@ class RowManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_row_row.Row]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``rows`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``rows``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
+        Only ``rows`` is yielded; call ``get_all`` for ``widgets``.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.rows
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.rows
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -3025,7 +3338,10 @@ class RowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_row_row.RowRead:
-        """RPC: /clappform.client.v1.row.RowManagement/Get (unary-unary)"""
+        """Get a single row
+
+        RPC: /clappform.client.v1.row.RowManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -3050,7 +3366,10 @@ class RowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_row_row.Row:
-        """RPC: /clappform.client.v1.row.RowManagement/Create (unary-unary)"""
+        """Create a new row
+
+        RPC: /clappform.client.v1.row.RowManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("settings", settings), ("order", order), ("page_id", page_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_row_row.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -3076,7 +3395,10 @@ class RowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_row_row.Row:
-        """RPC: /clappform.client.v1.row.RowManagement/Update (unary-unary)"""
+        """Update an existing row
+
+        RPC: /clappform.client.v1.row.RowManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("settings", settings), ("order", order), ("page_id", page_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_row_row.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -3101,7 +3423,10 @@ class RowManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.row.RowManagement/Delete (unary-unary)"""
+        """Delete an existing row
+
+        RPC: /clappform.client.v1.row.RowManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -3134,7 +3459,10 @@ class SecretManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_secret_secret.Secrets:
-        """RPC: /clappform.client.v1.secret.SecretManagement/GetAll (unary-unary)"""
+        """Get all secrets
+
+        RPC: /clappform.client.v1.secret.SecretManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -3163,29 +3491,32 @@ class SecretManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_secret_secret.Secret]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``secrets`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``secrets``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.secrets
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.secrets
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
         request: _m_clappform_client_v1_secret_secret.SecretRead | None = None,
         *,
         key: str | None = None,
-        scope: int | None = None,
+        scope: _m_clappform_client_v1_secret_secret.Scope | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_secret_secret.Secret:
-        """RPC: /clappform.client.v1.secret.SecretManagement/Get (unary-unary)"""
+        """Get a single secret
+
+        RPC: /clappform.client.v1.secret.SecretManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("key", key), ("scope", scope),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_secret_secret.SecretRead, request, _provided)
         return self._caller.invoke(
@@ -3206,14 +3537,17 @@ class SecretManagement(_runtime.ServiceBase):
         key: str | None = None,
         value: bytes | None = None,
         encrypted: bool | None = None,
-        scope: int | None = None,
-        type: int | None = None,
+        scope: _m_clappform_client_v1_secret_secret.Scope | int | str | None = None,
+        type: _m_clappform_client_v1_secret_secret.Type | int | str | None = None,
         expires_at: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_secret_secret.Secret:
-        """RPC: /clappform.client.v1.secret.SecretManagement/Create (unary-unary)"""
+        """Create a new secret
+
+        RPC: /clappform.client.v1.secret.SecretManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("key", key), ("value", value), ("encrypted", encrypted), ("scope", scope), ("type", type), ("expires_at", expires_at),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_secret_secret.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -3232,16 +3566,19 @@ class SecretManagement(_runtime.ServiceBase):
         request: _m_clappform_client_v1_secret_secret.UpdateRequest | None = None,
         *,
         key: str | None = None,
-        scope: int | None = None,
+        scope: _m_clappform_client_v1_secret_secret.Scope | int | str | None = None,
         value: bytes | None = None,
-        type: int | None = None,
+        type: _m_clappform_client_v1_secret_secret.Type | int | str | None = None,
         encrypted: bool | None = None,
         expires_at: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_secret_secret.Secret:
-        """RPC: /clappform.client.v1.secret.SecretManagement/Update (unary-unary)"""
+        """Update an existing secret
+
+        RPC: /clappform.client.v1.secret.SecretManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("key", key), ("scope", scope), ("value", value), ("type", type), ("encrypted", encrypted), ("expires_at", expires_at),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_secret_secret.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -3260,12 +3597,15 @@ class SecretManagement(_runtime.ServiceBase):
         request: _m_clappform_client_v1_secret_secret.SecretRead | None = None,
         *,
         key: str | None = None,
-        scope: int | None = None,
+        scope: _m_clappform_client_v1_secret_secret.Scope | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.secret.SecretManagement/Delete (unary-unary)"""
+        """Delete a secret
+
+        RPC: /clappform.client.v1.secret.SecretManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("key", key), ("scope", scope),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_secret_secret.SecretRead, request, _provided)
         return self._caller.invoke(
@@ -3288,16 +3628,18 @@ class SendgridManagement(_runtime.ServiceBase):
         request: _m_clappform_client_v1_sendgrid_sendgrid.EmailRequest | None = None,
         *,
         template_id: str | None = None,
-        personalizations: Sequence[_m_clappform_client_v1_sendgrid_sendgrid.Personalization] | None = None,
+        from_: _m_clappform_client_v1_sendgrid_sendgrid.Recipient | Mapping[str, Any] | None = None,
+        personalizations: Sequence[_m_clappform_client_v1_sendgrid_sendgrid.Personalization | Mapping[str, Any]] | None = None,
         include_tracking: bool | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.sendgrid.SendgridManagement/SendEmails (unary-unary)
-        Fields only settable via a request message (name collision): from
+        """Send multiple emails using Sendgrid
+
+        RPC: /clappform.client.v1.sendgrid.SendgridManagement/SendEmails (unary-unary)
         """
-        _provided = {_k: _v for _k, _v in (("template_id", template_id), ("personalizations", personalizations), ("include_tracking", include_tracking),) if _v is not None}
+        _provided = {_k: _v for _k, _v in (("template_id", template_id), ("from", from_), ("personalizations", personalizations), ("include_tracking", include_tracking),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_sendgrid_sendgrid.EmailRequest, request, _provided)
         return self._caller.invoke(
             "unary_unary",
@@ -3331,7 +3673,10 @@ class TransferManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_transfer_transfer.AppExport:
-        """RPC: /clappform.client.v1.transfer.TransferManagement/ExportApp (unary-unary)"""
+        """Export a single app
+
+        RPC: /clappform.client.v1.transfer.TransferManagement/ExportApp (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("type", type), ("name", name), ("include_app", include_app), ("include_queries", include_queries), ("include_actionflows", include_actionflows), ("include_questionnaires", include_questionnaires), ("definition_id", definition_id), ("run_id", run_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_transfer_transfer.ExportRequest, request, _provided)
         return self._caller.invoke(
@@ -3360,7 +3705,10 @@ class TransferManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.transfer.TransferManagement/ImportApp (unary-unary)"""
+        """Restore a single app
+
+        RPC: /clappform.client.v1.transfer.TransferManagement/ImportApp (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("app", app), ("queries", queries), ("actionflows", actionflows), ("questionnaires", questionnaires), ("overwrite", overwrite), ("definition_id", definition_id), ("run_id", run_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_transfer_transfer.AppImport, request, _provided)
         return self._caller.invoke(
@@ -3391,7 +3739,10 @@ class TransferManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_transfer_transfer.ActionflowExport:
-        """RPC: /clappform.client.v1.transfer.TransferManagement/ExportActionflow (unary-unary)"""
+        """Export a single actionflow
+
+        RPC: /clappform.client.v1.transfer.TransferManagement/ExportActionflow (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("type", type), ("name", name), ("include_app", include_app), ("include_queries", include_queries), ("include_actionflows", include_actionflows), ("include_questionnaires", include_questionnaires), ("definition_id", definition_id), ("run_id", run_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_transfer_transfer.ExportRequest, request, _provided)
         return self._caller.invoke(
@@ -3414,7 +3765,10 @@ class TransferManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.transfer.TransferManagement/ImportActionflow (unary-unary)"""
+        """Restore a single actionflow
+
+        RPC: /clappform.client.v1.transfer.TransferManagement/ImportActionflow (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("actionflow", actionflow),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_transfer_transfer.ActionflowImport, request, _provided)
         return self._caller.invoke(
@@ -3447,7 +3801,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_version_version.Versions:
-        """RPC: /clappform.client.v1.version.VersionManagement/GetAll (unary-unary)"""
+        """Get all versions
+
+        RPC: /clappform.client.v1.version.VersionManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -3476,17 +3833,17 @@ class VersionManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_version_version.Version]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``versions`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``versions``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.versions
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.versions
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -3499,7 +3856,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_version_version.Version:
-        """RPC: /clappform.client.v1.version.VersionManagement/Get (unary-unary)"""
+        """Get a single version
+
+        RPC: /clappform.client.v1.version.VersionManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -3524,7 +3884,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.version.VersionManagement/Revert (unary-unary)"""
+        """Lock a version
+
+        RPC: /clappform.client.v1.version.VersionManagement/Revert (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -3549,7 +3912,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.version.VersionManagement/Lock (unary-unary)"""
+        """Lock a version
+
+        RPC: /clappform.client.v1.version.VersionManagement/Lock (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -3574,7 +3940,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.version.VersionManagement/Unlock (unary-unary)"""
+        """Unlock a version
+
+        RPC: /clappform.client.v1.version.VersionManagement/Unlock (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -3607,7 +3976,10 @@ class WidgetManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_widget_widget.Widgets:
-        """RPC: /clappform.client.v1.widget.WidgetManagement/GetAll (unary-unary)"""
+        """Get all widgets
+
+        RPC: /clappform.client.v1.widget.WidgetManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -3636,17 +4008,17 @@ class WidgetManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_client_v1_widget_widget.Widget]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``widgets`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``widgets``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.widgets
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.widgets
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -3659,7 +4031,10 @@ class WidgetManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_widget_widget.Widget:
-        """RPC: /clappform.client.v1.widget.WidgetManagement/Get (unary-unary)"""
+        """Get a single widget
+
+        RPC: /clappform.client.v1.widget.WidgetManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -3686,7 +4061,10 @@ class WidgetManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_widget_widget.Widget:
-        """RPC: /clappform.client.v1.widget.WidgetManagement/Create (unary-unary)"""
+        """Create a new widget
+
+        RPC: /clappform.client.v1.widget.WidgetManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("settings", settings), ("row_id", row_id), ("main_widget_id", main_widget_id), ("main_change_id", main_change_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_widget_widget.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -3714,7 +4092,10 @@ class WidgetManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_client_v1_widget_widget.Widget:
-        """RPC: /clappform.client.v1.widget.WidgetManagement/Update (unary-unary)"""
+        """Update an existing widget
+
+        RPC: /clappform.client.v1.widget.WidgetManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("settings", settings), ("row_id", row_id), ("main_widget_id", main_widget_id), ("main_change_id", main_change_id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_client_v1_widget_widget.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -3739,7 +4120,10 @@ class WidgetManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.client.v1.widget.WidgetManagement/Delete (unary-unary)"""
+        """Delete a widget
+
+        RPC: /clappform.client.v1.widget.WidgetManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(

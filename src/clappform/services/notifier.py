@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from typing import Any
 
 from clappform import _runtime
@@ -25,18 +25,25 @@ class BatchManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_notifier_v1_batch_batch.BatchRequest | None = None,
         *,
-        steps: Sequence[_m_clappform_notifier_v1_batch_batch.NotificationStep] | None = None,
+        steps: Sequence[_m_clappform_notifier_v1_batch_batch.NotificationStep | Mapping[str, Any]] | None = None,
         default_variables: bytes | None = None,
-        default_actions: Sequence[_m_clappform_notifier_v1_batch_batch.Action] | None = None,
-        stop_conditions: _m_clappform_notifier_v1_batch_batch.StopConditions | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        default_actions: Sequence[_m_clappform_notifier_v1_batch_batch.Action | Mapping[str, Any]] | None = None,
+        stop_conditions: _m_clappform_notifier_v1_batch_batch.StopConditions | Mapping[str, Any] | None = None,
+        priority: _m_clappform_notifier_v1_batch_batch.priority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_batch_batch.theme | int | str | None = None,
         start_delivery_at: int | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_batch_batch.BatchStatus:
-        """RPC: /clappform.notifier.v1.batch.BatchManagement/SendBatch (unary-unary)"""
+        """Send notifications across multiple channels to multiple recipients
+
+        RPC: /clappform.notifier.v1.batch.BatchManagement/SendBatch (unary-unary)
+
+        Args:
+            default_variables: Shared defaults across all steps
+            stop_conditions: Batch-level configuration
+        """
         _provided = {_k: _v for _k, _v in (("steps", steps), ("default_variables", default_variables), ("default_actions", default_actions), ("stop_conditions", stop_conditions), ("priority", priority), ("theme", theme), ("start_delivery_at", start_delivery_at),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_batch_batch.BatchRequest, request, _provided)
         return self._caller.invoke(
@@ -59,7 +66,10 @@ class BatchManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_batch_batch.BatchStatus:
-        """RPC: /clappform.notifier.v1.batch.BatchManagement/GetBatchStatus (unary-unary)"""
+        """Get batch delivery status
+
+        RPC: /clappform.notifier.v1.batch.BatchManagement/GetBatchStatus (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_batch_batch.GetStatus, request, _provided)
         return self._caller.invoke(
@@ -92,6 +102,12 @@ class ConnectionManagement(_runtime.ServiceBase):
         """UpsertConnection creates or replaces a channel connection for the authenticated tenant.
 
         RPC: /clappform.notifier.v1.connections.ConnectionManagement/UpsertConnection (unary-unary)
+
+        Args:
+            channel: channel is populated from the URL path parameter at the gateway layer.
+            provider: provider identifies the external service (e.g. "sendgrid", "microsoft_teams").
+            config: config holds the raw (plaintext) provider credentials. Encrypted at handler layer.
+            config_preview: config_preview contains non-secret fields safe to return in GET responses.
         """
         _provided = {_k: _v for _k, _v in (("channel", channel), ("provider", provider), ("config", config), ("config_preview", config_preview),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_connections_connections.UpsertConnectionRequest, request, _provided)
@@ -224,18 +240,28 @@ class DirectManagement(_runtime.ServiceBase):
         is_html: bool | None = None,
         template_id: str | None = None,
         connection_id: str | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        priority: _m_clappform_notifier_v1_direct_direct.DirectPriority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_direct_direct.DirectTheme | int | str | None = None,
         facts: dict[str, str] | None = None,
-        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
         """SendEmail sends a single email directly to one recipient.
-         Uses the tenant's configured SendGrid connection; override with connection_id for multi-connection tenants.
+
+        Uses the tenant's configured SendGrid connection; override with connection_id for multi-connection tenants.
 
         RPC: /clappform.notifier.v1.direct.DirectManagement/SendEmail (unary-unary)
+
+        Args:
+            to: Recipient email address
+            template_id: template_id overrides the default SendGrid template for this send.
+            connection_id: connection_id selects a specific tenant connection; defaults to the primary configured connection.
+            priority: priority controls urgency and visual rendering. Defaults to HIGH.
+            theme: theme sets the semantic colour/icon. Defaults to INFO.
+            facts: facts are key-value metadata displayed as a structured table in the message.
+            actions: actions are CTA buttons appended to the message.
         """
         _provided = {_k: _v for _k, _v in (("to", to), ("subject", subject), ("body", body), ("is_html", is_html), ("template_id", template_id), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectEmailRequest, request, _provided)
@@ -250,7 +276,7 @@ class DirectManagement(_runtime.ServiceBase):
             location=location,
         )
 
-    def send_whats_app_template(
+    def send_whatsapp_template(
         self,
         request: _m_clappform_notifier_v1_direct_direct.DirectWhatsAppTemplateRequest | None = None,
         *,
@@ -258,16 +284,21 @@ class DirectManagement(_runtime.ServiceBase):
         template_name: str | None = None,
         language_code: str | None = None,
         connection_id: str | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        priority: _m_clappform_notifier_v1_direct_direct.DirectPriority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_direct_direct.DirectTheme | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
         """SendWhatsAppTemplate sends a WhatsApp template message directly.
-         Uses the tenant's configured WhatsApp connection.
+
+        Uses the tenant's configured WhatsApp connection.
 
         RPC: /clappform.notifier.v1.direct.DirectManagement/SendWhatsAppTemplate (unary-unary)
+
+        Args:
+            language_code: language_code is a BCP-47 language tag (default: en_US).
+            connection_id: connection_id selects a specific tenant connection; defaults to the primary configured connection.
         """
         _provided = {_k: _v for _k, _v in (("phone_number", phone_number), ("template_name", template_name), ("language_code", language_code), ("connection_id", connection_id), ("priority", priority), ("theme", theme),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectWhatsAppTemplateRequest, request, _provided)
@@ -282,23 +313,27 @@ class DirectManagement(_runtime.ServiceBase):
             location=location,
         )
 
-    def send_whats_app_message(
+    def send_whatsapp_message(
         self,
         request: _m_clappform_notifier_v1_direct_direct.DirectWhatsAppMessageRequest | None = None,
         *,
         phone_number: str | None = None,
         body: str | None = None,
         connection_id: str | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        priority: _m_clappform_notifier_v1_direct_direct.DirectPriority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_direct_direct.DirectTheme | int | str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
         """SendWhatsAppMessage sends a free-form WhatsApp message.
-         Requires an active 24-hour Meta session window (initiated by a prior template send).
+
+        Requires an active 24-hour Meta session window (initiated by a prior template send).
 
         RPC: /clappform.notifier.v1.direct.DirectManagement/SendWhatsAppMessage (unary-unary)
+
+        Args:
+            connection_id: connection_id selects a specific tenant connection; defaults to the primary configured connection.
         """
         _provided = {_k: _v for _k, _v in (("phone_number", phone_number), ("body", body), ("connection_id", connection_id), ("priority", priority), ("theme", theme),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectWhatsAppMessageRequest, request, _provided)
@@ -321,18 +356,24 @@ class DirectManagement(_runtime.ServiceBase):
         body: str | None = None,
         webhook_url: str | None = None,
         connection_id: str | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        priority: _m_clappform_notifier_v1_direct_direct.DirectPriority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_direct_direct.DirectTheme | int | str | None = None,
         facts: dict[str, str] | None = None,
-        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
         """SendTeams sends a message to a Microsoft Teams channel.
-         Uses the tenant's configured Teams connection; override webhook_url for multi-connection tenants.
+
+        Uses the tenant's configured Teams connection; override webhook_url for multi-connection tenants.
 
         RPC: /clappform.notifier.v1.direct.DirectManagement/SendTeams (unary-unary)
+
+        Args:
+            webhook_url: webhook_url overrides the tenant's configured Teams webhook for this send.
+                If omitted, the primary tenant connection is used.
+            connection_id: connection_id selects a specific tenant connection; defaults to the primary configured connection.
         """
         _provided = {_k: _v for _k, _v in (("subject", subject), ("body", body), ("webhook_url", webhook_url), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectTeamsRequest, request, _provided)
@@ -356,11 +397,11 @@ class DirectManagement(_runtime.ServiceBase):
         webhook_url: str | None = None,
         connection_id: str | None = None,
         channel_id: str | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        priority: _m_clappform_notifier_v1_direct_direct.DirectPriority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_direct_direct.DirectTheme | int | str | None = None,
         facts: dict[str, str] | None = None,
-        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
-        attachments: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAttachment] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction | Mapping[str, Any]] | None = None,
+        attachments: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAttachment | Mapping[str, Any]] | None = None,
         image_url: str | None = None,
         image_alt_text: str | None = None,
         timeout: float | None = None,
@@ -368,9 +409,22 @@ class DirectManagement(_runtime.ServiceBase):
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
         """SendSlack sends a message to a Slack channel.
-         Uses the tenant's configured Slack connection; override webhook_url for multi-connection tenants.
+
+        Uses the tenant's configured Slack connection; override webhook_url for multi-connection tenants.
 
         RPC: /clappform.notifier.v1.direct.DirectManagement/SendSlack (unary-unary)
+
+        Args:
+            subject: subject is optional; if omitted the message has no header block.
+            webhook_url: webhook_url overrides the tenant's configured Slack webhook for this send.
+                If omitted, the primary tenant connection is used.
+            connection_id: connection_id selects a specific tenant connection; defaults to the primary configured connection.
+            channel_id: channel_id is the target Slack channel ID (e.g. C08XXXXXXX) or name (e.g. #general).
+                Required when using a bot token without a webhook_url configured on the connection.
+            attachments: attachments are uploaded as Slack files and shared into the channel.
+                Requires files:write bot token scope.
+            image_url: image_url embeds an image inline as a Block Kit image block.
+                Must be a publicly accessible URL.
         """
         _provided = {_k: _v for _k, _v in (("subject", subject), ("body", body), ("webhook_url", webhook_url), ("connection_id", connection_id), ("channel_id", channel_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions), ("attachments", attachments), ("image_url", image_url), ("image_alt_text", image_alt_text),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectSlackRequest, request, _provided)
@@ -394,11 +448,11 @@ class DirectManagement(_runtime.ServiceBase):
         subject: str | None = None,
         body: str | None = None,
         connection_id: str | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        priority: _m_clappform_notifier_v1_direct_direct.DirectPriority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_direct_direct.DirectTheme | int | str | None = None,
         facts: dict[str, str] | None = None,
-        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
-        attachments: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAttachment] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction | Mapping[str, Any]] | None = None,
+        attachments: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAttachment | Mapping[str, Any]] | None = None,
         image_url: str | None = None,
         image_alt_text: str | None = None,
         timeout: float | None = None,
@@ -406,10 +460,17 @@ class DirectManagement(_runtime.ServiceBase):
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_direct_direct.DirectSendResponse:
         """SendSlackDM sends a direct message to a specific Slack user.
-         Identifies the target by user_id (Slack U… ID) or user_email (resolved via users.lookupByEmail).
-         Requires a bot token with users:read.email scope when using user_email.
+
+        Identifies the target by user_id (Slack U… ID) or user_email (resolved via users.lookupByEmail).
+        Requires a bot token with users:read.email scope when using user_email.
 
         RPC: /clappform.notifier.v1.direct.DirectManagement/SendSlackDM (unary-unary)
+
+        Args:
+            user_id: user_id is the Slack user ID (U…). Takes precedence over user_email if both are set.
+            user_email: user_email is the user's email address, resolved to a Slack user ID at send time.
+            subject: subject is optional; if omitted the message has no header block.
+            connection_id: connection_id selects a specific tenant connection; defaults to the primary configured connection.
         """
         _provided = {_k: _v for _k, _v in (("user_id", user_id), ("user_email", user_email), ("subject", subject), ("body", body), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("facts", facts), ("actions", actions), ("attachments", attachments), ("image_url", image_url), ("image_alt_text", image_alt_text),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectSlackDMRequest, request, _provided)
@@ -432,10 +493,10 @@ class DirectManagement(_runtime.ServiceBase):
         subject: str | None = None,
         body: str | None = None,
         connection_id: str | None = None,
-        priority: int | None = None,
-        theme: int | None = None,
+        priority: _m_clappform_notifier_v1_direct_direct.DirectPriority | int | str | None = None,
+        theme: _m_clappform_notifier_v1_direct_direct.DirectTheme | int | str | None = None,
         link_url: str | None = None,
-        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction] | None = None,
+        actions: Sequence[_m_clappform_notifier_v1_direct_direct.DirectAction | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
@@ -443,6 +504,11 @@ class DirectManagement(_runtime.ServiceBase):
         """SendPush sends a push notification to a single user's inbox.
 
         RPC: /clappform.notifier.v1.direct.DirectManagement/SendPush (unary-unary)
+
+        Args:
+            user_id: Target user's ID
+            connection_id: connection_id selects a specific tenant connection; defaults to the primary configured connection.
+            link_url: link_url is opened when the user taps the push notification.
         """
         _provided = {_k: _v for _k, _v in (("user_id", user_id), ("subject", subject), ("body", body), ("connection_id", connection_id), ("priority", priority), ("theme", theme), ("link_url", link_url), ("actions", actions),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_direct_direct.DirectPushRequest, request, _provided)
@@ -491,7 +557,7 @@ class FreqCapManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_notifier_v1_freqcap_freqcap.FreqCapRules | None = None,
         *,
-        rules: Sequence[_m_clappform_notifier_v1_freqcap_freqcap.ChannelCapRule] | None = None,
+        rules: Sequence[_m_clappform_notifier_v1_freqcap_freqcap.ChannelCapRule | Mapping[str, Any]] | None = None,
         priority_overrides: dict[str, str] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
@@ -500,6 +566,9 @@ class FreqCapManagement(_runtime.ServiceBase):
         """UpsertFreqCap creates or replaces the tenant's frequency cap rules.
 
         RPC: /clappform.notifier.v1.freqcap.FreqCapManagement/UpsertFreqCap (unary-unary)
+
+        Args:
+            priority_overrides: priority_overrides maps priority level to "bypass" or "enforce".
         """
         _provided = {_k: _v for _k, _v in (("rules", rules), ("priority_overrides", priority_overrides),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_freqcap_freqcap.FreqCapRules, request, _provided)
@@ -551,7 +620,10 @@ class GeneralManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.notifier.v1.general.GeneralManagement/General (unary-unary)"""
+        """A general hello message
+
+        RPC: /clappform.notifier.v1.general.GeneralManagement/General (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -577,7 +649,10 @@ class HealthManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_health_health.HealthStatus:
-        """RPC: /clappform.notifier.v1.health.HealthManagement/Health (unary-unary)"""
+        """Health check
+
+        RPC: /clappform.notifier.v1.health.HealthManagement/Health (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -602,7 +677,7 @@ class InboxManagement(_runtime.ServiceBase):
         user_id: str | None = None,
         offset: int | None = None,
         limit: int | None = None,
-        status_filter: Sequence[int] | None = None,
+        status_filter: Sequence[_m_clappform_notifier_v1_inbox_inbox.NotificationStatus | int | str] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
@@ -610,6 +685,9 @@ class InboxManagement(_runtime.ServiceBase):
         """GetNotifications returns paginated push notifications for the authenticated user.
 
         RPC: /clappform.notifier.v1.inbox.InboxManagement/GetNotifications (unary-unary)
+
+        Args:
+            limit: Max 100
         """
         _provided = {_k: _v for _k, _v in (("user_id", user_id), ("offset", offset), ("limit", limit), ("status_filter", status_filter),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_inbox_inbox.GetNotificationsRequest, request, _provided)
@@ -712,14 +790,15 @@ class InboxManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusRequest | None = None,
         *,
-        items: Sequence[_m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusItem] | None = None,
+        items: Sequence[_m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusItem | Mapping[str, Any]] | None = None,
         status: str | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_inbox_inbox.BulkUpdateStatusResponse:
         """BulkUpdateStatus updates the status of many notifications in a single call.
-         status must be one of: "READ", "ACKNOWLEDGED", "ARCHIVED".
+
+        status must be one of: "READ", "ACKNOWLEDGED", "ARCHIVED".
 
         RPC: /clappform.notifier.v1.inbox.InboxManagement/BulkUpdateStatus (unary-unary)
         """
@@ -797,7 +876,7 @@ class PolicyManagement(_runtime.ServiceBase):
         *,
         name: str | None = None,
         description: str | None = None,
-        steps: Sequence[_m_clappform_notifier_v1_policies_policies.PolicyStepRequest] | None = None,
+        steps: Sequence[_m_clappform_notifier_v1_policies_policies.PolicyStepRequest | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
@@ -877,7 +956,7 @@ class PolicyManagement(_runtime.ServiceBase):
         id: str | None = None,
         name: str | None = None,
         description: str | None = None,
-        steps: Sequence[_m_clappform_notifier_v1_policies_policies.PolicyStepRequest] | None = None,
+        steps: Sequence[_m_clappform_notifier_v1_policies_policies.PolicyStepRequest | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
@@ -933,7 +1012,7 @@ class PolicyManagement(_runtime.ServiceBase):
         subject: str | None = None,
         body: str | None = None,
         variables: dict[str, str] | None = None,
-        recipients: Sequence[_m_clappform_notifier_v1_policies_policies.FromPolicyRecipient] | None = None,
+        recipients: Sequence[_m_clappform_notifier_v1_policies_policies.FromPolicyRecipient | Mapping[str, Any]] | None = None,
         escalation_contacts: dict[str, str] | None = None,
         priority: str | None = None,
         semantic_theme: str | None = None,
@@ -944,6 +1023,9 @@ class PolicyManagement(_runtime.ServiceBase):
         """SendFromPolicy sends a batch notification using a saved policy as the step template.
 
         RPC: /clappform.notifier.v1.policies.PolicyManagement/SendFromPolicy (unary-unary)
+
+        Args:
+            escalation_contacts: escalation_contacts maps step recipients_override key to a contact identifier.
         """
         _provided = {_k: _v for _k, _v in (("policy_id", policy_id), ("subject", subject), ("body", body), ("variables", variables), ("recipients", recipients), ("escalation_contacts", escalation_contacts), ("priority", priority), ("semantic_theme", semantic_theme),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_policies_policies.FromPolicyRequest, request, _provided)
@@ -968,8 +1050,8 @@ class PreferenceManagement(_runtime.ServiceBase):
         *,
         user_id: str | None = None,
         preferred_channels: Sequence[str] | None = None,
-        channel_availability: dict[str, _m_clappform_notifier_v1_preferences_preferences.ChannelAvailability] | None = None,
-        quiet_hours: _m_clappform_notifier_v1_preferences_preferences.QuietHours | None = None,
+        channel_availability: dict[str, _m_clappform_notifier_v1_preferences_preferences.ChannelAvailability | Mapping[str, Any]] | None = None,
+        quiet_hours: _m_clappform_notifier_v1_preferences_preferences.QuietHours | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
@@ -977,6 +1059,10 @@ class PreferenceManagement(_runtime.ServiceBase):
         """SetPreferences creates or replaces the user's channel preference profile.
 
         RPC: /clappform.notifier.v1.preferences.PreferenceManagement/SetPreferences (unary-unary)
+
+        Args:
+            preferred_channels: preferred_channels lists channels in priority order (e.g. ["email", "whatsapp"]).
+            channel_availability: channel_availability maps channel name to its delivery window config.
         """
         _provided = {_k: _v for _k, _v in (("user_id", user_id), ("preferred_channels", preferred_channels), ("channel_availability", channel_availability), ("quiet_hours", quiet_hours),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_preferences_preferences.UserPreferences, request, _provided)
@@ -1052,12 +1138,18 @@ class WhatsappManagement(_runtime.ServiceBase):
         request: _m_clappform_notifier_v1_whatsapp_whatsapp.WebhookEventRequest | None = None,
         *,
         object: str | None = None,
-        entry: Sequence[_m_clappform_notifier_v1_whatsapp_whatsapp.WebhookEntry] | None = None,
+        entry: Sequence[_m_clappform_notifier_v1_whatsapp_whatsapp.WebhookEntry | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_whatsapp_whatsapp.WebhookEventResponse:
-        """RPC: /clappform.notifier.v1.whatsapp.WhatsappManagement/WebhookEvent (unary-unary)"""
+        """Health check
+
+        RPC: /clappform.notifier.v1.whatsapp.WhatsappManagement/WebhookEvent (unary-unary)
+
+        Args:
+            object: Always "whatsapp_business_account"
+        """
         _provided = {_k: _v for _k, _v in (("object", object), ("entry", entry),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_notifier_v1_whatsapp_whatsapp.WebhookEventRequest, request, _provided)
         return self._caller.invoke(
@@ -1079,7 +1171,10 @@ class WhatsappManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_notifier_v1_whatsapp_whatsapp.WebhookVerifyResponse:
-        """RPC: /clappform.notifier.v1.whatsapp.WhatsappManagement/WebhookVerification (unary-unary)"""
+        """Health check
+
+        RPC: /clappform.notifier.v1.whatsapp.WhatsappManagement/WebhookVerification (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(

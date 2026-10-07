@@ -161,9 +161,9 @@ def test_two_clusters_one_process_have_no_cross_talk() -> None:
         cf_prod = _client(prod)
         cf_qa = _client(qa)
         with cf_prod, cf_qa:
-            # copy prod -> qa by business key
+            # copy prod -> qa as new rows; the target assigns its own _id
             df = cf_prod.data.collection(CID).read()
-            cf_qa.data.collection(CID).append(df)
+            cf_qa.data.collection(CID).append(df.drop(columns="_id"))
 
             # the row is now in qa, and prod still has exactly its original row
             assert len(cf_qa.data.collection(CID).read()) == 1

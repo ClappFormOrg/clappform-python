@@ -32,13 +32,14 @@ recipe: use it whenever the result doesn't need to exist as one frame.
 ## Writes: `chunk_rows` and progress
 
 `append` / `update` / `upsert` stream the upload in chunks of `chunk_rows`
-(default 2500), so a failed chunk is retryable at the flow level rather than
-resending the whole frame. Raise it to trade memory for fewer round-trips; lower
-it for very wide rows.
+(default 2500), so no single gRPC message carries the whole frame. Raise it to
+trade memory for fewer round-trips; lower it for very wide rows, or when a
+write fails with `ResourceExhaustedError` (a message over 64 MiB).
 
-Pass a `progress` callback to surface a running count, handy for a notebook bar
-or a log line on a long load. It's called with the cumulative row count after
-each chunk:
+`append` takes a `progress` callback to surface a running count, handy for a
+notebook bar or a log line on a long load. It's called with the cumulative
+number of rows the server has acknowledged, after each chunk. `update` and
+`upsert` take no callback; they return the number of rows sent.
 
 ```python
 --8<-- "performance.py:write-progress"
@@ -54,9 +55,9 @@ each chunk:
 | A prewritten server-side aggregation | `cf.data.query(ref).read()` |
 
 Prefer a **saved query** over an ad-hoc pipeline when the same aggregation runs
-repeatedly: it lives server-side, so the client sends only its id, and the
-server can optimise a known query. Reach for an ad-hoc `pipeline=` when the
-shape is one-off or computed at runtime.
+repeatedly: it lives server-side, so the client sends only its id and every
+caller runs the same pipeline. Reach for an ad-hoc `pipeline=` when the shape
+is one-off or computed at runtime.
 
 ## Rules of thumb
 
@@ -64,5 +65,6 @@ shape is one-off or computed at runtime.
   don't tune preemptively.
 - Memory-bound? Stream (`iter_batches`) rather than raising `batch_size`.
 - Throughput-bound on a bulk load? Raise `chunk_rows` so there are fewer chunks.
-- A read that can't finish inside the deadline needs streaming, not just a
-  bigger `timeout=`. See [Errors & retries](errors-and-retries.md#per-call-deadlines).
+- Reads and writes stream with no deadline by default. If you set `timeout=`
+  or `stream_timeout=`, it bounds the whole stream, batches included. See
+  [Deadlines](errors-and-retries.md#deadlines).

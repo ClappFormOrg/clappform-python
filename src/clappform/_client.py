@@ -52,13 +52,46 @@ class _BoundCaller:
 class Clappform:
     """Client for every Clappform API on one cluster, bound to one tenant.
 
-    ``cluster`` is the host extension (``"qa"``, ``"qa-lts"``, ``"prod"`` or
-    ``""`` for the main cluster). When omitted, it is discovered from the
-    DNS CNAME of ``{location}.clappform.com``. Pass it explicitly in
-    air-gapped or split-DNS environments.
-
     All configuration is explicit constructor input: the library reads no
     config files and no environment variables.
+
+    Args:
+        location: The tenant (environment) subdomain, e.g. ``"acme"`` for
+            ``acme.clappform.com``. Sent as ``location`` metadata on every call.
+        cluster: The host extension of the cluster serving ``location``:
+            ``""`` for the main cluster, or e.g. ``"qa"`` or ``"prod-lts"``.
+            ``"prod"`` is accepted as another name for the main cluster
+            ``""``; it is *not* ``"prod-lts"``. When omitted, it is discovered
+            from the DNS CNAME of ``{location}.clappform.com`` (one lookup,
+            at most 5 seconds). Pass it explicitly in air-gapped or split-DNS
+            environments. Never discovered when ``transport=`` is given.
+        api_key: An API key, sent as ``x-api-key`` metadata. Pass exactly one
+            of ``api_key`` and ``credentials``.
+        credentials: Any :class:`~clappform.Credentials` implementation, for
+            auth flows other than a plain API key.
+        endpoints: Per-family address overrides, e.g.
+            ``{"data": "localhost:50051"}``. Keys are ``data``, ``client``,
+            ``auth`` and ``notifier``; values are used verbatim as
+            ``host[:port]``.
+        insecure: Use plaintext channels instead of TLS. Local development
+            only: the API key then travels unencrypted.
+        timeout: Deadline in seconds for unary calls (one request, one
+            response) that pass no ``timeout=`` of their own. ``None``
+            means no deadline.
+        stream_timeout: Deadline in seconds for streaming calls (the DataFrame
+            reads and writes, exports, any ``*_stream`` or ``*_many`` RPC)
+            that pass no ``timeout=``. Defaults to ``None``: a stream runs
+            as long as it keeps moving, and gRPC keepalive detects a dead
+            connection. One deadline covers the whole stream, including the
+            time your code spends between chunks.
+        retries: The :class:`~clappform.RetryPolicy` for ``UNAVAILABLE``
+            failures, or ``None`` to disable retries. Data-plane writes are
+            never retried.
+        channel_options: Extra gRPC channel arguments, appended after the
+            defaults (keepalive every 30s, 64 MiB message limits).
+        transport: A replacement transport, such as
+            :class:`~clappform.testing.LocalMock`. The client does not close
+            a transport it was given.
     """
 
     # Sub-clients are bound dynamically from API_FAMILIES in _bind_services;
@@ -95,6 +128,7 @@ class Clappform:
         endpoints: dict[str, str] | None = None,
         insecure: bool = False,
         timeout: float | None = 60.0,
+        stream_timeout: float | None = None,
         retries: RetryPolicy | None = DEFAULT_RETRIES,
         channel_options: list[tuple[str, Any]] | None = None,
         transport: _runtime.Caller | None = None,
@@ -107,15 +141,18 @@ class Clappform:
             )
         self._credentials = credentials if credentials is not None else ApiKey(api_key)  # type: ignore[arg-type]
         self.location = location
-        self.cluster_discovered = cluster is None
-        self.cluster = (
-            _discovery.discover_cluster(location) if cluster is None else cluster
+        # A custom transport owns its own routing, so there is nothing to
+        # discover; cluster then stays None unless the caller names one.
+        self.cluster_discovered = cluster is None and transport is None
+        self.cluster: str | None = (
+            _discovery.discover_cluster(location) if self.cluster_discovered else cluster
         )
 
         self._init_options: dict[str, Any] = {
             "endpoints": endpoints,
             "insecure": insecure,
             "timeout": timeout,
+            "stream_timeout": stream_timeout,
             "retries": retries,
             "channel_options": channel_options,
         }
@@ -123,6 +160,7 @@ class Clappform:
             self._transport: _runtime.Caller = transport
             self._owns_transport = False
         else:
+            assert self.cluster is not None  # noqa: S101 -- set or discovered above
             self._transport = GrpcTransport(
                 endpoints=resolve_endpoints(self.cluster, endpoints),
                 credentials=self._credentials,
@@ -130,6 +168,7 @@ class Clappform:
                 cluster_discovered=self.cluster_discovered,
                 insecure=insecure,
                 default_timeout=timeout,
+                stream_timeout=stream_timeout,
                 retries=retries,
                 channel_options=channel_options,
             )
@@ -160,8 +199,14 @@ class Clappform:
         def query(ref: str) -> dataframes.QueryHandle:
             return dataframes.QueryHandle(self, ref)
 
-        self.data.collection = collection  # type: ignore[attr-defined]
-        self.data.query = query  # type: ignore[attr-defined]
+        for name, handle in (("collection", collection), ("query", query)):
+            if hasattr(self.data, name):
+                # A generated cf.data service with this name would be shadowed.
+                raise ConfigurationError(
+                    f"cf.data.{name} is generated and would be shadowed by the "
+                    f"DataFrame handle; rename one of them"
+                )
+            setattr(self.data, name, handle)
 
         # Hoist the curated shortcuts onto the client itself so cf.collection(...)
         # resolves to the same callable as cf.data.collection(...). The
@@ -192,13 +237,19 @@ class Clappform:
         cluster was *discovered*, a different location is re-discovered:
         if it lands on the same cluster the transport is still shared,
         otherwise the clone gets its own transport for its own cluster.
+
+        Lifecycle: a clone that shares the transport stops working once this
+        client is closed, and closing the clone does nothing. A clone with
+        its own transport must be closed itself; use it as a context
+        manager (``with cf.with_location("other") as other: ...``); that is
+        safe for a shared clone too, including one for this same location.
         """
         if not location:
             raise ConfigurationError("location is required")
-        if location == self.location:
-            return self
 
-        if self.cluster_discovered and self._owns_transport:
+        # Clones of clones re-discover as well: a shared clone keeps the
+        # discovered flag, so it can still route a location on another cluster.
+        if self.cluster_discovered and location != self.location:
             new_cluster = _discovery.discover_cluster(location)
             if new_cluster != self.cluster:
                 clone = Clappform(
@@ -209,6 +260,9 @@ class Clappform:
                     **self._init_options,
                 )
                 clone.cluster_discovered = True
+                # Errors from the clone's own transport mark the cluster as
+                # discovered, the same as the parent's do.
+                clone._transport.cluster_discovered = True  # type: ignore[attr-defined]
                 return clone
 
         clone = object.__new__(Clappform)
@@ -287,10 +341,10 @@ class Clappform:
     def __repr__(self) -> str:
         from clappform import __proto_version__, __version__
 
-        cluster = self.cluster or "main"
+        cluster = "custom transport" if self.cluster is None else repr(self.cluster or "main")
         discovered = " (discovered)" if self.cluster_discovered else ""
         return (
-            f"Clappform(cluster={cluster!r}{discovered}, "
+            f"Clappform(cluster={cluster}{discovered}, "
             f"location={self.location!r}, auth={type(self._credentials).__name__}, "
             f"version={__version__}, protos={__proto_version__})"
         )

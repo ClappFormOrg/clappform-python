@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package clappform.demo.v1.parts;
+
+// Referenced only as a pagination item, so its module is imported for that alone.
+message Gadget {
+  string serial = 1;
+}

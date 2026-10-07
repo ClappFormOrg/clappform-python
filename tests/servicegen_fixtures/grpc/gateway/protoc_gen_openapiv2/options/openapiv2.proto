@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+// The subset of grpc-gateway's openapiv2.proto that servicegen reads, under
+// the upstream package and field numbers.
+package grpc.gateway.protoc_gen_openapiv2.options;
+
+message Operation {
+  repeated string tags = 1;
+  string summary = 2;
+  string description = 3;
+}

@@ -29,7 +29,11 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "grpcio>=1.60,<2",
+    # The floor is the GRPC_GENERATED_VERSION stamped into every
+    # clappform/gen/**/*_pb2_grpc.py (1.68.0); each stub raises RuntimeError at
+    # import on an older grpcio. tests/test_package.py holds both floors to the
+    # stamps, so a regeneration with newer tools fails until they move.
+    "grpcio>=1.68,<2",
     # The floor is the gencode version stamped into clappform/gen (5.28.1): an
     # older runtime either lacks google.protobuf.runtime_version entirely (4.x)
     # or fails its own gencode-newer-than-runtime check (5.27 and below). The

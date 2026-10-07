@@ -101,10 +101,11 @@ def test_omitted_cluster_is_discovered(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         client_mod._discovery, "discover_cluster", lambda loc: "prod-lts"
     )
-    cf = Clappform("noord-brabant", api_key="k", transport=FakeTransport())
-    assert cf.cluster == "prod-lts"
-    assert cf.cluster_discovered is True
-    assert "(discovered)" in repr(cf)
+    # The real transport opens no channel until the first call, so no network.
+    with Clappform("noord-brabant", api_key="k", insecure=True) as cf:
+        assert cf.cluster == "prod-lts"
+        assert cf.cluster_discovered is True
+        assert "(discovered)" in repr(cf)
 
 
 def test_discovery_failure_propagates_with_hint(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -113,7 +114,19 @@ def test_discovery_failure_propagates_with_hint(monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr(client_mod._discovery, "discover_cluster", fail)
     with pytest.raises(ConfigurationError, match="pass cluster= explicitly"):
-        Clappform("acme", api_key="k", transport=FakeTransport())
+        Clappform("acme", api_key="k", insecure=True)
+
+
+def test_custom_transport_skips_discovery(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        client_mod._discovery,
+        "discover_cluster",
+        lambda loc: pytest.fail("a custom transport must not trigger DNS"),
+    )
+    cf = Clappform("acme", api_key="k", transport=FakeTransport())
+    assert cf.cluster is None
+    assert cf.cluster_discovered is False
+    assert "custom transport" in repr(cf)
 
 
 # --- with_location ------------------------------------------------------------
@@ -135,9 +148,28 @@ def test_with_location_shares_transport_for_explicit_cluster(
     assert clone.cluster == "qa"
 
 
-def test_with_location_same_location_returns_self() -> None:
-    cf, _ = make_client()
-    assert cf.with_location("acme") is cf
+def test_with_location_same_location_is_a_clone_safe_to_close() -> None:
+    # `with cf.with_location(x) as other:` must never close the parent, even
+    # when x is the parent's own location.
+    cf, transport = make_client()
+    with cf.with_location("acme") as same:
+        assert same is not cf
+        assert same._transport is cf._transport
+    cf.data.insert.insert_single(collection="orders")
+    insert_single = "/clappform.data.v1.insert.InsertManagement/InsertSingle"
+    assert transport.calls[-1] == (insert_single, "acme")
+
+
+def test_clone_of_a_clone_still_rediscovers(monkeypatch: pytest.MonkeyPatch) -> None:
+    clusters = {"acme": "qa", "umbrella": "qa", "gelderland": ""}
+    monkeypatch.setattr(client_mod._discovery, "discover_cluster", clusters.__getitem__)
+    with Clappform("acme", api_key="k", insecure=True) as cf:
+        shared = cf.with_location("umbrella")
+        assert shared._transport is cf._transport
+        with shared.with_location("gelderland") as other:
+            assert other.cluster == ""
+            assert other._transport is not cf._transport
+            assert other._transport.cluster_discovered is True
 
 
 def test_with_location_requires_a_location() -> None:

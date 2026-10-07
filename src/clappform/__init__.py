@@ -12,6 +12,7 @@ from clappform._errors import (
     NotFoundError,
     NotSupportedError,
     PermissionDeniedError,
+    ResourceExhaustedError,
     TransientError,
 )
 from clappform._proto_version import __proto_version__
@@ -33,11 +34,12 @@ __all__ = [
     "ConflictError",
     "Credentials",
     "InvalidRequestError",
-    "QueryHandle",
-    "ReadResult",
     "NotFoundError",
     "NotSupportedError",
     "PermissionDeniedError",
+    "QueryHandle",
+    "ReadResult",
+    "ResourceExhaustedError",
     "RetryPolicy",
     "TransientError",
     "__proto_version__",
