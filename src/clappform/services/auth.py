@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from typing import Any
 
 from clappform import _runtime
@@ -38,7 +38,10 @@ class APIKeyManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_apikey_apikey.APIKeys:
-        """RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/ReadAll (unary-unary)"""
+        """Get all API keys for current user
+
+        RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/ReadAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -67,17 +70,17 @@ class APIKeyManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_authoriser_v1_apikey_apikey.APIKey]:
         """Auto-paginating variant of ``read_all``.
 
-        Yields each item from ``api_keys`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``api_keys``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.read_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.api_keys
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.api_keys
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def generate_key(
         self,
@@ -85,12 +88,15 @@ class APIKeyManagement(_runtime.ServiceBase):
         *,
         name: str | None = None,
         expiration_date: int | None = None,
-        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission] | None = None,
+        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_apikey_apikey.APIKey:
-        """RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/GenerateKey (unary-unary)"""
+        """Generate API keys
+
+        RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/GenerateKey (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("expiration_date", expiration_date), ("permissions", permissions),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_apikey_apikey.GenerateKeyRequest, request, _provided)
         return self._caller.invoke(
@@ -113,7 +119,10 @@ class APIKeyManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_apikey_apikey.VerifyKeyResponse:
-        """RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/VerifyKey (unary-unary)"""
+        """Verify API keys
+
+        RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/VerifyKey (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("api_key", api_key),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_apikey_apikey.VerifyKeyRequest, request, _provided)
         return self._caller.invoke(
@@ -138,7 +147,10 @@ class APIKeyManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/DeleteKey (unary-unary)"""
+        """Delete API keys
+
+        RPC: /clappform.authoriser.v1.apikey.APIKeyManagement/DeleteKey (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -171,7 +183,10 @@ class AzureManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_azure_azure.AzureAuthorities:
-        """RPC: /clappform.authoriser.v1.azure.AzureManagement/ReadAll (unary-unary)"""
+        """Get all available Azure authorities
+
+        RPC: /clappform.authoriser.v1.azure.AzureManagement/ReadAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -200,17 +215,17 @@ class AzureManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_authoriser_v1_azure_azure.AzureAuthority]:
         """Auto-paginating variant of ``read_all``.
 
-        Yields each item from ``authorities`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``authorities``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.read_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.authorities
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.authorities
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def azure_auth(
         self,
@@ -223,7 +238,10 @@ class AzureManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_azure_azure.AzureAuthResponse:
-        """RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureAuth (unary-unary)"""
+        """Authenticate using Azure SSO
+
+        RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureAuth (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("authority", authority), ("code_challenge", code_challenge), ("state", state),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_azure_azure.AzureAuthRequest, request, _provided)
         return self._caller.invoke(
@@ -237,7 +255,7 @@ class AzureManagement(_runtime.ServiceBase):
             location=location,
         )
 
-    def azure_auth_samlacs(
+    def azure_auth_saml_acs(
         self,
         request: _m_clappform_authoriser_v1_azure_azure.AzureAuthACSRequest | None = None,
         *,
@@ -247,7 +265,10 @@ class AzureManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.AuthTokenResponse:
-        """RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureAuthSAMLACS (unary-unary)"""
+        """Authenticate using Azure SAML Access Control Service (ACS)
+
+        RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureAuthSAMLACS (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("SAMLResponse", SAMLResponse), ("authority", authority),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_azure_azure.AzureAuthACSRequest, request, _provided)
         return self._caller.invoke(
@@ -261,7 +282,7 @@ class AzureManagement(_runtime.ServiceBase):
             location=location,
         )
 
-    def azure_auth_o_auth_acs(
+    def azure_auth_oauth_acs(
         self,
         request: _m_clappform_authoriser_v1_azure_azure.AzureAuthOAuthACSRequest | None = None,
         *,
@@ -272,7 +293,10 @@ class AzureManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.AuthTokenResponse:
-        """RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureAuthOAuthACS (unary-unary)"""
+        """Authenticate using Azure OAth Access Control Service (ACS)
+
+        RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureAuthOAuthACS (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("code", code), ("authority", authority), ("code_challenge", code_challenge),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_azure_azure.AzureAuthOAuthACSRequest, request, _provided)
         return self._caller.invoke(
@@ -297,7 +321,10 @@ class AzureManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_azure_azure.AzureAuthResponse:
-        """RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureLogOut (unary-unary)"""
+        """Logout from Azure Single Sign On (SSO)
+
+        RPC: /clappform.authoriser.v1.azure.AzureManagement/AzureLogOut (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("authority", authority), ("code_challenge", code_challenge), ("state", state),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_azure_azure.AzureAuthRequest, request, _provided)
         return self._caller.invoke(
@@ -323,7 +350,10 @@ class GeneralManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.general.GeneralManagement/General (unary-unary)"""
+        """A general hello message
+
+        RPC: /clappform.authoriser.v1.general.GeneralManagement/General (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -349,7 +379,10 @@ class GuestKeyManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.AuthTokenResponse:
-        """RPC: /clappform.authoriser.v1.guestkey.GuestKeyManagement/GetPublicAccessToken (unary-unary)"""
+        """Request authorization token
+
+        RPC: /clappform.authoriser.v1.guestkey.GuestKeyManagement/GetPublicAccessToken (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -373,7 +406,10 @@ class GuestKeyManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.AuthTokenResponse:
-        """RPC: /clappform.authoriser.v1.guestkey.GuestKeyManagement/GetElevatedAccessToken (unary-unary)"""
+        """Request authorization token
+
+        RPC: /clappform.authoriser.v1.guestkey.GuestKeyManagement/GetElevatedAccessToken (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("deep_dive", deep_dive), ("permissions", permissions),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_guestkey_guestkey.AuthRequest, request, _provided)
         return self._caller.invoke(
@@ -395,7 +431,10 @@ class GuestKeyManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Empty:
-        """RPC: /clappform.authoriser.v1.guestkey.GuestKeyManagement/CreateBaseRole (unary-unary)"""
+        """Request authorization token
+
+        RPC: /clappform.authoriser.v1.guestkey.GuestKeyManagement/CreateBaseRole (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -421,7 +460,10 @@ class OtpManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_otp_otp.GenerateResponse:
-        """RPC: /clappform.authoriser.v1.otp.OtpManagement/Setup (unary-unary)"""
+        """Setup OTP 2 factor authentication
+
+        RPC: /clappform.authoriser.v1.otp.OtpManagement/Setup (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -444,7 +486,10 @@ class OtpManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_otp_otp.VerifyResponse:
-        """RPC: /clappform.authoriser.v1.otp.OtpManagement/VerifySetup (unary-unary)"""
+        """Verify OTP 2 factor authentication setup
+
+        RPC: /clappform.authoriser.v1.otp.OtpManagement/VerifySetup (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("token", token),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_otp_otp.TokenRequest, request, _provided)
         return self._caller.invoke(
@@ -468,7 +513,10 @@ class OtpManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_otp_otp.ValidateResponse:
-        """RPC: /clappform.authoriser.v1.otp.OtpManagement/Validate (unary-unary)"""
+        """Validate a OTP code
+
+        RPC: /clappform.authoriser.v1.otp.OtpManagement/Validate (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("input_token", input_token), ("validation_key", validation_key),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_otp_otp.ValidateRequest, request, _provided)
         return self._caller.invoke(
@@ -490,7 +538,10 @@ class OtpManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.otp.OtpManagement/Disable (unary-unary)"""
+        """Disable OTP 2 factor authentication
+
+        RPC: /clappform.authoriser.v1.otp.OtpManagement/Disable (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -514,7 +565,10 @@ class OtpManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_otp_otp.RecoverResponse:
-        """RPC: /clappform.authoriser.v1.otp.OtpManagement/Recover (unary-unary)"""
+        """Request OTP recovery
+
+        RPC: /clappform.authoriser.v1.otp.OtpManagement/Recover (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("token", token), ("username", username),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_otp_otp.RecoverRequest, request, _provided)
         return self._caller.invoke(
@@ -537,7 +591,10 @@ class OtpManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_otp_otp.RecoveryCodesResponse:
-        """RPC: /clappform.authoriser.v1.otp.OtpManagement/RegenerateRecoveryCodes (unary-unary)"""
+        """Regenerate 2FA recovery codes. Requires a valid current TOTP code in the token field as step-up authentication.
+
+        RPC: /clappform.authoriser.v1.otp.OtpManagement/RegenerateRecoveryCodes (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("token", token),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_otp_otp.TokenRequest, request, _provided)
         return self._caller.invoke(
@@ -565,7 +622,10 @@ class PasswordManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.AuthTokenResponse:
-        """RPC: /clappform.authoriser.v1.password.PasswordManagement/Auth (unary-unary)"""
+        """Request authorization token
+
+        RPC: /clappform.authoriser.v1.password.PasswordManagement/Auth (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("username", username), ("password", password),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_password_password.AuthRequest, request, _provided)
         return self._caller.invoke(
@@ -587,7 +647,10 @@ class PasswordManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.DeauthResponse:
-        """RPC: /clappform.authoriser.v1.password.PasswordManagement/DeAuth (unary-unary)"""
+        """Render authorization token invalid
+
+        RPC: /clappform.authoriser.v1.password.PasswordManagement/DeAuth (unary-unary)
+        """
         _provided: dict[str, Any] = {}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Empty, request, _provided)
         return self._caller.invoke(
@@ -610,7 +673,10 @@ class PasswordManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.AuthTokenResponse:
-        """RPC: /clappform.authoriser.v1.password.PasswordManagement/Refresh (unary-unary)"""
+        """Request a new authorization token
+
+        RPC: /clappform.authoriser.v1.password.PasswordManagement/Refresh (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("refresh_token", refresh_token),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_password_password.RefreshTokenRequest, request, _provided)
         return self._caller.invoke(
@@ -634,7 +700,10 @@ class PasswordManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_password_password.AuthUserResponse:
-        """RPC: /clappform.authoriser.v1.password.PasswordManagement/Verify (unary-unary)"""
+        """Verify authorization token
+
+        RPC: /clappform.authoriser.v1.password.PasswordManagement/Verify (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("authorization_token", authorization_token), ("detail_level", detail_level),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_password_password.AuthTokenRequest, request, _provided)
         return self._caller.invoke(
@@ -656,13 +725,16 @@ class PermissionManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_authoriser_v1_permission_permission.Permissions | None = None,
         *,
-        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission] | None = None,
-        pagination: _m_clappform_v1_commons_commons.Pagination | None = None,
+        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission | Mapping[str, Any]] | None = None,
+        pagination: _m_clappform_v1_commons_commons.Pagination | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_permission_permission.Permissions:
-        """RPC: /clappform.authoriser.v1.permission.PermissionManagement/Create (unary-unary)"""
+        """Create a new permission
+
+        RPC: /clappform.authoriser.v1.permission.PermissionManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("permissions", permissions), ("pagination", pagination),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_permission_permission.Permissions, request, _provided)
         return self._caller.invoke(
@@ -687,7 +759,10 @@ class PermissionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.permission.PermissionManagement/Delete (unary-unary)"""
+        """Delete a permission
+
+        RPC: /clappform.authoriser.v1.permission.PermissionManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -705,13 +780,16 @@ class PermissionManagement(_runtime.ServiceBase):
         self,
         request: _m_clappform_authoriser_v1_permission_permission.Permissions | None = None,
         *,
-        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission] | None = None,
-        pagination: _m_clappform_v1_commons_commons.Pagination | None = None,
+        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission | Mapping[str, Any]] | None = None,
+        pagination: _m_clappform_v1_commons_commons.Pagination | Mapping[str, Any] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.permission.PermissionManagement/DeletePermissions (unary-unary)"""
+        """Delete multiple permissions
+
+        RPC: /clappform.authoriser.v1.permission.PermissionManagement/DeletePermissions (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("permissions", permissions), ("pagination", pagination),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_permission_permission.Permissions, request, _provided)
         return self._caller.invoke(
@@ -738,7 +816,10 @@ class RecoverManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.recover.RecoverManagement/RequestPasswordReset (unary-unary)"""
+        """Request password reset
+
+        RPC: /clappform.authoriser.v1.recover.RecoverManagement/RequestPasswordReset (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("username", username),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_recover_recover.ResetRequest, request, _provided)
         return self._caller.invoke(
@@ -762,7 +843,10 @@ class RecoverManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.recover.RecoverManagement/ConfirmPasswordReset (unary-unary)"""
+        """Confirm password reset
+
+        RPC: /clappform.authoriser.v1.recover.RecoverManagement/ConfirmPasswordReset (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("reset_key", reset_key), ("new_password", new_password),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_recover_recover.ConfirmResetRequest, request, _provided)
         return self._caller.invoke(
@@ -795,7 +879,10 @@ class RoleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_role_role.Roles:
-        """RPC: /clappform.authoriser.v1.role.RoleManagement/ReadAll (unary-unary)"""
+        """Get all roles
+
+        RPC: /clappform.authoriser.v1.role.RoleManagement/ReadAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -824,17 +911,17 @@ class RoleManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_authoriser_v1_role_role.Role]:
         """Auto-paginating variant of ``read_all``.
 
-        Yields each item from ``roles`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``roles``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.read_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.roles
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.roles
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def read(
         self,
@@ -847,7 +934,10 @@ class RoleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_role_role.Role:
-        """RPC: /clappform.authoriser.v1.role.RoleManagement/Read (unary-unary)"""
+        """Get a single role
+
+        RPC: /clappform.authoriser.v1.role.RoleManagement/Read (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -867,12 +957,15 @@ class RoleManagement(_runtime.ServiceBase):
         *,
         name: str | None = None,
         users: Sequence[str] | None = None,
-        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission] | None = None,
+        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_role_role.Role:
-        """RPC: /clappform.authoriser.v1.role.RoleManagement/Create (unary-unary)"""
+        """Create a role
+
+        RPC: /clappform.authoriser.v1.role.RoleManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("name", name), ("users", users), ("permissions", permissions),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_role_role.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -893,12 +986,15 @@ class RoleManagement(_runtime.ServiceBase):
         id: str | None = None,
         name: str | None = None,
         users: Sequence[str] | None = None,
-        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission] | None = None,
+        permissions: Sequence[_m_clappform_authoriser_v1_permission_permission.Permission | Mapping[str, Any]] | None = None,
         timeout: float | None = None,
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_role_role.Role:
-        """RPC: /clappform.authoriser.v1.role.RoleManagement/Update (unary-unary)"""
+        """Update a role
+
+        RPC: /clappform.authoriser.v1.role.RoleManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("name", name), ("users", users), ("permissions", permissions),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_role_role.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -923,7 +1019,10 @@ class RoleManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.role.RoleManagement/Delete (unary-unary)"""
+        """Delete a role
+
+        RPC: /clappform.authoriser.v1.role.RoleManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -956,7 +1055,10 @@ class SecurityProfileManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_security_profile_security_profile.Authorities:
-        """RPC: /clappform.authoriser.v1.security_profile.SecurityProfileManagement/ReadAll (unary-unary)"""
+        """Get all available authorities
+
+        RPC: /clappform.authoriser.v1.security_profile.SecurityProfileManagement/ReadAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -985,17 +1087,17 @@ class SecurityProfileManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_authoriser_v1_security_profile_security_profile.Authority]:
         """Auto-paginating variant of ``read_all``.
 
-        Yields each item from ``authorities`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``authorities``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.read_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.authorities
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.authorities
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def create_security_profile(
         self,
@@ -1015,7 +1117,10 @@ class SecurityProfileManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_security_profile_security_profile.Authority:
-        """RPC: /clappform.authoriser.v1.security_profile.SecurityProfileManagement/CreateSecurityProfile (unary-unary)"""
+        """Create new security profile for Azure Single Sign On (SSO)
+
+        RPC: /clappform.authoriser.v1.security_profile.SecurityProfileManagement/CreateSecurityProfile (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("authority", authority), ("client_id", client_id), ("app_id", app_id), ("type", type), ("certificate", certificate), ("private_key", private_key), ("webhook_secret", webhook_secret), ("default_roles", default_roles), ("auto_initiate", auto_initiate), ("default_user_info", default_user_info),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_security_profile_security_profile.CreateProfile, request, _provided)
         return self._caller.invoke(
@@ -1045,7 +1150,10 @@ class SecurityProfileManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_security_profile_security_profile.Authority:
-        """RPC: /clappform.authoriser.v1.security_profile.SecurityProfileManagement/UpdateSecurityProfile (unary-unary)"""
+        """Update existing security profile for Azure Single Sign On (SSO)
+
+        RPC: /clappform.authoriser.v1.security_profile.SecurityProfileManagement/UpdateSecurityProfile (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("authority", authority), ("app_id", app_id), ("certificate", certificate), ("private_key", private_key), ("webhook_secret", webhook_secret), ("default_roles", default_roles), ("auto_initiate", auto_initiate), ("default_user_info", default_user_info),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_security_profile_security_profile.UpdateProfile, request, _provided)
         return self._caller.invoke(
@@ -1078,7 +1186,10 @@ class UserManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_user_user.Users:
-        """RPC: /clappform.authoriser.v1.user.UserManagement/ReadAll (unary-unary)"""
+        """Get all users
+
+        RPC: /clappform.authoriser.v1.user.UserManagement/ReadAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -1107,17 +1218,17 @@ class UserManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_authoriser_v1_user_user.User]:
         """Auto-paginating variant of ``read_all``.
 
-        Yields each item from ``users`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``users``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.read_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.users
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.users
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def read(
         self,
@@ -1130,7 +1241,10 @@ class UserManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_user_user.User:
-        """RPC: /clappform.authoriser.v1.user.UserManagement/Read (unary-unary)"""
+        """Get a single user
+
+        RPC: /clappform.authoriser.v1.user.UserManagement/Read (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1160,7 +1274,10 @@ class UserManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_user_user.User:
-        """RPC: /clappform.authoriser.v1.user.UserManagement/Create (unary-unary)"""
+        """Create a new user
+
+        RPC: /clappform.authoriser.v1.user.UserManagement/Create (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("email", email), ("first_name", first_name), ("last_name", last_name), ("password", password), ("is_active", is_active), ("extra_information", extra_information), ("roles", roles), ("preferences", preferences),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_user_user.CreateRequest, request, _provided)
         return self._caller.invoke(
@@ -1190,7 +1307,10 @@ class UserManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_user_user.User:
-        """RPC: /clappform.authoriser.v1.user.UserManagement/Update (unary-unary)"""
+        """Update a user
+
+        RPC: /clappform.authoriser.v1.user.UserManagement/Update (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("email", email), ("first_name", first_name), ("last_name", last_name), ("password", password), ("extra_information", extra_information), ("roles", roles), ("preferences", preferences),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_authoriser_v1_user_user.UpdateRequest, request, _provided)
         return self._caller.invoke(
@@ -1215,7 +1335,10 @@ class UserManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.user.UserManagement/Disable (unary-unary)"""
+        """Disables a user account
+
+        RPC: /clappform.authoriser.v1.user.UserManagement/Disable (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1240,7 +1363,10 @@ class UserManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.user.UserManagement/Enable (unary-unary)"""
+        """Renables a user account
+
+        RPC: /clappform.authoriser.v1.user.UserManagement/Enable (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1265,7 +1391,10 @@ class UserManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.user.UserManagement/Delete (unary-unary)"""
+        """Delete a user
+
+        RPC: /clappform.authoriser.v1.user.UserManagement/Delete (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1298,7 +1427,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_version_version.Versions:
-        """RPC: /clappform.authoriser.v1.version.VersionManagement/GetAll (unary-unary)"""
+        """Get all versions
+
+        RPC: /clappform.authoriser.v1.version.VersionManagement/GetAll (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("page", page), ("limit", limit), ("batch_size", batch_size), ("query_parameters", query_parameters), ("include_deleted", include_deleted), ("detail_level", detail_level), ("sort", sort),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.PaginationRequest, request, _provided)
         return self._caller.invoke(
@@ -1327,17 +1459,17 @@ class VersionManagement(_runtime.ServiceBase):
     ) -> Iterator[_m_clappform_authoriser_v1_version_version.Version]:
         """Auto-paginating variant of ``get_all``.
 
-        Yields each item from ``versions`` across all pages, following
-        ``pagination`` until the last page.
+        Yields each item from ``versions``, requesting page 1, 2, ... until
+        a page comes back empty or ``pagination.pages`` is reached.
         """
         _page = 1
         while True:
             _resp = self.get_all(page=_page, limit=limit, batch_size=batch_size, query_parameters=query_parameters, include_deleted=include_deleted, detail_level=detail_level, sort=sort, timeout=timeout, metadata=metadata, location=location)
-            yield from _resp.versions
-            _pagination = _resp.pagination
-            if _pagination.pages <= _pagination.page:
+            _items = _resp.versions
+            yield from _items
+            if not _items or _resp.pagination.pages <= _page:
                 break
-            _page = _pagination.page + 1
+            _page += 1
 
     def get(
         self,
@@ -1350,7 +1482,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_authoriser_v1_version_version.Version:
-        """RPC: /clappform.authoriser.v1.version.VersionManagement/Get (unary-unary)"""
+        """Get a single version
+
+        RPC: /clappform.authoriser.v1.version.VersionManagement/Get (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1375,7 +1510,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.version.VersionManagement/Revert (unary-unary)"""
+        """Get a single version
+
+        RPC: /clappform.authoriser.v1.version.VersionManagement/Revert (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1400,7 +1538,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.version.VersionManagement/Lock (unary-unary)"""
+        """Lock a version
+
+        RPC: /clappform.authoriser.v1.version.VersionManagement/Lock (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
@@ -1425,7 +1566,10 @@ class VersionManagement(_runtime.ServiceBase):
         metadata: tuple[tuple[str, str], ...] | None = None,
         location: str | None = None,
     ) -> _m_clappform_v1_commons_commons.Message:
-        """RPC: /clappform.authoriser.v1.version.VersionManagement/Unlock (unary-unary)"""
+        """Unlock a version
+
+        RPC: /clappform.authoriser.v1.version.VersionManagement/Unlock (unary-unary)
+        """
         _provided = {_k: _v for _k, _v in (("id", id), ("detail_level", detail_level), ("include_deleted", include_deleted),) if _v is not None}
         _request = _runtime.build_request(_m_clappform_v1_commons_commons.Read, request, _provided)
         return self._caller.invoke(
