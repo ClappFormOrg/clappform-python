@@ -19,7 +19,7 @@ the credential type, an `ApiKey` prints as `ApiKey(***)`, and error messages do
 not include it.
 
 In an actionflow worker the location and key come from the worker; see
-[Running in an actionflow](actionflow-scripts.md).
+[Writing actionflow tasks](actionflow-scripts.md).
 
 !!! danger "Never commit a key"
     A key in a notebook cell, a script literal, or a committed `.env` is a

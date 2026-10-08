@@ -220,7 +220,7 @@ stops at the first empty page or once it reaches `pagination.pages`. See
 
 `custom_keys=` takes JSON bytes, so build it with
 `json.dumps({...}).encode("utf-8")`. See
-[Running in an actionflow](actionflow-scripts.md#passing-start-parameters).
+[Writing actionflow tasks](actionflow-scripts.md#passing-start-parameters).
 
 ??? note "Old reference"
 
