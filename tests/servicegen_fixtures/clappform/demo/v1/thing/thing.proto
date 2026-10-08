@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package clappform.demo.v1.thing;
+
+import "clappform/demo/v1/parts/gadget.proto";
+import "clappform/demo/v1/parts/widget.proto";
+import "clappform/v1/commons/commons.proto";
+import "grpc/gateway/protoc_gen_openapiv2/options/annotations.proto";
+
+service ThingManagement {
+  // Fetch a single thing by id.
+  rpc Get(clappform.v1.commons.Read) returns (Thing) {};
+  // List things with pagination.
+  rpc GetAll(clappform.v1.commons.PaginationRequest) returns (Things) {};
+  // Upload things in bulk.
+  rpc Upload(stream UploadRequest) returns (UploadSummary) {};
+  // Watch things as they change.
+  rpc Watch(clappform.v1.commons.Read) returns (stream Thing) {};
+  rpc Exchange(stream UploadRequest) returns (stream Thing) {};
+  rpc Collide(CollisionRequest) returns (clappform.v1.commons.Message) {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Exercise reserved field names."
+      description: "Fields named like a per-call argument or a Python keyword\nget a trailing underscore."
+    };
+  };
+  // Import things from an external source. The RPC name is a Python
+  // keyword, and this comment wraps over several lines:
+  //   - the first sentence becomes the summary
+  //   - relative indentation survives
+  rpc Import(ImportRequest) returns (clappform.v1.commons.Message) {};
+  // List gadgets, whose message lives in another file.
+  rpc ListGadgets(clappform.v1.commons.PaginationRequest) returns (Gadgets) {};
+  // List bundles, a response with more than one repeated message field.
+  rpc ListBundles(clappform.v1.commons.PaginationRequest) returns (Bundles) {};
+  rpc SendWhatsAppMessage(clappform.v1.commons.Read) returns (clappform.v1.commons.Empty) {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      description: "Send a message over WhatsApp."
+    };
+  };
+}
+
+// Where imported data comes from.
+enum Source {
+  SOURCE_UNSPECIFIED = 0;
+  SOURCE_FILE = 1;
+  SOURCE_URL = 2;
+}
+
+message Thing {
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    STATE_ACTIVE = 1;
+  }
+  message Dimensions {
+    double width = 1;
+    double height = 2;
+  }
+  string id = 1;
+  string name = 2;
+  repeated string tags = 3;
+  map<string, int64> counters = 4;
+}
+
+message Things {
+  repeated Thing things = 1;
+  clappform.v1.commons.Pagination pagination = 2;
+}
+
+message Gadgets {
+  repeated clappform.demo.v1.parts.Gadget gadgets = 1;
+  clappform.v1.commons.Pagination pagination = 2;
+}
+
+message Bundles {
+  repeated Thing things = 1;
+  repeated UploadSummary summaries = 2;
+  clappform.v1.commons.Pagination pagination = 3;
+}
+
+message UploadRequest {
+  bytes data = 1;
+}
+
+message UploadSummary {
+  uint32 processed = 1;
+}
+
+message ImportRequest {
+  // Where the data comes from.
+  Source source = 1;
+  Thing.State state = 2;  // Initial state of the imported things.
+  Thing.Dimensions dimensions = 3;
+  map<string, clappform.demo.v1.parts.Widget> widgets = 4;
+  oneof payload {
+    // Raw bytes to import.
+    bytes inline = 5;
+    // Location to fetch from.
+    //   Must be https.
+    string url = 6;
+  }
+  repeated Source fallbacks = 7;
+}
+
+message CollisionRequest {
+  // Collides with the per-call tenant argument.
+  string location = 1;
+  string payload = 2;
+  // Server-side task timeout in seconds, unrelated to the gRPC deadline.
+  int32 timeout = 3;
+  // Python keyword.
+  string from = 4;
+}

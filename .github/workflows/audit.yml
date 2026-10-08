@@ -1,0 +1,36 @@
+name: Audit
+
+# Advisories are published between commits, so this runs on a weekly schedule
+# as well as on every push and pull request: a vulnerability disclosed against
+# grpcio or protobuf today surfaces on Monday rather than whenever someone next
+# opens a PR.
+on:
+  push:
+    branches: ["Major/6", "development", "main"]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      # pip audits itself. The runner ships whatever pip its Python image was
+      # built with, and an advisory against that version fails the job for a
+      # reason that has nothing to do with this package.
+      - run: python -m pip install --upgrade pip
+      # [all] pulls in the optional DataFrame backends, so pandas, polars and
+      # pyarrow are audited alongside the required grpcio/protobuf pair.
+      - run: python -m pip install -e .[dev,all]
+      # --skip-editable drops the local editable clappform install, which has no
+      # published version to resolve. When an advisory has no fixed release yet,
+      # add `--ignore-vuln GHSA-xxxx-xxxx-xxxx` here with a comment naming the
+      # advisory and what blocks the upgrade.
+      - run: python -m pip_audit --skip-editable --desc on
