@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package clappform.v1.commons;
+
+message Empty {}
+
+message Message {
+  string message = 1;
+}
+
+message Read {
+  string id = 1;
+  optional int32 detail_level = 2;
+  optional bool include_deleted = 3;
+}
+
+message PaginationRequest {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string sort = 3;
+}
+
+message Pagination {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 pages = 4;
+}

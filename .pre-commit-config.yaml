@@ -1,0 +1,50 @@
+# Local fast-feedback mirror of the CI gates (.github/workflows/ci.yml).
+# The hook versions and scopes below are kept in step with CI and pyproject so
+# a passing `pre-commit run` means the lint/type jobs will pass too.
+#
+#   pip install pre-commit && pre-commit install   # one-time, per clone
+#   pre-commit run --all-files                      # check the whole tree
+#
+# Generated trees (clappform/gen, clappform/services, the servicegen golden
+# fixture, and the mkdocs `site/` output) are excluded everywhere, matching
+# ruff's extend-exclude: they are machine-written and must not be reformatted.
+exclude: |
+  (?x)^(
+    src/clappform/gen/|
+    src/clappform/services/|
+    tests/servicegen_golden/|
+    site/
+  )
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+
+  # ruff lint, matching the CI lint job (`ruff check .`, config in [tool.ruff]
+  # of pyproject.toml). Deliberately no ruff-format hook: this repo is not
+  # maintained with the ruff formatter (it uses hand-managed line breaks that
+  # the formatter would rewrite), and CI does not format-check either, so the
+  # hook mirrors exactly what CI enforces, nothing more.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.7
+    hooks:
+      - id: ruff
+        args: [--fix]
+
+  # Scoped and typed exactly like the CI typecheck job: `mypy src/clappform
+  # tools` with the same stub packages installed, so the hook and CI agree.
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.1
+    hooks:
+      - id: mypy
+        files: ^(src/clappform|tools)/
+        additional_dependencies:
+          - types-protobuf
+          - types-grpcio

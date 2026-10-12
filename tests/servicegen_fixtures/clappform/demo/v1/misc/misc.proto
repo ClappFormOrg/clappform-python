@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package clappform.demo.v1.misc;
+
+import "clappform/v1/commons/commons.proto";
+
+// A service and an RPC named after Python keywords.
+service Global {
+  // Check liveness.
+  rpc Pass(clappform.v1.commons.Empty) returns (clappform.v1.commons.Empty) {};
+}
