@@ -28,3 +28,6 @@ venv/
 
 # Local Claude Code config
 .claude/
+
+.env
+*.zip
